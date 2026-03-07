@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Layered Frames — Week 1</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #09090b;
+    --bg-secondary: #111113;
+    --bg-tertiary: #18181b;
+    --bg-card: #141416;
+    --bg-card-hover: #1a1a1e;
+    --border: #27272a;
+    --border-hover: #3f3f46;
+    --text-primary: #fafafa;
+    --text-secondary: #a1a1aa;
+    --text-tertiary: #71717a;
+    --accent: #d4a054;
+    --accent-dim: rgba(212,160,84,0.12);
+    --accent-glow: rgba(212,160,84,0.25);
+    --surface-glass: rgba(255,255,255,0.03);
+  }
+
+  html.light {
+    --bg-primary: #fafaf9;
+    --bg-secondary: #f5f5f4;
+    --bg-tertiary: #e7e5e4;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f5f5f4;
+    --border: #d6d3d1;
+    --border-hover: #a8a29e;
+    --text-primary: #1c1917;
+    --text-secondary: #57534e;
+    --text-tertiary: #78716c;
+    --accent: #b8860b;
+    --accent-dim: rgba(184,134,11,0.08);
+    --accent-glow: rgba(184,134,11,0.15);
+    --surface-glass: rgba(0,0,0,0.02);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.7;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, .serif {
+    font-family: 'Instrument Serif', serif;
+  }
+
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+
+  /* Navigation */
+  .nav-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(9,9,11,0.85);
+    transition: all 0.3s ease;
+  }
+  html.light .nav-bar { background: rgba(250,250,249,0.85); }
+
+  .nav-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.875rem 2rem;
+  }
+
+  .nav-brand {
+    display: flex; align-items: center; gap: 0.75rem;
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.125rem; color: var(--text-primary);
+    text-decoration: none;
+  }
+
+  .nav-brand .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+
+  .nav-links {
+    display: flex; align-items: center; gap: 1.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--text-tertiary); text-decoration: none;
+    font-size: 0.8125rem; font-weight: 500;
+    letter-spacing: 0.02em;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text-primary); }
+
+  .theme-toggle {
+    width: 36px; height: 36px; border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    transition: all 0.25s ease;
+    font-size: 0.875rem;
+  }
+  .theme-toggle:hover {
+    border-color: var(--border-hover);
+    color: var(--text-primary);
+    transform: scale(1.05);
+  }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 40%, var(--accent-dim) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 30% 60%, rgba(100,100,200,0.03) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-label {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.375rem 1rem;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: var(--surface-glass);
+    font-size: 0.75rem; font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    opacity: 0; animation: fadeUp 0.8s ease 0.2s forwards;
+  }
+
+  .hero-title {
+    font-size: clamp(3rem, 8vw, 6.5rem);
+    line-height: 1.05;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    opacity: 0; animation: fadeUp 0.8s ease 0.4s forwards;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-subtitle {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    color: var(--text-secondary);
+    max-width: 560px;
+    line-height: 1.7;
+    opacity: 0; animation: fadeUp 0.8s ease 0.6s forwards;
+  }
+
+  .hero-meta {
+    display: flex; gap: 2rem; margin-top: 3rem;
+    opacity: 0; animation: fadeUp 0.8s ease 0.8s forwards;
+  }
+
+  .hero-meta-item {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.25rem;
+  }
+
+  .hero-meta-item .value {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.5rem; color: var(--text-primary);
+  }
+
+  .hero-meta-item .label {
+    font-size: 0.6875rem; color: var(--text-tertiary);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+
+  .scroll-indicator {
+    position: absolute; bottom: 2.5rem;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.5rem;
+    color: var(--text-tertiary);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0; animation: fadeUp 0.8s ease 1s forwards;
+  }
+
+  .scroll-indicator i {
+    animation: bounce 2s ease infinite;
+  }
+
+  /* Sections */
+  .section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 6rem 2rem;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .section.visible {
+    opacity: 1; transform: translateY(0);
+  }
+
+  .section-label {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-size: 0.6875rem; font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+  }
+
+  .section-label i { font-size: 0.5rem; }
+
+  .section-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-desc {
+    font-size: 1.0625rem;
+    color: var(--text-secondary);
+    max-width: 680px;
+    line-height: 1.8;
+  }
+
+  /* Divider */
+  .divider {
+    max-width: 1200px; margin: 0 auto;
+    padding: 0 2rem;
+  }
+  .divider-line {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+  }
+
+  /* Acknowledgment */
+  .acknowledge-block {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--bg-card);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .acknowledge-block::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(to right, #d4a054, #c77d3e, #d4a054);
+  }
+
+  .acknowledge-block p {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    line-height: 1.85;
+    font-style: italic;
+  }
+
+  /* Info Cards */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.25rem;
+    margin-top: 2.5rem;
+  }
+
+  .info-card {
+    padding: 1.75rem;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--bg-card);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .info-card:hover {
+    border-color: var(--border-hover);
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  }
+
+  .info-card .card-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--accent-dim);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    font-size: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .info-card h3 {
+    font-size: 1.125rem;
+    font-weight: 400;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+  }
+
+  .info-card p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  .info-card .card-tag {
+    display: inline-block;
+    margin-top: 1rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.625rem;
+    border-radius: 6px;
+    background: var(--accent-dim);
+  }
+
+  /* Timeline */
+  .timeline-container {
+    position: relative;
+    margin-top: 3rem;
+  }
+
+  .timeline-phases {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+  }
+
+  .timeline-phase {
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-card);
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .timeline-phase:hover {
+    border-color: var(--accent);
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+  }
+
+  .timeline-phase .phase-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6875rem;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    margin-bottom: 0.625rem;
+  }
+
+  .timeline-phase .phase-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.0625rem;
+    color: var(--text-primary);
+    margin-bottom: 0.375rem;
+  }
+
+  .timeline-phase .phase-weeks {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+  }
+
+  /* Course Desc */
+  .course-overview-text {
+    font-size: 1.1875rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+    max-width: 780px;
+    margin-top: 2rem;
+  }
+
+  .course-overview-text strong {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  /* Melbourne History */
+  .history-block {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+    margin-top: 2.5rem;
+  }
+
+  .history-text {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.85;
+  }
+
+  .history-text em {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .history-sidebar {
+    padding: 2rem;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--bg-card);
+  }
+
+  .history-sidebar h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .history-sidebar .year {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    margin-bottom: 1rem;
+  }
+
+  .history-sidebar p {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    line-height: 1.75;
+  }
+
+  /* Festival Grid */
+  .festival-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+  }
+
+  .festival-item {
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-card);
+    transition: all 0.25s ease;
+    cursor: default;
+  }
+
+  .festival-item:hover {
+    border-color: var(--border-hover);
+    background: var(--bg-card-hover);
+  }
+
+  .festival-item h4 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.375rem;
+  }
+
+  .festival-item p {
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+    line-height: 1.6;
+  }
+
+  /* Blackmagic Section */
+  .bmc-hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    margin-top: 2.5rem;
+  }
+
+  .bmc-features {
+    display: flex; flex-direction: column; gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .bmc-feature {
+    display: flex; align-items: flex-start; gap: 0.875rem;
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
+    background: var(--surface-glass);
+    border: 1px solid var(--border);
+    transition: border-color 0.2s;
+  }
+
+  .bmc-feature:hover { border-color: var(--border-hover); }
+
+  .bmc-feature i {
+    color: var(--accent);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    flex-shrink: 0;
+  }
+
+  .bmc-feature .feat-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.125rem;
+  }
+
+  .bmc-feature .feat-desc {
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+    line-height: 1.6;
+  }
+
+  .bmc-visual {
+    padding: 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--bg-card);
+    text-align: center;
+  }
+
+  .bmc-visual .phone-mockup {
+    font-size: 5rem;
+    color: var(--text-tertiary);
+    margin-bottom: 1.5rem;
+    opacity: 0.4;
+  }
+
+  .bmc-visual h3 {
+    font-size: 1.375rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .bmc-visual p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  /* Settings */
+  .settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+
+  .setting-card {
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-card);
+    transition: all 0.25s ease;
+  }
+
+  .setting-card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-1px);
+  }
+
+  .setting-card .setting-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.5rem;
+  }
+
+  .setting-card .setting-value {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .setting-card .setting-desc {
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+    line-height: 1.6;
+  }
+
+  /* Camera Movements */
+  .movements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+
+  .movement-card {
+    padding: 1.75rem 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-card);
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .movement-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+
+  .movement-card:hover {
+    border-color: var(--border-hover);
+    background: var(--bg-card-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.1);
+  }
+
+  .movement-card:hover::after { transform: scaleX(1); }
+
+  .movement-card .mv-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: var(--accent-dim);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+    color: var(--accent);
+    font-size: 1.125rem;
+    transition: transform 0.3s ease;
+  }
+
+  .movement-card:hover .mv-icon { transform: scale(1.1); }
+
+  .movement-card h4 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.375rem;
+  }
+
+  .movement-card p {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    line-height: 1.6;
+  }
+
+  /* Zebra / Cinematic Mode */
+  .zebra-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    align-items: center;
+    margin-top: 2.5rem;
+  }
+
+  .zebra-info h3 {
+    font-size: 1.375rem;
+    margin-bottom: 1rem;
+  }
+
+  .zebra-list {
+    display: flex; flex-direction: column; gap: 0.75rem;
+  }
+
+  .zebra-list-item {
+    display: flex; align-items: center; gap: 0.75rem;
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+  }
+
+  .zebra-list-item .check {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    background: var(--accent-dim);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    font-size: 0.625rem;
+    flex-shrink: 0;
+  }
+
+  .zebra-visual {
+    padding: 3rem;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--bg-card);
+    display: flex; align-items: center; justify-content: center;
+    min-height: 280px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .zebra-visual .stripe {
+    position: absolute;
+    height: 100%;
+    width: 8px;
+    background: repeating-linear-gradient(
+      45deg,
+      var(--accent-dim),
+      var(--accent-dim) 4px,
+      transparent 4px,
+      transparent 8px
+    );
+    opacity: 0.5;
+  }
+
+  .zebra-visual .stripe:nth-child(1) { left: 15%; }
+  .zebra-visual .stripe:nth-child(2) { left: 40%; }
+  .zebra-visual .stripe:nth-child(3) { left: 65%; }
+  .zebra-visual .stripe:nth-child(4) { left: 85%; }
+
+  .zebra-visual .center-text {
+    position: relative; z-index: 1;
+    text-align: center;
+  }
+
+  .zebra-visual .center-text .big {
+    font-family: 'Instrument Serif', serif;
+    font-size: 3rem;
+    color: var(--accent);
+  }
+
+  .zebra-visual .center-text .sm {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* Codec Comparison */
+  .codec-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-top: 2rem;
+  }
+
+  .codec-card {
+    padding: 1.75rem;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--bg-card);
+  }
+
+  .codec-card.recommended {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, var(--bg-card) 0%, var(--accent-dim) 100%);
+  }
+
+  .codec-card h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8125rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.75rem;
+  }
+
+  .codec-card .codec-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.375rem;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+  }
+
+  .codec-card p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  /* Extension Info */
+  .extension-box {
+    margin-top: 2.5rem;
+    padding: 2rem;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--bg-card);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .extension-col h3 {
+    font-size: 1.125rem;
+    margin-bottom: 0.75rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+
+  .extension-col h3 i {
+    color: var(--accent);
+    font-size: 0.875rem;
+  }
+
+  .extension-col p, .extension-col li {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    line-height: 1.75;
+  }
+
+  .extension-col ul {
+    list-style: none; padding: 0;
+  }
+
+  .extension-col li {
+    padding-left: 1.25rem;
+    position: relative;
+  }
+
+  .extension-col li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0.7em;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Embedded Camera */
+  .embedded-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.25rem;
+    margin-top: 2.5rem;
+  }
+
+  .embedded-card {
+    padding: 2rem;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--bg-card);
+    transition: all 0.3s ease;
+  }
+
+  .embedded-card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+  }
+
+  .embedded-card h4 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .embedded-card p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  /* Footer */
+  .site-footer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    text-align: center;
+    border-top: 1px solid var(--border);
+  }
+
+  .site-footer p {
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+    line-height: 1.7;
+  }
+
+  .site-footer .footer-brand {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  /* Sidebar Nav (TOC) */
+  .toc-sidebar {
+    position: fixed;
+    left: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .toc-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    padding: 0;
+    position: relative;
+  }
+
+  .toc-dot:hover, .toc-dot.active {
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent-glow);
+    transform: scale(1.4);
+  }
+
+  .toc-dot .toc-tooltip {
+    position: absolute;
+    left: 1.5rem; top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.25rem 0.625rem;
+    font-size: 0.6875rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .toc-dot:hover .toc-tooltip { opacity: 1; }
+
+  /* Mobile Nav */
+  .mobile-menu-btn {
+    display: none;
+    width: 36px; height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    align-items: center; justify-content: center;
+    font-size: 0.875rem;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(4px); }
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .toc-sidebar { display: none; }
+    .history-block,
+    .bmc-hero,
+    .zebra-section,
+    .codec-compare,
+    .extension-box {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .mobile-menu-btn { display: flex; }
+    .nav-inner { padding: 0.75rem 1.25rem; }
+    .section { padding: 4rem 1.25rem; }
+    .hero { padding: 5rem 1.25rem 3rem; }
+    .hero-meta { gap: 1.25rem; }
+    .info-grid { grid-template-columns: 1fr; }
+    .timeline-phases { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+    .festival-grid { grid-template-columns: 1fr; }
+    .movements-grid { grid-template-columns: repeat(2, 1fr); }
+    .settings-grid { grid-template-columns: 1fr; }
+    .embedded-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 480px) {
+    .movements-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav-bar" id="navbar">
+  <div class="nav-inner">
+    <a href="#hero" class="nav-brand">
+      <span class="dot"></span>
+      Layered Frames
+    </a>
+    <ul class="nav-links">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#timeline">Timeline</a></li>
+      <li><a href="#melbourne">Melbourne</a></li>
+      <li><a href="#blackmagic">Camera</a></li>
+      <li><a href="#movements">Movements</a></li>
+    </ul>
+    <div style="display:flex;gap:0.625rem;align-items:center;">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+      <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- TOC Sidebar -->
+<div class="toc-sidebar" id="tocSidebar">
+  <button class="toc-dot active" data-target="hero"><span class="toc-tooltip">Home</span></button>
+  <button class="toc-dot" data-target="acknowledge"><span class="toc-tooltip">Acknowledgment</span></button>
+  <button class="toc-dot" data-target="essentials"><span class="toc-tooltip">Essentials</span></button>
+  <button class="toc-dot" data-target="overview"><span class="toc-tooltip">Overview</span></button>
+  <button class="toc-dot" data-target="timeline"><span class="toc-tooltip">Timeline</span></button>
+  <button class="toc-dot" data-target="melbourne"><span class="toc-tooltip">Melbourne</span></button>
+  <button class="toc-dot" data-target="festivals"><span class="toc-tooltip">Festivals</span></button>
+  <button class="toc-dot" data-target="blackmagic"><span class="toc-tooltip">Camera</span></button>
+  <button class="toc-dot" data-target="settings"><span class="toc-tooltip">Settings</span></button>
+  <button class="toc-dot" data-target="movements"><span class="toc-tooltip">Movements</span></button>
+  <button class="toc-dot" data-target="embedded"><span class="toc-tooltip">Embedded</span></button>
+</div>
+
+<!-- Hero -->
+<section class="hero" id="hero">
+  <div class="hero-label">
+    <i class="fa-solid fa-circle" style="font-size:5px;color:var(--accent);"></i>
+    ARCH 1433 &middot; Communications Systems
+  </div>
+  <h1 class="hero-title"><em>Layered</em> Frames</h1>
+  <p class="hero-subtitle">
+    Exploring video production, editing, and visual effects through spatial narrative and cinematic storytelling.
+  </p>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <span class="value">Week 1</span>
+      <span class="label">Session</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="value">2026</span>
+      <span class="label">Semester</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="value">13 Wks</span>
+      <span class="label">Duration</span>
+    </div>
+  </div>
+  <div class="scroll-indicator">
+    <span>Scroll</span>
+    <i class="fa-solid fa-chevron-down"></i>
+  </div>
+</section>
+
+<!-- Acknowledgment -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="acknowledge">
+  <div class="section-label">
+    <i class="fa-solid fa-circle"></i>
+    Womin Djeka
+  </div>
+  <div class="acknowledge-block">
+    <p>RMIT University acknowledges the people of the Woi wurrung and Boon wurrung language groups of the eastern Kulin Nation on whose unceded lands we conduct the business of the University. RMIT respectfully acknowledges their Ancestors and Elders, past and present. RMIT also acknowledges the Traditional Custodians and their Ancestors of the lands and waterways across Australia where we conduct our business.</p>
+  </div>
+</section>
+
+<!-- Essentials -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="essentials">
+  <div class="section-label">
+    <i class="fa-solid fa-circle"></i>
+    Essentials
+  </div>
+  <h2 class="section-title">Before We Begin</h2>
+  <p class="section-desc">Key information for navigating the Design Hub and accessing course resources.</p>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="card-icon"><i class="fa-solid fa-user-group"></i></div>
+      <h3>Student Assistants</h3>
+      <p>Available in the Design Hub to help with software questions, printing, and other assistance. Look for the blue t-shirts.</p>
+      <span class="card-tag">Support</span>
+    </div>
+    <div class="info-card">
+      <div class="card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+      <h3>Personal Security</h3>
+      <p>Keep your belongings secure at all times. Items are frequently lost or stolen in the Design Hub. Lockers auto-open after 5 days.</p>
+      <span class="card-tag">Important</span>
+    </div>
+    <div class="info-card">
+      <div class="card-icon"><i class="fa-solid fa-video"></i></div>
+      <h3>AV Equipment Loan</h3>
+      <p>Free audio-visual equipment loans for students and staff. Cameras, microphones, lighting, and more. Building 8, Level 7, Room 44.</p>
+      <span class="card-tag">Resources</span>
+    </div>
+  </div>
+
+  <!-- Extensions -->
+  <div class="extension-box">
+    <div class="extension-col">
+      <h3><i class="fa-solid fa-calendar-plus"></i> Assessment Extensions</h3>
+      <p>Submit extension requests through the Parent Shell (ARCH 1433) to the coordinator. Applications must be submitted at least 24 hours before the assessment due date.</p>
+    </div>
+    <div class="extension-col">
+      <h3><i class="fa-solid fa-file-medical"></i> Extension Rules</h3>
+      <ul>
+        <li>More than one week requires Special Consideration with supporting evidence</li>
+        <li>If unable to attend class, email the coordinator in advance with reason</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Course Overview -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="overview">
+  <div class="section-label">
+    <i class="fa-solid fa-circle"></i>
+    Course Overview
+  </div>
+  <h2 class="section-title">Visual Layers</h2>
+  <div class="course-overview-text">
+    Layered Frames explores the art of <strong>video production, editing, and visual effects</strong> using Adobe Premiere Pro and After Effects. Students develop essential filmmaking techniques — from <strong>cinematic storytelling, lighting, and sound design</strong> to motion tracking, AI-assisted visuals, and advanced compositing.
+    <br><br>
+    Through practical projects, you will learn to construct <strong>visual narratives</strong> that articulate unique perspectives and creative visions. The course emphasizes the intersection of <strong>technical proficiency and artistic expression</strong>, exploring how digital media serves as a tool for storytelling and world-building in contemporary filmmaking.
+  </div>
+  <div style="margin-top:2rem;display:inline-flex;align-items:center;gap:0.5rem;padding:0.375rem 1rem;border-radius:100px;border:1px solid var(--border);font-size:0.75rem;color:var(--text-tertiary);">
+    <i class="fa-solid fa-quote-left" style="font-size:0.5rem;color:var(--accent);"></i>
+    <span class="serif" style="font-size:0.9rem;color:var(--text-secondary);">
+      <em>Layered</em> — to arrange in a layer or layers
+    </span>
+  </div>
+</section>
+
+<!-- Timeline -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="timeline">
+  <div class="section-label">
+    <i class="fa-solid fa-circle"></i>
+    Course Structure
+  </div>
+  <h2 class="section-title">13-Week Journey</h2>
+  <p class="section-desc">A structured progression from foundational skills to advanced world-building.</p>
+
+  <div class="timeline-phases">
+    <div class="timeline-phase">
+      <div class="phase-num">Phase 01</div>
+      <div class="phase-title">Reading Space</div>
+      <div class="phase-weeks">Weeks 1–3</div>
+    </div>
+    <div class="timeline-phase">
+      <div class="phase-num">Phase 02</div>
+      <div class="phase-title">Shaping Space</div>
+      <div class="phase-weeks">Weeks 4–5</div>
+    </div>
+    <div class="timeline-phase">
+      <div class="phase-num">Phase 03</div>
+      <div class="phase-title">Mid-Semester</div>
+      <div class="phase-weeks">Week 6</div>
+    </div>
+    <div class="timeline-phase">
+      <div class="phase-num">Phase 04</div>
+      <div class="phase-title">Imagining Space</div>
+      <div class="phase-weeks">Weeks 7–8</div>
+    </div>
+    <div class="timeline-phase">
+      <div class="phase-num">Phase 05</div>
+      <div class="phase-title">Building Worlds</div>
+      <div class="phase-weeks">Weeks 9–11</div>
+    </div>
+    <div class="timeline-phase">
+      <div class="phase-num">Phase 06</div>
+      <div class="phase-title">Final Submission</div>
+      <div class="phase-weeks">Weeks 12–13</div>
+    </div>
+  </div>
+</section>
+
+<!-- Melbourne Film History -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="melbourne">
+  <div class="section-label">
+    <i class="fa-solid fa-circle"></i>
+    Melbourne &amp; Film
+  </div>
+  <h2 class="section-title">The Lost City of Melbourne</h2>
+  <p class="section-desc">A city deeply intertwined with the origins of cinema.</p>
+
+  <div class="history-block">
+    <div class="history-text">
+      <p>
+        In the 1850s, Melbourne was the <em>fastest growing city in the world</em>. It became an epicentre of film culture, and its hotels, restaurants, and cafes gained world renown.
+      </p>
+      <br>
+      <p>
+        However, the attempted "modernisation" of Melbourne in the 1950s destroyed much of the city, including its elegant cinemas and picture palaces. Buildings were deemed too Victorian — the opposite of a modern metropolis — and a demolition blitz began.
+      </p>
+      <br>
+      <p>
+        Featuring rare archival film and photography, the documentary <em>The Lost City of Melbourne</em> is a revelatory work that allows audiences to reimagine the former glory of the city.
+      </p>
+    </div>
+    <div class="history-sidebar">
+      <h3>The Story of the Kelly Gang</h3>
+      <div class="year">1906 &middot; Melbourne</div>
+      <p>
+        In 1906, Melbourne produced <em>The Story of the Kelly Gang</em>, recognized as the world's first feature-length narrative film. The city also hosts the Melbourne International Film Festival, launched in 1952 — one of the world's oldest — cementing its status as a global film culture hub.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Film Festivals -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="festivals">
+  <div class="section-label">
+    <i class="fa-solid fa-circle"></i>
+    Film Culture
+  </div>
+  <h2 class="section-title">Melbourne Film Festivals</h2>
+  <p class="section-desc">Melbourne's rich landscape of film festivals and cultural events.</p>
+
+  <div class="festival-grid">
+    <div class="festival-item">
+      <h4>Melbourne Queer Film Festival</h4>
+      <p>LGBTQ+ themes and stories, promoting diversity and inclusion.</p>
+    </div>
+    <div class="festival-item">
+      <h4>Indian Film Festival of Melbourne</h4>
+      <p>Celebrating Indian cinema from India and its diaspora.</p>
+    </div>
+    <div class="festival-item">
+      <h4>Melbourne Short Film Festival</h4>
+      <p>Platform for emerging filmmakers showcasing shorts worldwide.</p>
+    </div>
+    <div class="festival-item">
+      <h4>Women in Film Festival</h4>
+      <p>Empowering women and gender-diverse screen practitioners.</p>
+    </div>
+    <div class="festival-item">
+      <h4>Documentary Film Festival</h4>
+      <p>Largest documentary festival in the Southern Hemisphere.</p>
+    </div>
+    <div class="festival-item">
+      <h4>St Kilda Film Festival</h4>
+      <p>Australian and international short films for emerging voices.</p>
+    </div>
+    <div class="festival-item">
+      <h4>Underground Film Festival</h4>
+      <p>Avant-garde and experimental independent cinema.</p>
+    </div>
+    <div class="festival-item">
+      <h4>Int'l Animation Festival</h4>
+      <p>The largest animation festival in Australia.</p>
+    </div>
+    <div class="festival-item">
+      <h4>Environmental Film Festival</h4>
+      <p>Films addressing environmental issues and inspiring action.</p>
+    </div>
+    <div class="festival-item">
+      <h4>Horror Film Society Events</h4>
+      <p>Regular screenings for horror film enthusiasts.</p>
+    </div>
+    <div class="festival-item">
+      <h4>Japanese Film Festival</h4>
+      <p>Insight into Japan's rich cinematic culture.</p>
+    </div>
+    <div class="festival-item">
+      <h4>European Film Festival</h4>
+      <p>Diversity of European cinema from multiple countries.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Blackmagic Camera -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="blackmagic">
+  <div class="section-label">
+    <i class="fa-solid fa-circle"></i>
+    Shooting Tool
+  </div>
+  <h2 class="section-title">Blackmagic Camera</h2>
+  <p class="section-desc">This semester we use the Blackmagic app to shoot short films. Your mobile phone is the primary shooting device.</p>
+
+  <div class="bmc-hero">
+    <div>
+      <div class="bmc-features">
+        <div class="bmc-feature">
+          <i class="fa-solid fa-sliders"></i>
+          <div>
+            <div class="feat-title">Professional Controls</div>
+            <div class="feat-desc">Adjust frame rate, shutter angle, white balance, and ISO — all in a single tap.</div>
+          </div>
+        </div>
+        <div class="bmc-feature">
+          <i class="fa-solid fa-film"></i>
+          <div>
+            <div class="feat-title">Cinematic Look</div>
+            <div class="feat-desc">Create the same cinematic aesthetic as Hollywood feature films using Blackmagic's image processing.</div>
+          </div>
+        </div>
+        <div class="bmc-feature">
+          <i class="fa-solid fa-cloud"></i>
+          <div>
+            <div class="feat-title">Cloud Collaboration</div>
+            <div class="feat-desc">Record to Blackmagic Cloud in industry-standard formats up to 8K for remote DaVinci Resolve editing.</div>
+          </div>
+        </div>
+        <div class="bmc-feature">
+          <i class="fa-solid fa-mobile-screen-button"></i>
+          <div>
+            <div class="feat-title">Free Download</div>
+            <div class="feat-desc">Available for iPhone, iPad, Android phone and tablet — completely free.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bmc-visual">
+      <div class="phone-mockup"><i class="fa-solid fa-mobile-screen"></i></div>
+      <h3>Your Cinema in Your Pocket</h3>
+      <p>Professional digital film camera interface, designed for intuitive use on any mobile device.</p>
+    </div>
+  </div>
+
+  <!-- Cinematic Mode / Zebras -->
+  <div class="zebra-section" style="margin-top:4rem;">
+    <div class="zebra-info">
+      <h3>Cinematic Mode &amp; Zebras</h3>
+      <p style="color:var(--text-secondary);font-size:0.9375rem;margin-bottom:1.5rem;">
+        Zebras are an exposure tool that highlights areas exceeding a set brightness threshold with striped patterns, helping avoid overexposure.
+      </p>
+      <div class="zebra-list">
+        <div class="zebra-list-item">
+          <span class="check"><i class="fa-solid fa-check"></i></span>
+          Customizable threshold (95%, 100%, etc.)
+        </div>
+        <div class="zebra-list-item">
+          <span class="check"><i class="fa-solid fa-check"></i></span>
+          Prevents overexposure, protects highlight details
+        </div>
+        <div class="zebra-list-item">
+          <span class="check"><i class="fa-solid fa-check"></i></span>
+          Real-time on-screen aid — not recorded
+        </div>
+        <div class="zebra-list-item">
+          <span class="check"><i class="fa-solid fa-check"></i></span>
+          Ensures accurate exposure in flat/Log profiles
+        </div>
+      </div>
+    </div>
+    <div class="zebra-visual">
+      <div class="stripe"></div>
+      <div class="stripe"></div>
+      <div class="stripe"></div>
+      <div class="stripe"></div>
+      <div class="center-text">
+        <div class="big">95%</div>
+        <div class="sm">Zebra Threshold</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Camera Settings -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="settings">
+  <div class="section-label">
+    <i class="fa-solid fa-circle"></i>
+    Configuration
+  </div>
+  <h2 class="section-title">Camera Settings</h2>
+  <p class="section-desc">Recommended Blackmagic Camera settings for this course.</p>
+
+  <div class="settings-grid">
+    <div class="setting-card">
+      <div class="setting-name">Shutter</div>
+      <div class="setting-value">180° Angle</div>
+      <div class="setting-desc">Standard cinema film shutter angle for natural motion blur.</div>
+    </div>
+    <div class="setting-card">
+      <div class="setting-name">Frame Rate</div>
+      <div class="setting-value">24 fps / 120 fps</div>
+      <div class="setting-desc">24fps for cinematic, 120fps for dramatic slow motion.</div>
+    </div>
+    <div class="setting-card">
+      <div class="setting-name">Color Space</div>
+      <div class="setting-value">Rec.709 / Apple Log</div>
+      <div class="setting-desc">Rec.709 for standard; Apple Log for maximum grading flexibility.</div>
+    </div>
+    <div class="setting-card">
+      <div class="setting-name">Codec</div>
+      <div class="setting-value">HEVC (H.265)</div>
+      <div class="setting-desc">Smaller file sizes, efficient compression. Good for general use.</div>
+    </div>
+  </div>
+
+  <!-- Codec Comparison -->
+  <div class="codec-compare" style="margin-top:2rem;">
+    <div class="codec-card">
+      <h4>Professional</h4>
+      <div class="codec-name">Apple ProRes</div>
+      <p>High quality, great for professional editing workflows. Larger files but preserves maximum detail. Ideal for serious projects with ample storage.</p>
+    </div>
+    <div class="codec-card recommended">
+      <h4>Recommended</h4>
+      <div class="codec-name">HEVC (H.265)</div>
+      <p>Smaller files with efficient compression. Good for everyday shooting or when storage is limited. The recommended codec for this course.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Camera Movements -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="movements">
+  <div class="section-label">
+    <i class="fa-solid fa-circle"></i>
+    Cinematography
+  </div>
+  <h2 class="section-title">Camera Movements</h2>
+  <p class="section-desc">Essential camera movements that shape spatial perception and narrative tension in your films.</p>
+
+  <div class="movements-grid">
+    <div class="movement-card">
+      <div class="mv-icon"><i class="fa-solid fa-stop"></i></div>
+      <h4>Static</h4>
+      <p>Fixed frame. Stillness creates contemplation and draws focus to subject action.</p>
+    </div>
+    <div class="movement-card">
+      <div class="mv-icon"><i class="fa-solid fa-arrows-up-down"></i></div>
+      <h4>Tilt</h4>
+      <p>Vertical pivot. Reveals height, scale, and power dynamics between subjects.</p>
+    </div>
+    <div class="movement-card">
+      <div class="mv-icon"><i class="fa-solid fa-arrow-right"></i></div>
+      <h4>Push In</h4>
+      <p>Forward movement into the scene. Builds intensity, focus, and emotional engagement.</p>
+    </div>
+    <div class="movement-card">
+      <div class="mv-icon"><i class="fa-solid fa-arrow-left"></i></div>
+      <h4>Push Out</h4>
+      <p>Backward movement from the scene. Reveals context, isolation, or conclusion.</p>
+    </div>
+    <div class="movement-card">
+      <div class="mv-icon"><i class="fa-solid fa-magnifying-glass-plus"></i></div>
+      <h4>Zoom</h4>
+      <p>Optical focal length change. Compresses or expands perceived depth of space.</p>
+    </div>
+    <div class="movement-card">
+      <div class="mv-icon"><i class="fa-solid fa-burst"></i></div>
+      <h4>Dolly Zoom</h4>
+      <p>Simultaneous zoom and dolly. Creates the disorienting "vertigo effect."</p>
+    </div>
+    <div class="movement-card">
+      <div class="mv-icon"><i class="fa-solid fa-rotate"></i></div>
+      <h4>Roll</h4>
+      <p>Rotation on the lens axis. Conveys disorientation, dreaming, or shifting reality.</p>
+    </div>
+    <div class="movement-card">
+      <div class="mv-icon"><i class="fa-solid fa-rotate-left"></i></div>
+      <h4>Arc Shot</h4>
+      <p>Circular movement around the subject. Creates dynamic spatial awareness.</p>
+    </div>
+    <div class="movement-card">
+      <div class="mv-icon"><i class="fa-solid fa-location-crosshairs"></i></div>
+      <h4>Tracking</h4>
+      <p>Lateral movement alongside or behind subjects. Creates immersive spatial flow.</p>
+    </div>
+    <div class="movement-card">
+      <div class="mv-icon"><i class="fa-solid fa-shuffle"></i></div>
+      <h4>Random</h4>
+      <p>Handheld, unpredictable movement. Evokes chaos, urgency, or raw documentary feel.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Embedded Camera / Special Perspective -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="embedded">
+  <div class="section-label">
+    <i class="fa-solid fa-circle"></i>
+    Advanced Technique
+  </div>
+  <h2 class="section-title">Special Perspective Shooting</h2>
+  <p class="section-desc">Placing the camera in unconventional positions to create immersive, voyeuristic, or narrative-driven viewpoints.</p>
+
+  <div class="embedded-grid">
+    <div class="embedded-card">
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+        <div class="card-icon" style="background:var(--accent-dim);color:var(--accent);width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.875rem;">
+          <i class="fa-solid fa-eye"></i>
+        </div>
+        <h4 style="margin:0;">Embedded Camera</h4>
+      </div>
+      <p>Camera placed in unconventional spots — inside a bag, refrigerator, or object — creating unique, restricted viewpoints that feel both intimate and voyeuristic.</p>
+    </div>
+    <div class="embedded-card">
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+        <div class="card-icon" style="background:var(--accent-dim);color:var(--accent);width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.875rem;">
+          <i class="fa-solid fa-camera-rotate"></i>
+        </div>
+        <h4 style="margin:0;">Third-Person Perspective</h4>
+      </div>
+      <p>A specialized form using embedded, object-based external view. Fixed frame constraints create a restrictive yet story-driven narrative perspective.</p>
+    </div>
+    <div class="embedded-card">
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+        <div class="card-icon" style="background:var(--accent-dim);color:var(--accent);width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.875rem;">
+          <i class="fa-solid fa-person-running"></i>
+        </div>
+        <h4 style="margin:0;">Action Camera Play</h4>
+      </div>
+      <p>Using action cameras in creative mounting configurations — body-mounted, vehicle-attached, or suspended — for dynamic and immersive first-person footage.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <div class="footer-brand">Layered Frames</div>
+  <p>ARCH 1433 Communications Systems &middot; RMIT University &middot; Semester 1, 2026</p>
+  <p style="margin-top:0.5rem;font-size:0.75rem;">
+    Videos are being created now more than ever in history.
+  </p>
+</footer>
+
+<script>
+// Theme Toggle
+const toggle = document.getElementById('themeToggle');
+const icon = toggle.querySelector('i');
+
+function setTheme(light) {
+  document.documentElement.classList.toggle('light', light);
+  icon.className = light ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+  localStorage.setItem('theme', light ? 'light' : 'dark');
+}
+
+// Init theme
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+const saved = localStorage.getItem('theme');
+if (saved) { setTheme(saved === 'light'); }
+else { setTheme(!prefersDark); }
+
+toggle.addEventListener('click', () => {
+  const isLight = document.documentElement.classList.contains('light');
+  setTheme(!isLight);
+});
+
+// Scroll reveal
+const sections = document.querySelectorAll('.section');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); }
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -50px 0px' });
+sections.forEach(s => observer.observe(s));
+
+// TOC dots
+const tocDots = document.querySelectorAll('.toc-dot');
+const tocTargets = Array.from(tocDots).map(d => document.getElementById(d.dataset.target));
+
+tocDots.forEach(dot => {
+  dot.addEventListener('click', () => {
+    const target = document.getElementById(dot.dataset.target);
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+
+const tocObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      tocDots.forEach(d => d.classList.remove('active'));
+      const dot = document.querySelector(`.toc-dot[data-target="${e.target.id}"]`);
+      if (dot) dot.classList.add('active');
+    }
+  });
+}, { threshold: 0.3 });
+tocTargets.forEach(t => { if (t) tocObserver.observe(t); });
+
+// Navbar shadow on scroll
+window.addEventListener('scroll', () => {
+  const nb = document.getElementById('navbar');
+  if (window.scrollY > 10) {
+    nb.style.boxShadow = '0 1px 8px rgba(0,0,0,0.08)';
+  } else {
+    nb.style.boxShadow = 'none';
+  }
+});
+</script>
+
+</body>
+</html>
