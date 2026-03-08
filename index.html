@@ -1181,259 +1181,308 @@
   .embed-viewport {
     position: relative;
     width: 100%;
-    height: 130px;
+    height: 140px;
     border-radius: 10px;
     overflow: hidden;
-    background: var(--bg-tertiary);
+    background: #0a0a0a;
     margin-bottom: 1rem;
   }
 
-  /* --- Fridge --- */
+  /* --- Fridge Cam: door opens, face looks down --- */
   .embed-fridge .fridge-interior {
     position: absolute; inset: 0;
-    background: linear-gradient(180deg, #1a2a3a 0%, #0d1a26 100%);
-    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(180deg, #0d1820 0%, #142430 100%);
   }
-  .embed-fridge .fridge-shelves {
-    position: absolute; left: 0; right: 0;
-    height: 1px; background: rgba(255,255,255,0.15);
+  /* Fridge light glow from top */
+  .embed-fridge .fridge-glow {
+    position: absolute; top: 0; left: 20%; right: 20%;
+    height: 50%;
+    background: radial-gradient(ellipse at top center, rgba(255,240,180,0.25) 0%, transparent 70%);
+    opacity: 0;
   }
-  .embed-fridge .shelf-1 { top: 33%; }
-  .embed-fridge .shelf-2 { top: 66%; }
+  /* Shelves */
+  .embed-fridge .fridge-shelf {
+    position: absolute; left: 8%; right: 8%;
+    height: 1px; background: rgba(255,255,255,0.12);
+  }
+  .embed-fridge .fridge-shelf-1 { bottom: 65%; }
+  .embed-fridge .fridge-shelf-2 { bottom: 35%; }
+  /* Items on shelves */
   .embed-fridge .fridge-items {
-    position: absolute; bottom: 12%; left: 15%;
-    display: flex; gap: 8px; align-items: flex-end;
+    position: absolute; left: 12%; display: flex; gap: 6px; align-items: flex-end;
   }
-  .embed-fridge .fridge-item {
-    border-radius: 3px;
-    opacity: 0.6;
+  .embed-fridge .fridge-items-top { bottom: 66%; }
+  .embed-fridge .fridge-items-bot { bottom: 36%; }
+  .embed-fridge .fi-bottle { width: 6px; height: 20px; background: #4a9eff; border-radius: 2px 2px 1px 1px; opacity: 0.5; }
+  .embed-fridge .fi-box { width: 14px; height: 12px; background: #e8c547; border-radius: 1px; opacity: 0.5; }
+  .embed-fridge .fi-jar { width: 10px; height: 15px; background: #6bbb6b; border-radius: 2px; opacity: 0.5; }
+  .embed-fridge .fi-milk { width: 10px; height: 22px; background: #f0f0f0; border-radius: 2px; opacity: 0.4; }
+  .embed-fridge .fi-can { width: 8px; height: 12px; background: #ef4444; border-radius: 2px; opacity: 0.5; }
+  /* Face looking down */
+  .embed-fridge .fridge-face {
+    position: absolute; top: -40px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center;
+    opacity: 0; z-index: 3;
   }
-  .embed-fridge .fi-bottle { width: 8px; height: 28px; background: #4a9eff; border-radius: 3px 3px 1px 1px; }
-  .embed-fridge .fi-box { width: 18px; height: 16px; background: #e8c547; }
-  .embed-fridge .fi-jar { width: 12px; height: 20px; background: #6bbb6b; border-radius: 3px; }
-  .embed-fridge .fridge-light {
-    position: absolute; top: 8px; right: 12px;
-    width: 6px; height: 6px; border-radius: 50%;
-    background: #ffeaa7;
-    box-shadow: 0 0 12px #ffeaa7;
-    opacity: 0;
-    transition: opacity 0.5s;
+  .embed-fridge .face-head {
+    width: 40px; height: 44px; border-radius: 50%;
+    background: linear-gradient(180deg, #c4956a 0%, #b8845a 100%);
+    position: relative;
   }
-  .embed-fridge .fridge-door {
-    position: absolute; inset: 0;
-    background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%);
-    transform-origin: left center;
-    transition: transform 0.6s ease;
-    border-right: 3px solid #6b7280;
-    z-index: 2;
+  .embed-fridge .face-hair {
+    position: absolute; top: -2px; left: -2px; right: -2px; height: 22px;
+    background: #3d2b1a; border-radius: 22px 22px 0 0;
   }
-  .embed-fridge .door-handle {
-    position: absolute; right: 10px; top: 50%;
-    transform: translateY(-50%);
-    width: 4px; height: 22px;
-    background: #6b7280;
-    border-radius: 2px;
+  .embed-fridge .face-eyes {
+    position: absolute; top: 24px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 10px;
   }
-  .embed-fridge .fridge-person {
-    position: absolute; top: 0; left: 0; right: 0;
-    height: 100%;
-    display: flex; align-items: flex-start; justify-content: center;
-    padding-top: 10px;
-    opacity: 0;
-    z-index: 1;
-    transition: opacity 0.3s;
+  .embed-fridge .face-eye {
+    width: 5px; height: 5px; border-radius: 50%; background: #1a1a1a;
   }
-  .embed-fridge .fp-head {
-    width: 22px; height: 22px; border-radius: 50%;
-    background: var(--accent); opacity: 0.7;
+  .embed-fridge .face-mouth {
+    position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+    width: 8px; height: 4px; border-radius: 0 0 8px 8px;
+    border-bottom: 2px solid #8b5e3c;
   }
-  .embedded-card:hover .embed-fridge .fridge-door {
-    animation: fridgeOpen 3s ease-in-out infinite;
+  /* Door — two halves that split open */
+  .embed-fridge .fridge-door-l,
+  .embed-fridge .fridge-door-r {
+    position: absolute; top: 0; bottom: 0; width: 50%;
+    background: linear-gradient(135deg, #c8ccd0 0%, #a0a5ab 100%);
+    z-index: 5;
+    transition: transform 0.4s ease;
   }
-  .embedded-card:hover .embed-fridge .fridge-light {
-    animation: fridgeLight 3s ease-in-out infinite;
+  .embed-fridge .fridge-door-l {
+    left: 0; transform-origin: left center;
+    border-right: 1px solid #888;
   }
-  .embedded-card:hover .embed-fridge .fridge-person {
-    animation: fridgePerson 3s ease-in-out infinite;
+  .embed-fridge .fridge-door-r {
+    right: 0; transform-origin: right center;
+    border-left: 1px solid #888;
   }
-  @keyframes fridgeOpen {
-    0%, 10%  { transform: perspective(600px) rotateY(0deg); }
-    30%, 70% { transform: perspective(600px) rotateY(-70deg); }
-    90%, 100% { transform: perspective(600px) rotateY(0deg); }
+  .embed-fridge .fridge-handle {
+    position: absolute; top: 50%; width: 3px; height: 18px;
+    background: #6b7280; border-radius: 2px; transform: translateY(-50%);
   }
-  @keyframes fridgeLight {
-    0%, 10%  { opacity: 0; }
-    30%, 70% { opacity: 1; }
+  .embed-fridge .fridge-door-l .fridge-handle { right: 8px; }
+  .embed-fridge .fridge-door-r .fridge-handle { left: 8px; }
+
+  .embedded-card:hover .embed-fridge .fridge-door-l { animation: fridgeDoorL 4s ease-in-out infinite; }
+  .embedded-card:hover .embed-fridge .fridge-door-r { animation: fridgeDoorR 4s ease-in-out infinite; }
+  .embedded-card:hover .embed-fridge .fridge-face { animation: fridgeFace 4s ease-in-out infinite; }
+  .embedded-card:hover .embed-fridge .fridge-glow { animation: fridgeGlow 4s ease-in-out infinite; }
+
+  @keyframes fridgeDoorL {
+    0%, 8%    { transform: perspective(400px) rotateY(0deg); }
+    25%, 70%  { transform: perspective(400px) rotateY(-75deg); }
+    90%, 100% { transform: perspective(400px) rotateY(0deg); }
+  }
+  @keyframes fridgeDoorR {
+    0%, 8%    { transform: perspective(400px) rotateY(0deg); }
+    25%, 70%  { transform: perspective(400px) rotateY(75deg); }
+    90%, 100% { transform: perspective(400px) rotateY(0deg); }
+  }
+  @keyframes fridgeFace {
+    0%, 15%   { opacity: 0; top: -40px; }
+    35%, 60%  { opacity: 1; top: -8px; }
+    80%, 100% { opacity: 0; top: -40px; }
+  }
+  @keyframes fridgeGlow {
+    0%, 10%   { opacity: 0; }
+    25%, 70%  { opacity: 1; }
     90%, 100% { opacity: 0; }
   }
-  @keyframes fridgePerson {
-    0%, 15%  { opacity: 0; }
-    35%, 65% { opacity: 1; }
-    85%, 100% { opacity: 0; }
-  }
 
-  /* --- Bag --- */
+  /* --- Bag Cam: bag opens from top, face peers in --- */
   .embed-bag .bag-interior {
     position: absolute; inset: 0;
-    background: linear-gradient(180deg, #1a1a1a 0%, #2d1f14 100%);
+    background: linear-gradient(180deg, #1a1410 0%, #2a1e14 100%);
   }
-  .embed-bag .bag-opening {
-    position: absolute; top: 0; left: 0; right: 0;
-    height: 100%;
-    overflow: hidden;
-  }
-  .embed-bag .bag-flap-l,
-  .embed-bag .bag-flap-r {
-    position: absolute; top: 0; width: 55%;
-    height: 100%;
-    background: #3d2b1a;
-    z-index: 2;
-    transition: transform 0.5s ease;
-  }
-  .embed-bag .bag-flap-l {
-    left: 0;
-    transform-origin: left center;
-    border-right: 2px solid #2a1d0f;
-  }
-  .embed-bag .bag-flap-r {
-    right: 0;
-    transform-origin: right center;
-    border-left: 2px solid #2a1d0f;
-  }
-  .embed-bag .bag-stuff {
-    position: absolute; bottom: 10px; left: 20%;
-    display: flex; gap: 6px; align-items: flex-end;
-    opacity: 0.5; z-index: 1;
-  }
-  .embed-bag .bag-keys { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #c0c0c0; }
-  .embed-bag .bag-pen { width: 4px; height: 22px; background: #555; border-radius: 2px; }
-  .embed-bag .bag-wallet { width: 20px; height: 14px; background: #5c3a1e; border-radius: 2px; }
-  .embed-bag .bag-sky {
-    position: absolute; top: 0; left: 10%; right: 10%;
-    height: 60%;
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0;
+  /* Bag texture - side walls */
+  .embed-bag .bag-wall-l,
+  .embed-bag .bag-wall-r {
+    position: absolute; top: 0; bottom: 0; width: 15%;
+    background: linear-gradient(180deg, #3d2b1a 0%, #2a1d0f 100%);
     z-index: 1;
   }
-  .embed-bag .bag-hand {
-    width: 16px; height: 30px;
-    background: var(--accent); opacity: 0.6;
-    border-radius: 4px 4px 0 0;
+  .embed-bag .bag-wall-l { left: 0; border-right: 1px solid #4a3520; }
+  .embed-bag .bag-wall-r { right: 0; border-left: 1px solid #4a3520; }
+  /* Items at bottom of bag */
+  .embed-bag .bag-stuff {
+    position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 5px; align-items: flex-end; z-index: 1;
   }
-  .embedded-card:hover .embed-bag .bag-flap-l {
-    animation: bagOpenL 3.5s ease-in-out infinite;
+  .embed-bag .bag-keys { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #aaa; }
+  .embed-bag .bag-pen { width: 3px; height: 24px; background: #555; border-radius: 1px; transform: rotate(12deg); }
+  .embed-bag .bag-phone { width: 12px; height: 20px; background: #333; border-radius: 2px; border: 1px solid #555; }
+  /* Top flap that opens */
+  .embed-bag .bag-flap {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 100%;
+    background: linear-gradient(180deg, #4a3520 0%, #3d2b1a 100%);
+    transform-origin: top center;
+    z-index: 4;
   }
-  .embedded-card:hover .embed-bag .bag-flap-r {
-    animation: bagOpenR 3.5s ease-in-out infinite;
+  .embed-bag .bag-zipper {
+    position: absolute; bottom: 0; left: 20%; right: 20%;
+    height: 2px; background: #888; border-radius: 1px;
   }
-  .embedded-card:hover .embed-bag .bag-sky {
-    animation: bagSky 3.5s ease-in-out infinite;
+  /* Face from above */
+  .embed-bag .bag-face {
+    position: absolute; top: -40px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center;
+    opacity: 0; z-index: 3;
   }
-  @keyframes bagOpenL {
-    0%, 10%   { transform: rotateY(0deg); }
-    30%, 65%  { transform: rotateY(-55deg); }
-    85%, 100% { transform: rotateY(0deg); }
+  .embed-bag .bf-head {
+    width: 36px; height: 40px; border-radius: 50%;
+    background: linear-gradient(180deg, #c4956a 0%, #b8845a 100%);
+    position: relative;
   }
-  @keyframes bagOpenR {
-    0%, 10%   { transform: rotateY(0deg); }
-    30%, 65%  { transform: rotateY(55deg); }
-    85%, 100% { transform: rotateY(0deg); }
+  .embed-bag .bf-hair {
+    position: absolute; top: -2px; left: -2px; right: -2px; height: 20px;
+    background: #1a1a2e; border-radius: 20px 20px 0 0;
   }
-  @keyframes bagSky {
-    0%, 15%   { opacity: 0; }
-    35%, 60%  { opacity: 1; }
-    80%, 100% { opacity: 0; }
+  .embed-bag .bf-eyes {
+    position: absolute; top: 22px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px;
+  }
+  .embed-bag .bf-eye { width: 4px; height: 4px; border-radius: 50%; background: #1a1a1a; }
+  /* Sky/light behind face */
+  .embed-bag .bag-light {
+    position: absolute; top: 0; left: 25%; right: 25%; height: 60%;
+    background: radial-gradient(ellipse at top, rgba(180,200,230,0.3) 0%, transparent 70%);
+    opacity: 0; z-index: 2;
   }
 
-  /* --- Mounted (Apple-style: laptop/bike/cart) --- */
-  .embed-mounted .mount-scene {
+  .embedded-card:hover .embed-bag .bag-flap { animation: bagFlapOpen 4s ease-in-out infinite; }
+  .embedded-card:hover .embed-bag .bag-face { animation: bagFaceIn 4s ease-in-out infinite; }
+  .embedded-card:hover .embed-bag .bag-light { animation: bagLightIn 4s ease-in-out infinite; }
+
+  @keyframes bagFlapOpen {
+    0%, 8%    { transform: perspective(300px) rotateX(0deg); }
+    28%, 65%  { transform: perspective(300px) rotateX(-80deg); }
+    88%, 100% { transform: perspective(300px) rotateX(0deg); }
+  }
+  @keyframes bagFaceIn {
+    0%, 18%   { opacity: 0; top: -40px; }
+    38%, 58%  { opacity: 1; top: -6px; }
+    78%, 100% { opacity: 0; top: -40px; }
+  }
+  @keyframes bagLightIn {
+    0%, 12%   { opacity: 0; }
+    28%, 65%  { opacity: 1; }
+    88%, 100% { opacity: 0; }
+  }
+
+  /* --- Mounted Cam: Shopping cart POV in supermarket --- */
+  .embed-cart .cart-scene {
     position: absolute; inset: 0;
-    background: linear-gradient(180deg, #1e293b 0%, #334155 80%, #475569 100%);
+    background: linear-gradient(180deg, #f5f0e8 0%, #e8e0d4 100%);
+    overflow: hidden;
   }
-  .embed-mounted .mount-ground {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    height: 35%;
-    background: #475569;
-    border-top: 2px solid #64748b;
+  html.light .embed-cart .cart-scene {
+    background: linear-gradient(180deg, #faf8f5 0%, #f0ece5 100%);
   }
-  .embed-mounted .mount-ground-lines {
-    position: absolute; bottom: 15%; left: 0; right: 0;
-    height: 2px;
-    background: repeating-linear-gradient(90deg, #64748b 0px, #64748b 30px, transparent 30px, transparent 60px);
+  /* Floor */
+  .embed-cart .cart-floor {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 25%;
+    background: #d4cbbe;
+    border-top: 1px solid #c0b5a5;
   }
-  .embed-mounted .mount-object {
-    position: absolute; bottom: 35%; left: 50%;
-    transform: translateX(-50%);
+  .embed-cart .cart-floor-tiles {
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(90deg, transparent 0px, transparent 28px, #c8bfb0 28px, #c8bfb0 30px);
   }
-  .embed-mounted .mount-laptop {
-    width: 40px; height: 3px;
-    background: #94a3b8;
+  /* Shelves - left side */
+  .embed-cart .cart-shelves-l,
+  .embed-cart .cart-shelves-r {
+    position: absolute; top: 8%; bottom: 25%;
+    width: 28%;
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 4px 0;
+  }
+  .embed-cart .cart-shelves-l { left: 0; border-right: 2px solid #b5a994; }
+  .embed-cart .cart-shelves-r { right: 0; border-left: 2px solid #b5a994; }
+  .embed-cart .cart-shelf-row {
+    display: flex; gap: 3px; padding: 2px 4px; align-items: flex-end;
+    height: 30%;
+  }
+  .embed-cart .cart-shelves-l .cart-shelf-row { justify-content: flex-end; }
+  .embed-cart .cart-shelves-r .cart-shelf-row { justify-content: flex-start; }
+  .embed-cart .shelf-item {
     border-radius: 1px;
-    position: relative;
+    opacity: 0.7;
   }
-  .embed-mounted .mount-laptop::before {
+  .embed-cart .si-red { width: 6px; height: 14px; background: #e74c3c; }
+  .embed-cart .si-blue { width: 6px; height: 12px; background: #3498db; }
+  .embed-cart .si-green { width: 8px; height: 10px; background: #2ecc71; }
+  .embed-cart .si-yellow { width: 5px; height: 16px; background: #f1c40f; }
+  .embed-cart .si-purple { width: 7px; height: 11px; background: #9b59b6; }
+  .embed-cart .si-orange { width: 6px; height: 13px; background: #e67e22; }
+  .embed-cart .si-white { width: 8px; height: 9px; background: #ecf0f1; }
+  .embed-cart .si-pink { width: 5px; height: 15px; background: #e91e8c; }
+  /* Cart handle at bottom */
+  .embed-cart .cart-handle {
+    position: absolute; bottom: 8%; left: 25%; right: 25%;
+    height: 4px;
+    background: #888;
+    border-radius: 2px;
+    z-index: 3;
+    box-shadow: 0 -1px 3px rgba(0,0,0,0.2);
+  }
+  .embed-cart .cart-handle::before,
+  .embed-cart .cart-handle::after {
     content: '';
-    position: absolute; bottom: 3px; left: 5px;
-    width: 30px; height: 20px;
-    border: 1.5px solid #94a3b8;
-    border-bottom: none;
-    border-radius: 2px 2px 0 0;
-    background: rgba(100,180,255,0.15);
+    position: absolute; bottom: 0;
+    width: 3px; height: 12px;
+    background: #999;
+    border-radius: 1px;
   }
-  .embed-mounted .mount-trees {
-    position: absolute; bottom: 35%;
-    display: flex; gap: 25px;
-    width: 100%; justify-content: space-around;
-    padding: 0 10%;
-  }
-  .embed-mounted .mount-tree {
-    width: 3px; height: 20px;
-    background: #64748b;
-    position: relative;
-  }
-  .embed-mounted .mount-tree::before {
-    content: '';
-    position: absolute; top: -8px; left: -5px;
-    width: 13px; height: 13px;
-    background: #4a7a5a;
-    border-radius: 50%;
+  .embed-cart .cart-handle::before { left: 0; }
+  .embed-cart .cart-handle::after { right: 0; }
+  /* Aisle end / vanishing point */
+  .embed-cart .cart-aisle-end {
+    position: absolute; top: 5%; left: 30%; right: 30%;
+    height: 15%;
+    background: linear-gradient(180deg, #ddd5c8 0%, #e0d8cc 100%);
+    border: 1px solid #c0b5a5;
+    border-radius: 2px;
     opacity: 0.6;
   }
-  .embedded-card:hover .embed-mounted .mount-scene {
-    animation: mountMove 2s linear infinite;
+  /* Scrolling wrapper for shelves */
+  .embed-cart .cart-scroll-wrap {
+    position: absolute; inset: 0;
   }
-  .embedded-card:hover .embed-mounted .mount-trees {
-    animation: mountScroll 2s linear infinite;
+
+  .embedded-card:hover .embed-cart .cart-scroll-wrap { animation: cartMove 2.5s linear infinite; }
+  .embedded-card:hover .embed-cart .cart-handle { animation: cartBounce 0.5s ease-in-out infinite; }
+  .embedded-card:hover .embed-cart .cart-floor-tiles { animation: cartFloor 1.5s linear infinite; }
+
+  @keyframes cartMove {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(-30px); }
   }
-  .embedded-card:hover .embed-mounted .mount-ground-lines {
-    animation: mountRoad 1s linear infinite;
+  @keyframes cartBounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-2px); }
   }
-  .embedded-card:hover .embed-mounted .mount-object {
-    animation: mountBounce 0.4s ease-in-out infinite;
-  }
-  @keyframes mountScroll {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-60px); }
-  }
-  @keyframes mountRoad {
+  @keyframes cartFloor {
     0%   { background-position: 0 0; }
-    100% { background-position: 60px 0; }
-  }
-  @keyframes mountBounce {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50%      { transform: translateX(-50%) translateY(-3px); }
+    100% { background-position: 30px 0; }
   }
 
   /* Touch support for embedded cards */
-  .embedded-card.touch-active .embed-fridge .fridge-door { animation: fridgeOpen 3s ease-in-out infinite; }
-  .embedded-card.touch-active .embed-fridge .fridge-light { animation: fridgeLight 3s ease-in-out infinite; }
-  .embedded-card.touch-active .embed-fridge .fridge-person { animation: fridgePerson 3s ease-in-out infinite; }
-  .embedded-card.touch-active .embed-bag .bag-flap-l { animation: bagOpenL 3.5s ease-in-out infinite; }
-  .embedded-card.touch-active .embed-bag .bag-flap-r { animation: bagOpenR 3.5s ease-in-out infinite; }
-  .embedded-card.touch-active .embed-bag .bag-sky { animation: bagSky 3.5s ease-in-out infinite; }
-  .embedded-card.touch-active .embed-mounted .mount-trees { animation: mountScroll 2s linear infinite; }
-  .embedded-card.touch-active .embed-mounted .mount-ground-lines { animation: mountRoad 1s linear infinite; }
-  .embedded-card.touch-active .embed-mounted .mount-object { animation: mountBounce 0.4s ease-in-out infinite; }
+  .embedded-card.touch-active .embed-fridge .fridge-door-l { animation: fridgeDoorL 4s ease-in-out infinite; }
+  .embedded-card.touch-active .embed-fridge .fridge-door-r { animation: fridgeDoorR 4s ease-in-out infinite; }
+  .embedded-card.touch-active .embed-fridge .fridge-face { animation: fridgeFace 4s ease-in-out infinite; }
+  .embedded-card.touch-active .embed-fridge .fridge-glow { animation: fridgeGlow 4s ease-in-out infinite; }
+  .embedded-card.touch-active .embed-bag .bag-flap { animation: bagFlapOpen 4s ease-in-out infinite; }
+  .embedded-card.touch-active .embed-bag .bag-face { animation: bagFaceIn 4s ease-in-out infinite; }
+  .embedded-card.touch-active .embed-bag .bag-light { animation: bagLightIn 4s ease-in-out infinite; }
+  .embedded-card.touch-active .embed-cart .cart-scroll-wrap { animation: cartMove 2.5s linear infinite; }
+  .embedded-card.touch-active .embed-cart .cart-handle { animation: cartBounce 0.5s ease-in-out infinite; }
+  .embedded-card.touch-active .embed-cart .cart-floor-tiles { animation: cartFloor 1.5s linear infinite; }
 
   /* Homework Section */
   .hw-hero {
@@ -2719,62 +2768,110 @@
     <div class="embedded-card">
       <div class="embed-viewport embed-fridge">
         <div class="fridge-interior">
-          <div class="fridge-shelves shelf-1"></div>
-          <div class="fridge-shelves shelf-2"></div>
-          <div class="fridge-items">
-            <div class="fridge-item fi-bottle"></div>
-            <div class="fridge-item fi-box"></div>
-            <div class="fridge-item fi-jar"></div>
+          <div class="fridge-glow"></div>
+          <div class="fridge-shelf fridge-shelf-1"></div>
+          <div class="fridge-shelf fridge-shelf-2"></div>
+          <div class="fridge-items fridge-items-top">
+            <div class="fi-bottle"></div>
+            <div class="fi-box"></div>
+            <div class="fi-jar"></div>
           </div>
-          <div class="fridge-light"></div>
-          <div class="fridge-person"><div class="fp-head"></div></div>
+          <div class="fridge-items fridge-items-bot">
+            <div class="fi-milk"></div>
+            <div class="fi-can"></div>
+            <div class="fi-bottle"></div>
+          </div>
+          <div class="fridge-face">
+            <div class="face-head">
+              <div class="face-hair"></div>
+              <div class="face-eyes"><div class="face-eye"></div><div class="face-eye"></div></div>
+              <div class="face-mouth"></div>
+            </div>
+          </div>
         </div>
-        <div class="fridge-door"><div class="door-handle"></div></div>
+        <div class="fridge-door-l"><div class="fridge-handle"></div></div>
+        <div class="fridge-door-r"><div class="fridge-handle"></div></div>
       </div>
       <h4>Fridge Cam</h4>
-      <p>Camera inside a refrigerator. The door swings open to reveal the person — a classic embedded POV that feels intimate and voyeuristic.</p>
+      <p>Camera inside a refrigerator. The doors open and a face peers down — a classic embedded POV used in films and commercials.</p>
     </div>
 
     <!-- Bag Camera -->
     <div class="embedded-card">
       <div class="embed-viewport embed-bag">
         <div class="bag-interior">
+          <div class="bag-wall-l"></div>
+          <div class="bag-wall-r"></div>
           <div class="bag-stuff">
             <div class="bag-keys"></div>
             <div class="bag-pen"></div>
-            <div class="bag-wallet"></div>
+            <div class="bag-phone"></div>
           </div>
-          <div class="bag-sky"><div class="bag-hand"></div></div>
+          <div class="bag-light"></div>
+          <div class="bag-face">
+            <div class="bf-head">
+              <div class="bf-hair"></div>
+              <div class="bf-eyes"><div class="bf-eye"></div><div class="bf-eye"></div></div>
+            </div>
+          </div>
         </div>
-        <div class="bag-opening">
-          <div class="bag-flap-l"></div>
-          <div class="bag-flap-r"></div>
-        </div>
+        <div class="bag-flap"><div class="bag-zipper"></div></div>
       </div>
       <h4>Bag Cam</h4>
-      <p>Camera hidden inside a bag. The flaps open to reveal a hand reaching in — restricted viewpoint creates mystery and a sense of discovery.</p>
+      <p>Camera hidden inside a bag. The flap opens and someone peers in — a restricted viewpoint that creates mystery and intimacy.</p>
     </div>
 
-    <!-- Mounted Camera (Apple-style) -->
+    <!-- Shopping Cart Cam -->
     <div class="embedded-card">
-      <div class="embed-viewport embed-mounted">
-        <div class="mount-scene">
-          <div class="mount-trees">
-            <div class="mount-tree"></div>
-            <div class="mount-tree"></div>
-            <div class="mount-tree"></div>
-            <div class="mount-tree"></div>
-            <div class="mount-tree"></div>
-            <div class="mount-tree"></div>
+      <div class="embed-viewport embed-cart">
+        <div class="cart-scene">
+          <div class="cart-scroll-wrap">
+            <div class="cart-aisle-end"></div>
+            <div class="cart-shelves-l">
+              <div class="cart-shelf-row">
+                <div class="shelf-item si-red"></div>
+                <div class="shelf-item si-blue"></div>
+                <div class="shelf-item si-green"></div>
+                <div class="shelf-item si-yellow"></div>
+              </div>
+              <div class="cart-shelf-row">
+                <div class="shelf-item si-purple"></div>
+                <div class="shelf-item si-orange"></div>
+                <div class="shelf-item si-white"></div>
+                <div class="shelf-item si-red"></div>
+              </div>
+              <div class="cart-shelf-row">
+                <div class="shelf-item si-blue"></div>
+                <div class="shelf-item si-pink"></div>
+                <div class="shelf-item si-green"></div>
+              </div>
+            </div>
+            <div class="cart-shelves-r">
+              <div class="cart-shelf-row">
+                <div class="shelf-item si-orange"></div>
+                <div class="shelf-item si-white"></div>
+                <div class="shelf-item si-purple"></div>
+                <div class="shelf-item si-blue"></div>
+              </div>
+              <div class="cart-shelf-row">
+                <div class="shelf-item si-yellow"></div>
+                <div class="shelf-item si-red"></div>
+                <div class="shelf-item si-green"></div>
+                <div class="shelf-item si-pink"></div>
+              </div>
+              <div class="cart-shelf-row">
+                <div class="shelf-item si-white"></div>
+                <div class="shelf-item si-orange"></div>
+                <div class="shelf-item si-blue"></div>
+              </div>
+            </div>
           </div>
-          <div class="mount-ground">
-            <div class="mount-ground-lines"></div>
-          </div>
-          <div class="mount-object"><div class="mount-laptop"></div></div>
+          <div class="cart-floor"><div class="cart-floor-tiles"></div></div>
+          <div class="cart-handle"></div>
         </div>
       </div>
-      <h4>Mounted Cam</h4>
-      <p>Camera fixed on a moving object — laptop, bicycle, or shopping cart. The world scrolls past while the object gently bounces, inspired by Apple product ads.</p>
+      <h4>Cart Cam</h4>
+      <p>Camera mounted on a shopping cart moving through supermarket aisles. Shelves scroll past on both sides — inspired by Apple's product ads.</p>
     </div>
   </div>
 </section>
