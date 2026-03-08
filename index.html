@@ -858,14 +858,18 @@
     75%      { transform: rotate(-12deg) scale(1.2); }
   }
 
-  /* Arc — scene rotates with slight translate (orbiting feel) */
+  /* Arc — camera orbits around the subject */
   .movement-card:hover .mv-arc .mv-scene {
     animation: arcOrbit 3s ease-in-out infinite;
+    transform-style: preserve-3d;
+    perspective: 400px;
   }
   @keyframes arcOrbit {
-    0%   { transform: translateX(-10%) scale(1.15) rotateY(0deg); }
-    50%  { transform: translateX(10%) scale(1.15) rotateY(0deg); }
-    100% { transform: translateX(-10%) scale(1.15) rotateY(0deg); }
+    0%   { transform: scale(1.15) rotateY(-25deg) translateX(-8%); }
+    25%  { transform: scale(1.15) rotateY(0deg) translateX(0%); }
+    50%  { transform: scale(1.15) rotateY(25deg) translateX(8%); }
+    75%  { transform: scale(1.15) rotateY(0deg) translateX(0%); }
+    100% { transform: scale(1.15) rotateY(-25deg) translateX(-8%); }
   }
 
   /* Tracking — horizontal pan */
