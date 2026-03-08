@@ -615,15 +615,15 @@
   /* Camera Movements */
   .movements-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
     margin-top: 2.5rem;
   }
 
   .movement-card {
-    padding: 1.75rem 1.5rem;
+    padding: 1.5rem;
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 14px;
     background: var(--bg-card);
     text-align: center;
     transition: all 0.3s ease;
@@ -651,18 +651,244 @@
 
   .movement-card:hover::after { transform: scaleX(1); }
 
-  .movement-card .mv-icon {
-    width: 48px; height: 48px;
-    border-radius: 12px;
-    background: var(--accent-dim);
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 1rem;
-    color: var(--accent);
-    font-size: 1.125rem;
-    transition: transform 0.3s ease;
+  /* Mini Viewport */
+  .mv-viewport {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-primary);
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 1rem;
   }
 
-  .movement-card:hover .mv-icon { transform: scale(1.1); }
+  /* Viewfinder crosshair overlay */
+  .mv-viewport::before {
+    content: '';
+    position: absolute; inset: 0; z-index: 3;
+    pointer-events: none;
+    background:
+      linear-gradient(to right, transparent calc(50% - 0.5px), var(--border) calc(50% - 0.5px), var(--border) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+      linear-gradient(to bottom, transparent calc(50% - 0.5px), var(--border) calc(50% - 0.5px), var(--border) calc(50% + 0.5px), transparent calc(50% + 0.5px));
+    opacity: 0.3;
+  }
+
+  /* Corner brackets */
+  .mv-viewport::after {
+    content: '';
+    position: absolute; inset: 6px; z-index: 3;
+    pointer-events: none;
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .movement-card:hover .mv-viewport::after { opacity: 0.5; }
+
+  /* REC dot */
+  .mv-rec {
+    position: absolute; top: 8px; right: 8px; z-index: 4;
+    display: flex; align-items: center; gap: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.5625rem;
+    color: var(--text-tertiary);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .mv-rec .dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: #ef4444;
+  }
+  .movement-card:hover .mv-rec {
+    opacity: 1;
+    animation: recBlink 1s ease infinite;
+  }
+  @keyframes recBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* Scene inside viewport */
+  .mv-scene {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  /* Scene elements — a simple room-like composition */
+  .mv-scene-inner {
+    position: relative;
+    width: 100%; height: 100%;
+  }
+
+  /* Floor line */
+  .sc-floor {
+    position: absolute;
+    bottom: 30%; left: 10%; right: 10%;
+    height: 1px;
+    background: var(--border-hover);
+    opacity: 0.6;
+  }
+
+  /* Wall object (door/window) */
+  .sc-wall {
+    position: absolute;
+    width: 16%; height: 35%;
+    bottom: 30%; left: 42%;
+    border: 1px solid var(--accent);
+    border-bottom: none;
+    opacity: 0.5;
+    border-radius: 2px 2px 0 0;
+  }
+
+  /* Subject figure */
+  .sc-subject {
+    position: absolute;
+    bottom: 30%; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .sc-subject .head {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.7;
+    margin-bottom: 2px;
+  }
+  .sc-subject .body {
+    width: 6px; height: 18px;
+    background: var(--accent);
+    opacity: 0.5;
+    border-radius: 2px;
+  }
+
+  /* Furniture blocks */
+  .sc-block {
+    position: absolute;
+    background: var(--border);
+    opacity: 0.35;
+    border-radius: 1px;
+  }
+  .sc-block-l { width: 14%; height: 12%; bottom: 30%; left: 12%; }
+  .sc-block-r { width: 10%; height: 18%; bottom: 30%; right: 14%; }
+
+  /* Horizon / ceiling */
+  .sc-ceiling {
+    position: absolute;
+    top: 22%; left: 10%; right: 10%;
+    height: 1px;
+    background: var(--border);
+    opacity: 0.25;
+  }
+
+  /* ====== Per-movement animations (hover-triggered) ====== */
+
+  /* Static — subtle breathing pulse on subject */
+  .mv-static .mv-scene { transition: none; }
+  .movement-card:hover .mv-static .sc-subject {
+    animation: staticBreathe 2s ease-in-out infinite;
+  }
+  @keyframes staticBreathe {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.05); }
+  }
+
+  /* Tilt — scene moves vertically */
+  .movement-card:hover .mv-tilt .mv-scene {
+    animation: tiltMove 2.5s ease-in-out infinite;
+  }
+  @keyframes tiltMove {
+    0%, 100% { transform: translateY(15%); }
+    50% { transform: translateY(-15%); }
+  }
+
+  /* Push In — scene scales up */
+  .movement-card:hover .mv-pushin .mv-scene {
+    animation: pushIn 2.5s ease-in-out infinite;
+  }
+  @keyframes pushIn {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.45); }
+    100% { transform: scale(1); }
+  }
+
+  /* Push Out — scene scales down */
+  .movement-card:hover .mv-pushout .mv-scene {
+    animation: pushOut 2.5s ease-in-out infinite;
+  }
+  @keyframes pushOut {
+    0%   { transform: scale(1.4); }
+    50%  { transform: scale(1); }
+    100% { transform: scale(1.4); }
+  }
+
+  /* Zoom — scale with slight crop feel */
+  .movement-card:hover .mv-zoom .mv-scene {
+    animation: zoomLens 2s ease-in-out infinite;
+  }
+  @keyframes zoomLens {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.6); }
+  }
+
+  /* Dolly Zoom — scene scales up while inner shrinks (vertigo) */
+  .movement-card:hover .mv-dollyzoom .mv-scene {
+    animation: dollyOuter 2.5s ease-in-out infinite;
+  }
+  .movement-card:hover .mv-dollyzoom .mv-scene-inner {
+    animation: dollyInner 2.5s ease-in-out infinite;
+  }
+  @keyframes dollyOuter {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.4); }
+  }
+  @keyframes dollyInner {
+    0%, 100% { transform: perspective(200px) translateZ(0px); }
+    50%      { transform: perspective(200px) translateZ(-40px); }
+  }
+
+  /* Roll — scene rotates */
+  .movement-card:hover .mv-roll .mv-scene {
+    animation: rollSpin 3s ease-in-out infinite;
+  }
+  @keyframes rollSpin {
+    0%, 100% { transform: rotate(0deg) scale(1.2); }
+    25%      { transform: rotate(12deg) scale(1.2); }
+    75%      { transform: rotate(-12deg) scale(1.2); }
+  }
+
+  /* Arc — scene rotates with slight translate (orbiting feel) */
+  .movement-card:hover .mv-arc .mv-scene {
+    animation: arcOrbit 3s ease-in-out infinite;
+  }
+  @keyframes arcOrbit {
+    0%   { transform: translateX(-10%) scale(1.15) rotateY(0deg); }
+    50%  { transform: translateX(10%) scale(1.15) rotateY(0deg); }
+    100% { transform: translateX(-10%) scale(1.15) rotateY(0deg); }
+  }
+
+  /* Tracking — horizontal pan */
+  .movement-card:hover .mv-tracking .mv-scene {
+    animation: trackPan 2.5s ease-in-out infinite;
+  }
+  @keyframes trackPan {
+    0%, 100% { transform: translateX(-18%); }
+    50%      { transform: translateX(18%); }
+  }
+
+  /* Random — chaotic shake */
+  .movement-card:hover .mv-random .mv-scene {
+    animation: randomShake 0.3s ease-in-out infinite;
+  }
+  @keyframes randomShake {
+    0%   { transform: translate(0, 0) rotate(0deg); }
+    20%  { transform: translate(-3%, 2%) rotate(-0.5deg); }
+    40%  { transform: translate(2%, -3%) rotate(0.8deg); }
+    60%  { transform: translate(-1%, 1%) rotate(-0.3deg); }
+    80%  { transform: translate(3%, -1%) rotate(0.5deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+  }
 
   .movement-card h4 {
     font-family: 'DM Sans', sans-serif;
@@ -677,6 +903,23 @@
     color: var(--text-tertiary);
     line-height: 1.6;
   }
+
+  /* Touch-active mirrors hover for mobile */
+  .movement-card.touch-active { border-color: var(--border-hover); background: var(--bg-card-hover); transform: translateY(-3px); box-shadow: 0 12px 36px rgba(0,0,0,0.1); }
+  .movement-card.touch-active::after { transform: scaleX(1); }
+  .movement-card.touch-active .mv-viewport::after { opacity: 0.5; }
+  .movement-card.touch-active .mv-rec { opacity: 1; animation: recBlink 1s ease infinite; }
+  .movement-card.touch-active .mv-static .sc-subject { animation: staticBreathe 2s ease-in-out infinite; }
+  .movement-card.touch-active .mv-tilt .mv-scene { animation: tiltMove 2.5s ease-in-out infinite; }
+  .movement-card.touch-active .mv-pushin .mv-scene { animation: pushIn 2.5s ease-in-out infinite; }
+  .movement-card.touch-active .mv-pushout .mv-scene { animation: pushOut 2.5s ease-in-out infinite; }
+  .movement-card.touch-active .mv-zoom .mv-scene { animation: zoomLens 2s ease-in-out infinite; }
+  .movement-card.touch-active .mv-dollyzoom .mv-scene { animation: dollyOuter 2.5s ease-in-out infinite; }
+  .movement-card.touch-active .mv-dollyzoom .mv-scene-inner { animation: dollyInner 2.5s ease-in-out infinite; }
+  .movement-card.touch-active .mv-roll .mv-scene { animation: rollSpin 3s ease-in-out infinite; }
+  .movement-card.touch-active .mv-arc .mv-scene { animation: arcOrbit 3s ease-in-out infinite; }
+  .movement-card.touch-active .mv-tracking .mv-scene { animation: trackPan 2.5s ease-in-out infinite; }
+  .movement-card.touch-active .mv-random .mv-scene { animation: randomShake 0.3s ease-in-out infinite; }
 
   /* Zebra / Cinematic Mode */
   .zebra-section {
@@ -884,6 +1127,508 @@
     line-height: 1.7;
   }
 
+  /* Homework Section */
+  .hw-hero {
+    margin-top: 2.5rem;
+    padding: 2.5rem;
+    border: 1px solid var(--accent);
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--bg-card) 0%, var(--accent-dim) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hw-hero::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(to right, var(--accent), transparent);
+  }
+
+  .hw-hero-badge {
+    display: inline-flex; align-items: center; gap: 0.375rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6875rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 1rem;
+  }
+
+  .hw-hero h3 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+  }
+
+  .hw-hero h3 em { color: var(--accent); font-style: italic; }
+
+  .hw-hero-desc {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    max-width: 680px;
+  }
+
+  .hw-principle {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border-radius: 12px;
+    background: var(--surface-glass);
+    border: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 1rem;
+  }
+
+  .hw-principle-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: var(--accent-dim);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    font-size: 0.875rem;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+  }
+
+  .hw-principle p {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    line-height: 1.75;
+    font-style: italic;
+  }
+
+  .hw-principle strong {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-style: normal;
+  }
+
+  /* Task Steps */
+  .hw-steps {
+    margin-top: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+
+  .hw-steps::before {
+    content: '';
+    position: absolute;
+    left: 20px; top: 40px; bottom: 40px;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .hw-step {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    gap: 1.25rem;
+    align-items: start;
+    padding: 1.25rem 0;
+    position: relative;
+  }
+
+  .hw-step + .hw-step {
+    border-top: 1px solid var(--border);
+  }
+
+  .hw-step-num {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent);
+    position: relative;
+    z-index: 1;
+  }
+
+  .hw-step-content h4 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.375rem;
+  }
+
+  .hw-step-content p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.75;
+  }
+
+  .hw-step-content .hw-checklist {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .hw-checklist-item {
+    display: flex; align-items: flex-start; gap: 0.625rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.65;
+  }
+
+  .hw-checklist-item i {
+    color: var(--accent);
+    font-size: 0.5rem;
+    margin-top: 0.45em;
+    flex-shrink: 0;
+  }
+
+  .hw-step-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6875rem;
+    color: var(--text-tertiary);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.25rem 0.625rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Prompt Table */
+  .hw-prompts {
+    margin-top: 2.5rem;
+  }
+
+  .hw-prompts-title {
+    font-size: 1.125rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+  }
+
+  .hw-prompts-desc {
+    font-size: 0.875rem;
+    color: var(--text-tertiary);
+    margin-bottom: 1.25rem;
+  }
+
+  .hw-prompt-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .hw-prompt-row {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 1rem;
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-card);
+    transition: border-color 0.2s;
+  }
+
+  .hw-prompt-row:hover { border-color: var(--border-hover); }
+
+  .hw-prompt-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  .hw-prompt-extension {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  /* Submission Box */
+  .hw-submission {
+    margin-top: 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  .hw-sub-card {
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-card);
+  }
+
+  .hw-sub-card h4 {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+
+  .hw-sub-card h4 i {
+    color: var(--accent);
+    font-size: 0.8125rem;
+  }
+
+  .hw-sub-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .hw-sub-list-item {
+    display: flex; align-items: flex-start; gap: 0.625rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.65;
+  }
+
+  .hw-sub-list-item i {
+    color: var(--accent);
+    font-size: 0.5rem;
+    margin-top: 0.45em;
+    flex-shrink: 0;
+  }
+
+  .hw-warning {
+    margin-top: 1.5rem;
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
+    background: rgba(239,68,68,0.06);
+    border: 1px solid rgba(239,68,68,0.15);
+    display: flex; align-items: center; gap: 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+  }
+
+  .hw-warning i { color: #ef4444; font-size: 0.875rem; flex-shrink: 0; }
+  .hw-warning strong { color: var(--text-primary); font-weight: 500; }
+
+  .hw-total-time {
+    margin-top: 1.5rem;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 100px;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+
+  .hw-total-time i { font-size: 0.625rem; }
+
+  @media (max-width: 768px) {
+    .hw-step { grid-template-columns: 32px 1fr; gap: 1rem; }
+    .hw-step-time { grid-column: 2; margin-top: -0.5rem; }
+    .hw-steps::before { left: 16px; }
+    .hw-step-num { width: 32px; height: 32px; font-size: 0.625rem; }
+    .hw-prompt-row { grid-template-columns: 1fr; }
+    .hw-submission { grid-template-columns: 1fr; }
+  }
+
+  /* Video Gallery */
+  .video-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.25rem;
+    margin-top: 2.5rem;
+  }
+
+  .video-card {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--bg-card);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .video-card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.12);
+  }
+
+  .video-thumb {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--bg-tertiary);
+  }
+
+  .video-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease, filter 0.3s ease;
+    filter: brightness(0.85);
+  }
+
+  .video-card:hover .video-thumb img {
+    transform: scale(1.05);
+    filter: brightness(1);
+  }
+
+  .video-thumb .play-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .play-btn {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 1.25rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .video-card:hover .play-btn {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: scale(1.1);
+    box-shadow: 0 0 24px var(--accent-glow);
+  }
+
+  .video-card-info {
+    padding: 1rem 1.25rem;
+  }
+
+  .video-card-info .video-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .video-card-info .video-channel {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: 0.25rem;
+  }
+
+  /* Video Modal */
+  .video-modal {
+    position: fixed; inset: 0;
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .video-modal.open {
+    opacity: 1; pointer-events: all;
+  }
+
+  .video-modal-bg {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+  }
+
+  .video-modal-content {
+    position: relative;
+    width: 90%;
+    max-width: 960px;
+    aspect-ratio: 16 / 9;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+  }
+
+  .video-modal.open .video-modal-content {
+    transform: scale(1);
+  }
+
+  .video-modal-content iframe {
+    width: 100%; height: 100%;
+    border: none;
+  }
+
+  .video-modal-close {
+    position: absolute;
+    top: -48px; right: 0;
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .video-modal-close:hover { background: rgba(255,255,255,0.15); }
+
+  .slides-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--bg-card);
+    margin-top: 2rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .slides-card:hover {
+    border-color: var(--border-hover);
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+  }
+
+  .slides-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: var(--accent-dim);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .slides-card-text h4 {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.125rem;
+  }
+
+  .slides-card-text p {
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+  }
+
+  @media (max-width: 768px) {
+    .video-gallery { grid-template-columns: 1fr; }
+    .video-modal-content { width: 95%; }
+    .video-modal-close { top: -44px; }
+  }
+
   /* Footer */
   .site-footer {
     max-width: 1200px;
@@ -1024,6 +1769,7 @@
       <li><a href="#melbourne">Melbourne</a></li>
       <li><a href="#blackmagic">Camera</a></li>
       <li><a href="#movements">Movements</a></li>
+      <li><a href="#videos">Videos</a></li>
     </ul>
     <div style="display:flex;gap:0.625rem;align-items:center;">
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
@@ -1049,6 +1795,8 @@
   <button class="toc-dot" data-target="settings"><span class="toc-tooltip">Settings</span></button>
   <button class="toc-dot" data-target="movements"><span class="toc-tooltip">Movements</span></button>
   <button class="toc-dot" data-target="embedded"><span class="toc-tooltip">Embedded</span></button>
+  <button class="toc-dot" data-target="homework"><span class="toc-tooltip">Homework</span></button>
+  <button class="toc-dot" data-target="videos"><span class="toc-tooltip">Videos</span></button>
 </div>
 
 <!-- Hero -->
@@ -1448,58 +2196,203 @@
   </div>
   <h2 class="section-title">Camera Movements</h2>
   <p class="section-desc">Essential camera movements that shape spatial perception and narrative tension in your films.</p>
+  <p style="margin-top:0.75rem;font-size:0.75rem;color:var(--text-tertiary);display:flex;align-items:center;gap:0.375rem;">
+    <i class="fa-solid fa-hand-pointer" style="font-size:0.625rem;color:var(--accent);"></i>
+    Hover over each card to preview the camera movement
+  </p>
 
   <div class="movements-grid">
+
+    <!-- Static -->
     <div class="movement-card">
-      <div class="mv-icon"><i class="fa-solid fa-stop"></i></div>
+      <div class="mv-viewport mv-static">
+        <span class="mv-rec"><span class="dot"></span>REC</span>
+        <div class="mv-scene">
+          <div class="mv-scene-inner">
+            <div class="sc-ceiling"></div>
+            <div class="sc-floor"></div>
+            <div class="sc-wall"></div>
+            <div class="sc-block sc-block-l"></div>
+            <div class="sc-block sc-block-r"></div>
+            <div class="sc-subject"><div class="head"></div><div class="body"></div></div>
+          </div>
+        </div>
+      </div>
       <h4>Static</h4>
       <p>Fixed frame. Stillness creates contemplation and draws focus to subject action.</p>
     </div>
+
+    <!-- Tilt -->
     <div class="movement-card">
-      <div class="mv-icon"><i class="fa-solid fa-arrows-up-down"></i></div>
+      <div class="mv-viewport mv-tilt">
+        <span class="mv-rec"><span class="dot"></span>REC</span>
+        <div class="mv-scene">
+          <div class="mv-scene-inner">
+            <div class="sc-ceiling"></div>
+            <div class="sc-floor"></div>
+            <div class="sc-wall"></div>
+            <div class="sc-block sc-block-l"></div>
+            <div class="sc-block sc-block-r"></div>
+            <div class="sc-subject"><div class="head"></div><div class="body"></div></div>
+          </div>
+        </div>
+      </div>
       <h4>Tilt</h4>
       <p>Vertical pivot. Reveals height, scale, and power dynamics between subjects.</p>
     </div>
+
+    <!-- Push In -->
     <div class="movement-card">
-      <div class="mv-icon"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="mv-viewport mv-pushin">
+        <span class="mv-rec"><span class="dot"></span>REC</span>
+        <div class="mv-scene">
+          <div class="mv-scene-inner">
+            <div class="sc-ceiling"></div>
+            <div class="sc-floor"></div>
+            <div class="sc-wall"></div>
+            <div class="sc-block sc-block-l"></div>
+            <div class="sc-block sc-block-r"></div>
+            <div class="sc-subject"><div class="head"></div><div class="body"></div></div>
+          </div>
+        </div>
+      </div>
       <h4>Push In</h4>
       <p>Forward movement into the scene. Builds intensity, focus, and emotional engagement.</p>
     </div>
+
+    <!-- Push Out -->
     <div class="movement-card">
-      <div class="mv-icon"><i class="fa-solid fa-arrow-left"></i></div>
+      <div class="mv-viewport mv-pushout">
+        <span class="mv-rec"><span class="dot"></span>REC</span>
+        <div class="mv-scene">
+          <div class="mv-scene-inner">
+            <div class="sc-ceiling"></div>
+            <div class="sc-floor"></div>
+            <div class="sc-wall"></div>
+            <div class="sc-block sc-block-l"></div>
+            <div class="sc-block sc-block-r"></div>
+            <div class="sc-subject"><div class="head"></div><div class="body"></div></div>
+          </div>
+        </div>
+      </div>
       <h4>Push Out</h4>
       <p>Backward movement from the scene. Reveals context, isolation, or conclusion.</p>
     </div>
+
+    <!-- Zoom -->
     <div class="movement-card">
-      <div class="mv-icon"><i class="fa-solid fa-magnifying-glass-plus"></i></div>
+      <div class="mv-viewport mv-zoom">
+        <span class="mv-rec"><span class="dot"></span>REC</span>
+        <div class="mv-scene">
+          <div class="mv-scene-inner">
+            <div class="sc-ceiling"></div>
+            <div class="sc-floor"></div>
+            <div class="sc-wall"></div>
+            <div class="sc-block sc-block-l"></div>
+            <div class="sc-block sc-block-r"></div>
+            <div class="sc-subject"><div class="head"></div><div class="body"></div></div>
+          </div>
+        </div>
+      </div>
       <h4>Zoom</h4>
       <p>Optical focal length change. Compresses or expands perceived depth of space.</p>
     </div>
+
+    <!-- Dolly Zoom -->
     <div class="movement-card">
-      <div class="mv-icon"><i class="fa-solid fa-burst"></i></div>
+      <div class="mv-viewport mv-dollyzoom">
+        <span class="mv-rec"><span class="dot"></span>REC</span>
+        <div class="mv-scene">
+          <div class="mv-scene-inner">
+            <div class="sc-ceiling"></div>
+            <div class="sc-floor"></div>
+            <div class="sc-wall"></div>
+            <div class="sc-block sc-block-l"></div>
+            <div class="sc-block sc-block-r"></div>
+            <div class="sc-subject"><div class="head"></div><div class="body"></div></div>
+          </div>
+        </div>
+      </div>
       <h4>Dolly Zoom</h4>
       <p>Simultaneous zoom and dolly. Creates the disorienting "vertigo effect."</p>
     </div>
+
+    <!-- Roll -->
     <div class="movement-card">
-      <div class="mv-icon"><i class="fa-solid fa-rotate"></i></div>
+      <div class="mv-viewport mv-roll">
+        <span class="mv-rec"><span class="dot"></span>REC</span>
+        <div class="mv-scene">
+          <div class="mv-scene-inner">
+            <div class="sc-ceiling"></div>
+            <div class="sc-floor"></div>
+            <div class="sc-wall"></div>
+            <div class="sc-block sc-block-l"></div>
+            <div class="sc-block sc-block-r"></div>
+            <div class="sc-subject"><div class="head"></div><div class="body"></div></div>
+          </div>
+        </div>
+      </div>
       <h4>Roll</h4>
       <p>Rotation on the lens axis. Conveys disorientation, dreaming, or shifting reality.</p>
     </div>
+
+    <!-- Arc Shot -->
     <div class="movement-card">
-      <div class="mv-icon"><i class="fa-solid fa-rotate-left"></i></div>
+      <div class="mv-viewport mv-arc">
+        <span class="mv-rec"><span class="dot"></span>REC</span>
+        <div class="mv-scene">
+          <div class="mv-scene-inner">
+            <div class="sc-ceiling"></div>
+            <div class="sc-floor"></div>
+            <div class="sc-wall"></div>
+            <div class="sc-block sc-block-l"></div>
+            <div class="sc-block sc-block-r"></div>
+            <div class="sc-subject"><div class="head"></div><div class="body"></div></div>
+          </div>
+        </div>
+      </div>
       <h4>Arc Shot</h4>
       <p>Circular movement around the subject. Creates dynamic spatial awareness.</p>
     </div>
+
+    <!-- Tracking -->
     <div class="movement-card">
-      <div class="mv-icon"><i class="fa-solid fa-location-crosshairs"></i></div>
+      <div class="mv-viewport mv-tracking">
+        <span class="mv-rec"><span class="dot"></span>REC</span>
+        <div class="mv-scene">
+          <div class="mv-scene-inner">
+            <div class="sc-ceiling"></div>
+            <div class="sc-floor"></div>
+            <div class="sc-wall"></div>
+            <div class="sc-block sc-block-l"></div>
+            <div class="sc-block sc-block-r"></div>
+            <div class="sc-subject"><div class="head"></div><div class="body"></div></div>
+          </div>
+        </div>
+      </div>
       <h4>Tracking</h4>
       <p>Lateral movement alongside or behind subjects. Creates immersive spatial flow.</p>
     </div>
+
+    <!-- Random -->
     <div class="movement-card">
-      <div class="mv-icon"><i class="fa-solid fa-shuffle"></i></div>
+      <div class="mv-viewport mv-random">
+        <span class="mv-rec"><span class="dot"></span>REC</span>
+        <div class="mv-scene">
+          <div class="mv-scene-inner">
+            <div class="sc-ceiling"></div>
+            <div class="sc-floor"></div>
+            <div class="sc-wall"></div>
+            <div class="sc-block sc-block-l"></div>
+            <div class="sc-block sc-block-r"></div>
+            <div class="sc-subject"><div class="head"></div><div class="body"></div></div>
+          </div>
+        </div>
+      </div>
       <h4>Random</h4>
       <p>Handheld, unpredictable movement. Evokes chaos, urgency, or raw documentary feel.</p>
     </div>
+
   </div>
 </section>
 
@@ -1543,6 +2436,177 @@
     </div>
   </div>
 </section>
+
+<!-- Homework: Two Spaces, One Edit -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="homework">
+  <div class="section-label">
+    <i class="fa-solid fa-circle"></i>
+    Homework
+  </div>
+  <h2 class="section-title">Week 1 Assignment</h2>
+  <p class="section-desc">Due next class. Approx. 3.5 hours total.</p>
+
+  <!-- Hero Brief -->
+  <div class="hw-hero">
+    <div class="hw-hero-badge"><i class="fa-solid fa-scissors"></i> Editing Exercise</div>
+    <h3>Two Spaces, <em>One Edit</em></h3>
+    <div class="hw-hero-desc">
+      In class you filmed inside the university building. Now go home and film in a completely different space. Then use Premiere Pro to combine both into a single cohesive edit. The challenge: making two unrelated locations feel like one story through editing alone.
+    </div>
+    <div class="hw-principle">
+      <div class="hw-principle-icon"><i class="fa-solid fa-lightbulb"></i></div>
+      <p><strong>Why this matters:</strong> Spatial narrative is constructed in the edit, not in the shoot. Two shots filmed in completely different buildings can feel continuous if the rhythm, movement, and visual logic connect them. This exercise trains that instinct from day one.</p>
+    </div>
+  </div>
+
+  <!-- Task Steps -->
+  <div class="hw-steps">
+
+    <div class="hw-step">
+      <div class="hw-step-num">01</div>
+      <div class="hw-step-content">
+        <h4>Review Your In-Class Footage</h4>
+        <p>Watch what you filmed in class. Pick the strongest 3–5 clips — think about which camera movements and spatial moments work best.</p>
+      </div>
+      <div class="hw-step-time"><i class="fa-regular fa-clock"></i> 20 min</div>
+    </div>
+
+    <div class="hw-step">
+      <div class="hw-step-num">02</div>
+      <div class="hw-step-content">
+        <h4>Film at Home (or Any Space Outside Uni)</h4>
+        <p>Shoot 5–8 new clips that extend or echo your in-class prompt. Use at least 3 different camera movements from what we covered (static, pan, tilt, push in/out, tracking, handheld, etc.).</p>
+        <p style="margin-top:0.5rem;">Think spatially: How does this new space connect to the university space? It could be a continuation of the story, a contrast, a mirror, or a before/after.</p>
+      </div>
+      <div class="hw-step-time"><i class="fa-regular fa-clock"></i> 1 hr</div>
+    </div>
+
+    <div class="hw-step">
+      <div class="hw-step-num">03</div>
+      <div class="hw-step-content">
+        <h4>Edit in Premiere Pro</h4>
+        <p>Combine your in-class footage and home footage into one 30–60 second video. You must:</p>
+        <div class="hw-checklist">
+          <div class="hw-checklist-item"><i class="fa-solid fa-circle"></i>Use the Razor Tool (or Ctrl/Cmd+K) at least once to split a clip</div>
+          <div class="hw-checklist-item"><i class="fa-solid fa-circle"></i>Trim at least two clips to adjust their length</div>
+          <div class="hw-checklist-item"><i class="fa-solid fa-circle"></i>Reorder clips — don't just put them in the order you filmed them</div>
+          <div class="hw-checklist-item"><i class="fa-solid fa-circle"></i>Create at least one moment where a cut from Space A (uni) to Space B (home) feels intentional, not random</div>
+        </div>
+        <p style="margin-top:0.75rem;font-size:0.8125rem;color:var(--text-tertiary);">No audio, music, or colour grading needed at this stage. Focus entirely on visual rhythm and edit logic.</p>
+      </div>
+      <div class="hw-step-time"><i class="fa-regular fa-clock"></i> 1.5 hr</div>
+    </div>
+
+    <div class="hw-step">
+      <div class="hw-step-num">04</div>
+      <div class="hw-step-content">
+        <h4>Write a Short Reflection</h4>
+        <p>3–5 sentences. Describe: Which cut between the two spaces works best in your edit, and why? What connects the two spaces visually?</p>
+      </div>
+      <div class="hw-step-time"><i class="fa-regular fa-clock"></i> 15 min</div>
+    </div>
+
+    <div class="hw-step">
+      <div class="hw-step-num">05</div>
+      <div class="hw-step-content">
+        <h4>Instagram Post</h4>
+        <p>Upload at least one clip to <strong>@layered_frames</strong>. In the caption, write one sentence describing the spatial relationship you were exploring.</p>
+      </div>
+      <div class="hw-step-time"><i class="fa-regular fa-clock"></i> 10 min</div>
+    </div>
+
+  </div>
+
+  <div class="hw-total-time"><i class="fa-solid fa-clock"></i> Total estimated time: approx. 3.5 hours</div>
+
+  <!-- Prompt Ideas -->
+  <div class="hw-prompts">
+    <h3 class="hw-prompts-title serif">Connecting to Your In-Class Prompt</h3>
+    <p class="hw-prompts-desc">Here are some ideas for how your home footage could relate to your in-class prompt — but feel free to find your own approach.</p>
+    <div class="hw-prompt-grid">
+      <div class="hw-prompt-row">
+        <div class="hw-prompt-name">The Missing Person</div>
+        <div class="hw-prompt-extension">The "missing" person appears in a domestic space — or their absence is felt through empty rooms, untouched objects.</div>
+      </div>
+      <div class="hw-prompt-row">
+        <div class="hw-prompt-name">A Repeating Day</div>
+        <div class="hw-prompt-extension">The loop continues at home: the same morning routine, the same hallway, but something subtly shifts each time.</div>
+      </div>
+      <div class="hw-prompt-row">
+        <div class="hw-prompt-name">Behind the Scenes</div>
+        <div class="hw-prompt-extension">Extend the "hidden spaces" idea to your own home — under beds, inside closets, behind appliances. What does a space look like when no one is watching?</div>
+      </div>
+      <div class="hw-prompt-row">
+        <div class="hw-prompt-name">Unexpected Encounter</div>
+        <div class="hw-prompt-extension">After the encounter at uni, one character goes home. The domestic space reflects their emotional state — tidy vs. messy, bright vs. dark.</div>
+      </div>
+      <div class="hw-prompt-row">
+        <div class="hw-prompt-name">The Last Classroom</div>
+        <div class="hw-prompt-extension">The search continues at home — opening doors, checking rooms, looking for something that may not exist.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submission -->
+  <div class="hw-submission">
+    <div class="hw-sub-card">
+      <h4><i class="fa-solid fa-upload"></i> Submission Requirements</h4>
+      <div class="hw-sub-list">
+        <div class="hw-sub-list-item"><i class="fa-solid fa-circle"></i>Edited video (30–60 sec), exported from Premiere Pro. Visuals only, no audio required.</div>
+        <div class="hw-sub-list-item"><i class="fa-solid fa-circle"></i>Short reflection (3–5 sentences), submitted as PDF or text on Canvas.</div>
+        <div class="hw-sub-list-item"><i class="fa-solid fa-circle"></i>Instagram post on @layered_frames with a one-sentence caption.</div>
+      </div>
+    </div>
+    <div class="hw-sub-card">
+      <h4><i class="fa-solid fa-calendar"></i> Deadline &amp; Tools</h4>
+      <div class="hw-sub-list">
+        <div class="hw-sub-list-item"><i class="fa-solid fa-circle"></i>Due: next class session</div>
+        <div class="hw-sub-list-item"><i class="fa-solid fa-circle"></i>Required tool: Adobe Premiere Pro</div>
+        <div class="hw-sub-list-item"><i class="fa-solid fa-circle"></i>Key techniques: Razor Tool, trimming, reordering, cross-space cuts</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hw-warning">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <span><strong>Important:</strong> Use Adobe Premiere Pro for editing. Do NOT use CapCut, iMovie, or other quick-edit apps.</span>
+  </div>
+
+</section>
+
+<!-- Video Resources -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="videos">
+  <div class="section-label">
+    <i class="fa-solid fa-circle"></i>
+    Reference Material
+  </div>
+  <h2 class="section-title">Video Resources</h2>
+  <p class="section-desc">Curated reference videos for this week's topics — camera techniques, visual storytelling, and creative inspiration.</p>
+
+  <div class="video-gallery" id="videoGallery">
+    <!-- Videos will be populated by JS -->
+  </div>
+
+  <!-- Google Slides Link -->
+  <a href="https://docs.google.com/presentation/d/1YXjLizQjFyckmzKW3v700QcNgDtGpn8Z/edit?slide=id.g33c9498e14e_0_258#slide=id.g33c9498e14e_0_258" target="_blank" rel="noopener" class="slides-card">
+    <div class="slides-icon"><i class="fa-solid fa-file-powerpoint"></i></div>
+    <div class="slides-card-text">
+      <h4>Week 1 Presentation Slides</h4>
+      <p>Open the full Google Slides deck in a new tab</p>
+    </div>
+  </a>
+</section>
+
+<!-- Video Modal -->
+<div class="video-modal" id="videoModal">
+  <div class="video-modal-bg" id="videoModalBg"></div>
+  <div class="video-modal-content">
+    <button class="video-modal-close" id="videoModalClose"><i class="fa-solid fa-xmark"></i></button>
+    <iframe id="videoIframe" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+</div>
 
 <!-- Footer -->
 <footer class="site-footer">
@@ -1605,6 +2669,100 @@ const tocObserver = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.3 });
 tocTargets.forEach(t => { if (t) tocObserver.observe(t); });
+
+// Mobile touch toggle for movement cards
+document.querySelectorAll('.movement-card').forEach(card => {
+  card.addEventListener('touchstart', (e) => {
+    // Remove active from all other cards
+    document.querySelectorAll('.movement-card.touch-active').forEach(c => {
+      if (c !== card) c.classList.remove('touch-active');
+    });
+    card.classList.toggle('touch-active');
+  }, { passive: true });
+});
+
+// Video Gallery
+const videoData = [
+  { id: 'YJg02ivYzSs', title: 'HYPER-REALITY — Keiichi Matsuda' },
+  { id: 'b1dBQe58fzg', title: '' },
+  { id: 'g8aeSOualRk', title: '' },
+  { id: 'ZhYvs7rrGnw', title: '' },
+  { id: 'PJlmYh27MHg', title: '' },
+  { id: 'h2c3JZ6X3f8', title: '' },
+  { id: 'QRTGVvQosWk', title: '' },
+  { id: 'liusEeP1QcE', title: '' },
+  { id: 'ttZAdY3n4nc', title: '' },
+  { id: 'Xt20A2L0Djw', title: '' },
+  { id: 'mkVYpzyJvG8', title: '' },
+  { id: 'urgDBUXShos', title: '' },
+  { id: 'EEnVa7RMDak', title: '' },
+  { id: 'FhvJffMr_w0', title: '' }
+];
+
+const gallery = document.getElementById('videoGallery');
+
+// Build cards with thumbnails
+videoData.forEach((v, i) => {
+  const card = document.createElement('div');
+  card.className = 'video-card';
+  card.dataset.videoId = v.id;
+  card.innerHTML = `
+    <div class="video-thumb">
+      <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg" alt="" loading="lazy">
+      <div class="play-overlay"><div class="play-btn"><i class="fa-solid fa-play" style="margin-left:2px;"></i></div></div>
+    </div>
+    <div class="video-card-info">
+      <div class="video-title" id="vtitle-${i}">${v.title || 'Loading...'}</div>
+      <div class="video-channel">YouTube</div>
+    </div>
+  `;
+  gallery.appendChild(card);
+});
+
+// Fetch titles from YouTube oembed (client-side)
+videoData.forEach((v, i) => {
+  if (v.title) return; // already known
+  fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${v.id}&format=json`)
+    .then(r => r.json())
+    .then(data => {
+      const el = document.getElementById(`vtitle-${i}`);
+      if (el && data.title) {
+        el.textContent = data.title;
+        // Also update channel
+        const ch = el.parentElement.querySelector('.video-channel');
+        if (ch && data.author_name) ch.textContent = data.author_name;
+      }
+    })
+    .catch(() => {
+      const el = document.getElementById(`vtitle-${i}`);
+      if (el) el.textContent = 'Video Resource';
+    });
+});
+
+// Modal logic
+const modal = document.getElementById('videoModal');
+const iframe = document.getElementById('videoIframe');
+
+function openVideo(videoId) {
+  iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeVideo() {
+  modal.classList.remove('open');
+  iframe.src = '';
+  document.body.style.overflow = '';
+}
+
+gallery.addEventListener('click', e => {
+  const card = e.target.closest('.video-card');
+  if (card) openVideo(card.dataset.videoId);
+});
+
+document.getElementById('videoModalBg').addEventListener('click', closeVideo);
+document.getElementById('videoModalClose').addEventListener('click', closeVideo);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVideo(); });
 
 // Navbar shadow on scroll
 window.addEventListener('scroll', () => {
