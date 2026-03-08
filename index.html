@@ -794,13 +794,14 @@
     50% { transform: translateX(-50%) scale(1.05); }
   }
 
-  /* Tilt — scene moves vertically */
+  /* Tilt — camera fixed, lens pivots up/down on tripod */
   .movement-card:hover .mv-tilt .mv-scene {
     animation: tiltMove 2.5s ease-in-out infinite;
+    transform-style: preserve-3d;
   }
   @keyframes tiltMove {
-    0%, 100% { transform: translateY(15%); }
-    50% { transform: translateY(-15%); }
+    0%, 100% { transform: perspective(500px) rotateX(12deg) scale(1.1); }
+    50%      { transform: perspective(500px) rotateX(-12deg) scale(1.1); }
   }
 
   /* Push In — camera physically moves closer, perspective shifts */
@@ -874,26 +875,36 @@
     100% { transform: scale(1.15) rotateY(-25deg) translateX(-8%); }
   }
 
-  /* Tracking — horizontal pan */
+  /* Tracking — camera moves on rails parallel to subject, parallax effect */
   .movement-card:hover .mv-tracking .mv-scene {
-    animation: trackPan 2.5s ease-in-out infinite;
+    animation: trackPan 3s ease-in-out infinite;
+    transform-style: preserve-3d;
+  }
+  .movement-card:hover .mv-tracking .mv-scene-inner {
+    animation: trackParallax 3s ease-in-out infinite;
   }
   @keyframes trackPan {
-    0%, 100% { transform: translateX(-18%); }
-    50%      { transform: translateX(18%); }
+    0%, 100% { transform: perspective(500px) translateX(-15%) translateZ(10px); }
+    50%      { transform: perspective(500px) translateX(15%) translateZ(10px); }
+  }
+  @keyframes trackParallax {
+    0%, 100% { transform: translateX(5%); }
+    50%      { transform: translateX(-5%); }
   }
 
-  /* Random — chaotic shake */
+  /* Random — camera swings wildly to different parts of scene */
   .movement-card:hover .mv-random .mv-scene {
-    animation: randomShake 0.3s ease-in-out infinite;
+    animation: randomSwing 2.5s steps(1, end) infinite;
+    transform: scale(1.6);
   }
-  @keyframes randomShake {
-    0%   { transform: translate(0, 0) rotate(0deg); }
-    20%  { transform: translate(-3%, 2%) rotate(-0.5deg); }
-    40%  { transform: translate(2%, -3%) rotate(0.8deg); }
-    60%  { transform: translate(-1%, 1%) rotate(-0.3deg); }
-    80%  { transform: translate(3%, -1%) rotate(0.5deg); }
-    100% { transform: translate(0, 0) rotate(0deg); }
+  @keyframes randomSwing {
+    0%    { transform: scale(1.6) translate(0, 0) rotate(0deg); }
+    16%   { transform: scale(1.6) translate(-20%, 15%) rotate(-3deg); }
+    33%   { transform: scale(1.6) translate(18%, -12%) rotate(2deg); }
+    50%   { transform: scale(1.6) translate(-10%, -18%) rotate(-1.5deg); }
+    66%   { transform: scale(1.6) translate(22%, 10%) rotate(4deg); }
+    83%   { transform: scale(1.6) translate(-15%, 8%) rotate(-2deg); }
+    100%  { transform: scale(1.6) translate(0, 0) rotate(0deg); }
   }
 
   .movement-card h4 {
@@ -924,8 +935,9 @@
   .movement-card.touch-active .mv-dollyzoom .mv-scene-inner { animation: dollyInner 2.5s ease-in-out infinite; }
   .movement-card.touch-active .mv-roll .mv-scene { animation: rollSpin 3s ease-in-out infinite; }
   .movement-card.touch-active .mv-arc .mv-scene { animation: arcOrbit 3s ease-in-out infinite; }
-  .movement-card.touch-active .mv-tracking .mv-scene { animation: trackPan 2.5s ease-in-out infinite; }
-  .movement-card.touch-active .mv-random .mv-scene { animation: randomShake 0.3s ease-in-out infinite; }
+  .movement-card.touch-active .mv-tracking .mv-scene { animation: trackPan 3s ease-in-out infinite; }
+  .movement-card.touch-active .mv-tracking .mv-scene-inner { animation: trackParallax 3s ease-in-out infinite; }
+  .movement-card.touch-active .mv-random .mv-scene { animation: randomSwing 2.5s steps(1, end) infinite; transform: scale(1.6); }
 
   /* Zebra / Cinematic Mode */
   .zebra-section {
