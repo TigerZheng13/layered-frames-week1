@@ -803,14 +803,15 @@
     50% { transform: translateY(-15%); }
   }
 
-  /* Push In — scene scales up */
+  /* Push In — camera physically moves closer, perspective shifts */
   .movement-card:hover .mv-pushin .mv-scene {
     animation: pushIn 2.5s ease-in-out infinite;
+    transform-style: preserve-3d;
   }
   @keyframes pushIn {
-    0%   { transform: scale(1); }
-    50%  { transform: scale(1.45); }
-    100% { transform: scale(1); }
+    0%   { transform: perspective(600px) translateZ(0px); }
+    50%  { transform: perspective(600px) translateZ(120px); }
+    100% { transform: perspective(600px) translateZ(0px); }
   }
 
   /* Push Out — scene scales down */
@@ -823,13 +824,14 @@
     100% { transform: scale(1.4); }
   }
 
-  /* Zoom — scale with slight crop feel */
+  /* Zoom — optical zoom, uniform scale with no perspective change, crop feel */
   .movement-card:hover .mv-zoom .mv-scene {
     animation: zoomLens 2s ease-in-out infinite;
+    transform-origin: center center;
   }
   @keyframes zoomLens {
-    0%, 100% { transform: scale(1); }
-    50%      { transform: scale(1.6); }
+    0%, 100% { transform: scale(1); filter: none; }
+    50%      { transform: scale(1.8); filter: none; }
   }
 
   /* Dolly Zoom — scene scales up while inner shrinks (vertigo) */
