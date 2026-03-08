@@ -1176,6 +1176,265 @@
     line-height: 1.7;
   }
 
+  /* ====== Embedded Camera Animations ====== */
+
+  .embed-viewport {
+    position: relative;
+    width: 100%;
+    height: 130px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--bg-tertiary);
+    margin-bottom: 1rem;
+  }
+
+  /* --- Fridge --- */
+  .embed-fridge .fridge-interior {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, #1a2a3a 0%, #0d1a26 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .embed-fridge .fridge-shelves {
+    position: absolute; left: 0; right: 0;
+    height: 1px; background: rgba(255,255,255,0.15);
+  }
+  .embed-fridge .shelf-1 { top: 33%; }
+  .embed-fridge .shelf-2 { top: 66%; }
+  .embed-fridge .fridge-items {
+    position: absolute; bottom: 12%; left: 15%;
+    display: flex; gap: 8px; align-items: flex-end;
+  }
+  .embed-fridge .fridge-item {
+    border-radius: 3px;
+    opacity: 0.6;
+  }
+  .embed-fridge .fi-bottle { width: 8px; height: 28px; background: #4a9eff; border-radius: 3px 3px 1px 1px; }
+  .embed-fridge .fi-box { width: 18px; height: 16px; background: #e8c547; }
+  .embed-fridge .fi-jar { width: 12px; height: 20px; background: #6bbb6b; border-radius: 3px; }
+  .embed-fridge .fridge-light {
+    position: absolute; top: 8px; right: 12px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #ffeaa7;
+    box-shadow: 0 0 12px #ffeaa7;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  .embed-fridge .fridge-door {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%);
+    transform-origin: left center;
+    transition: transform 0.6s ease;
+    border-right: 3px solid #6b7280;
+    z-index: 2;
+  }
+  .embed-fridge .door-handle {
+    position: absolute; right: 10px; top: 50%;
+    transform: translateY(-50%);
+    width: 4px; height: 22px;
+    background: #6b7280;
+    border-radius: 2px;
+  }
+  .embed-fridge .fridge-person {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 100%;
+    display: flex; align-items: flex-start; justify-content: center;
+    padding-top: 10px;
+    opacity: 0;
+    z-index: 1;
+    transition: opacity 0.3s;
+  }
+  .embed-fridge .fp-head {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent); opacity: 0.7;
+  }
+  .embedded-card:hover .embed-fridge .fridge-door {
+    animation: fridgeOpen 3s ease-in-out infinite;
+  }
+  .embedded-card:hover .embed-fridge .fridge-light {
+    animation: fridgeLight 3s ease-in-out infinite;
+  }
+  .embedded-card:hover .embed-fridge .fridge-person {
+    animation: fridgePerson 3s ease-in-out infinite;
+  }
+  @keyframes fridgeOpen {
+    0%, 10%  { transform: perspective(600px) rotateY(0deg); }
+    30%, 70% { transform: perspective(600px) rotateY(-70deg); }
+    90%, 100% { transform: perspective(600px) rotateY(0deg); }
+  }
+  @keyframes fridgeLight {
+    0%, 10%  { opacity: 0; }
+    30%, 70% { opacity: 1; }
+    90%, 100% { opacity: 0; }
+  }
+  @keyframes fridgePerson {
+    0%, 15%  { opacity: 0; }
+    35%, 65% { opacity: 1; }
+    85%, 100% { opacity: 0; }
+  }
+
+  /* --- Bag --- */
+  .embed-bag .bag-interior {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, #1a1a1a 0%, #2d1f14 100%);
+  }
+  .embed-bag .bag-opening {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+  .embed-bag .bag-flap-l,
+  .embed-bag .bag-flap-r {
+    position: absolute; top: 0; width: 55%;
+    height: 100%;
+    background: #3d2b1a;
+    z-index: 2;
+    transition: transform 0.5s ease;
+  }
+  .embed-bag .bag-flap-l {
+    left: 0;
+    transform-origin: left center;
+    border-right: 2px solid #2a1d0f;
+  }
+  .embed-bag .bag-flap-r {
+    right: 0;
+    transform-origin: right center;
+    border-left: 2px solid #2a1d0f;
+  }
+  .embed-bag .bag-stuff {
+    position: absolute; bottom: 10px; left: 20%;
+    display: flex; gap: 6px; align-items: flex-end;
+    opacity: 0.5; z-index: 1;
+  }
+  .embed-bag .bag-keys { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #c0c0c0; }
+  .embed-bag .bag-pen { width: 4px; height: 22px; background: #555; border-radius: 2px; }
+  .embed-bag .bag-wallet { width: 20px; height: 14px; background: #5c3a1e; border-radius: 2px; }
+  .embed-bag .bag-sky {
+    position: absolute; top: 0; left: 10%; right: 10%;
+    height: 60%;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0;
+    z-index: 1;
+  }
+  .embed-bag .bag-hand {
+    width: 16px; height: 30px;
+    background: var(--accent); opacity: 0.6;
+    border-radius: 4px 4px 0 0;
+  }
+  .embedded-card:hover .embed-bag .bag-flap-l {
+    animation: bagOpenL 3.5s ease-in-out infinite;
+  }
+  .embedded-card:hover .embed-bag .bag-flap-r {
+    animation: bagOpenR 3.5s ease-in-out infinite;
+  }
+  .embedded-card:hover .embed-bag .bag-sky {
+    animation: bagSky 3.5s ease-in-out infinite;
+  }
+  @keyframes bagOpenL {
+    0%, 10%   { transform: rotateY(0deg); }
+    30%, 65%  { transform: rotateY(-55deg); }
+    85%, 100% { transform: rotateY(0deg); }
+  }
+  @keyframes bagOpenR {
+    0%, 10%   { transform: rotateY(0deg); }
+    30%, 65%  { transform: rotateY(55deg); }
+    85%, 100% { transform: rotateY(0deg); }
+  }
+  @keyframes bagSky {
+    0%, 15%   { opacity: 0; }
+    35%, 60%  { opacity: 1; }
+    80%, 100% { opacity: 0; }
+  }
+
+  /* --- Mounted (Apple-style: laptop/bike/cart) --- */
+  .embed-mounted .mount-scene {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, #1e293b 0%, #334155 80%, #475569 100%);
+  }
+  .embed-mounted .mount-ground {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 35%;
+    background: #475569;
+    border-top: 2px solid #64748b;
+  }
+  .embed-mounted .mount-ground-lines {
+    position: absolute; bottom: 15%; left: 0; right: 0;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, #64748b 0px, #64748b 30px, transparent 30px, transparent 60px);
+  }
+  .embed-mounted .mount-object {
+    position: absolute; bottom: 35%; left: 50%;
+    transform: translateX(-50%);
+  }
+  .embed-mounted .mount-laptop {
+    width: 40px; height: 3px;
+    background: #94a3b8;
+    border-radius: 1px;
+    position: relative;
+  }
+  .embed-mounted .mount-laptop::before {
+    content: '';
+    position: absolute; bottom: 3px; left: 5px;
+    width: 30px; height: 20px;
+    border: 1.5px solid #94a3b8;
+    border-bottom: none;
+    border-radius: 2px 2px 0 0;
+    background: rgba(100,180,255,0.15);
+  }
+  .embed-mounted .mount-trees {
+    position: absolute; bottom: 35%;
+    display: flex; gap: 25px;
+    width: 100%; justify-content: space-around;
+    padding: 0 10%;
+  }
+  .embed-mounted .mount-tree {
+    width: 3px; height: 20px;
+    background: #64748b;
+    position: relative;
+  }
+  .embed-mounted .mount-tree::before {
+    content: '';
+    position: absolute; top: -8px; left: -5px;
+    width: 13px; height: 13px;
+    background: #4a7a5a;
+    border-radius: 50%;
+    opacity: 0.6;
+  }
+  .embedded-card:hover .embed-mounted .mount-scene {
+    animation: mountMove 2s linear infinite;
+  }
+  .embedded-card:hover .embed-mounted .mount-trees {
+    animation: mountScroll 2s linear infinite;
+  }
+  .embedded-card:hover .embed-mounted .mount-ground-lines {
+    animation: mountRoad 1s linear infinite;
+  }
+  .embedded-card:hover .embed-mounted .mount-object {
+    animation: mountBounce 0.4s ease-in-out infinite;
+  }
+  @keyframes mountScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-60px); }
+  }
+  @keyframes mountRoad {
+    0%   { background-position: 0 0; }
+    100% { background-position: 60px 0; }
+  }
+  @keyframes mountBounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%      { transform: translateX(-50%) translateY(-3px); }
+  }
+
+  /* Touch support for embedded cards */
+  .embedded-card.touch-active .embed-fridge .fridge-door { animation: fridgeOpen 3s ease-in-out infinite; }
+  .embedded-card.touch-active .embed-fridge .fridge-light { animation: fridgeLight 3s ease-in-out infinite; }
+  .embedded-card.touch-active .embed-fridge .fridge-person { animation: fridgePerson 3s ease-in-out infinite; }
+  .embedded-card.touch-active .embed-bag .bag-flap-l { animation: bagOpenL 3.5s ease-in-out infinite; }
+  .embedded-card.touch-active .embed-bag .bag-flap-r { animation: bagOpenR 3.5s ease-in-out infinite; }
+  .embedded-card.touch-active .embed-bag .bag-sky { animation: bagSky 3.5s ease-in-out infinite; }
+  .embedded-card.touch-active .embed-mounted .mount-trees { animation: mountScroll 2s linear infinite; }
+  .embedded-card.touch-active .embed-mounted .mount-ground-lines { animation: mountRoad 1s linear infinite; }
+  .embedded-card.touch-active .embed-mounted .mount-object { animation: mountBounce 0.4s ease-in-out infinite; }
+
   /* Homework Section */
   .hw-hero {
     margin-top: 2.5rem;
@@ -2456,32 +2715,66 @@
   <p class="section-desc">Placing the camera in unconventional positions to create immersive, voyeuristic, or narrative-driven viewpoints.</p>
 
   <div class="embedded-grid">
+    <!-- Fridge Camera -->
     <div class="embedded-card">
-      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
-        <div class="card-icon" style="background:var(--accent-dim);color:var(--accent);width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.875rem;">
-          <i class="fa-solid fa-eye"></i>
+      <div class="embed-viewport embed-fridge">
+        <div class="fridge-interior">
+          <div class="fridge-shelves shelf-1"></div>
+          <div class="fridge-shelves shelf-2"></div>
+          <div class="fridge-items">
+            <div class="fridge-item fi-bottle"></div>
+            <div class="fridge-item fi-box"></div>
+            <div class="fridge-item fi-jar"></div>
+          </div>
+          <div class="fridge-light"></div>
+          <div class="fridge-person"><div class="fp-head"></div></div>
         </div>
-        <h4 style="margin:0;">Embedded Camera</h4>
+        <div class="fridge-door"><div class="door-handle"></div></div>
       </div>
-      <p>Camera placed in unconventional spots — inside a bag, refrigerator, or object — creating unique, restricted viewpoints that feel both intimate and voyeuristic.</p>
+      <h4>Fridge Cam</h4>
+      <p>Camera inside a refrigerator. The door swings open to reveal the person — a classic embedded POV that feels intimate and voyeuristic.</p>
     </div>
+
+    <!-- Bag Camera -->
     <div class="embedded-card">
-      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
-        <div class="card-icon" style="background:var(--accent-dim);color:var(--accent);width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.875rem;">
-          <i class="fa-solid fa-camera-rotate"></i>
+      <div class="embed-viewport embed-bag">
+        <div class="bag-interior">
+          <div class="bag-stuff">
+            <div class="bag-keys"></div>
+            <div class="bag-pen"></div>
+            <div class="bag-wallet"></div>
+          </div>
+          <div class="bag-sky"><div class="bag-hand"></div></div>
         </div>
-        <h4 style="margin:0;">Third-Person Perspective</h4>
+        <div class="bag-opening">
+          <div class="bag-flap-l"></div>
+          <div class="bag-flap-r"></div>
+        </div>
       </div>
-      <p>A specialized form using embedded, object-based external view. Fixed frame constraints create a restrictive yet story-driven narrative perspective.</p>
+      <h4>Bag Cam</h4>
+      <p>Camera hidden inside a bag. The flaps open to reveal a hand reaching in — restricted viewpoint creates mystery and a sense of discovery.</p>
     </div>
+
+    <!-- Mounted Camera (Apple-style) -->
     <div class="embedded-card">
-      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
-        <div class="card-icon" style="background:var(--accent-dim);color:var(--accent);width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.875rem;">
-          <i class="fa-solid fa-person-running"></i>
+      <div class="embed-viewport embed-mounted">
+        <div class="mount-scene">
+          <div class="mount-trees">
+            <div class="mount-tree"></div>
+            <div class="mount-tree"></div>
+            <div class="mount-tree"></div>
+            <div class="mount-tree"></div>
+            <div class="mount-tree"></div>
+            <div class="mount-tree"></div>
+          </div>
+          <div class="mount-ground">
+            <div class="mount-ground-lines"></div>
+          </div>
+          <div class="mount-object"><div class="mount-laptop"></div></div>
         </div>
-        <h4 style="margin:0;">Action Camera Play</h4>
       </div>
-      <p>Using action cameras in creative mounting configurations — body-mounted, vehicle-attached, or suspended — for dynamic and immersive first-person footage.</p>
+      <h4>Mounted Cam</h4>
+      <p>Camera fixed on a moving object — laptop, bicycle, or shopping cart. The world scrolls past while the object gently bounces, inspired by Apple product ads.</p>
     </div>
   </div>
 </section>
@@ -2722,8 +3015,17 @@ tocTargets.forEach(t => { if (t) tocObserver.observe(t); });
 // Mobile touch toggle for movement cards
 document.querySelectorAll('.movement-card').forEach(card => {
   card.addEventListener('touchstart', (e) => {
-    // Remove active from all other cards
     document.querySelectorAll('.movement-card.touch-active').forEach(c => {
+      if (c !== card) c.classList.remove('touch-active');
+    });
+    card.classList.toggle('touch-active');
+  }, { passive: true });
+});
+
+// Mobile touch toggle for embedded cards
+document.querySelectorAll('.embedded-card').forEach(card => {
+  card.addEventListener('touchstart', (e) => {
+    document.querySelectorAll('.embedded-card.touch-active').forEach(c => {
       if (c !== card) c.classList.remove('touch-active');
     });
     card.classList.toggle('touch-active');
