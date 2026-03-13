@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Layered Frames — Week 2 · Sound</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #09090b;
+    --bg-secondary: #111113;
+    --bg-tertiary: #18181b;
+    --bg-card: #141416;
+    --bg-card-hover: #1a1a1e;
+    --border: #27272a;
+    --border-hover: #3f3f46;
+    --text-primary: #fafafa;
+    --text-secondary: #a1a1aa;
+    --text-tertiary: #71717a;
+    --accent: #7c9cba;
+    --accent-warm: #d4a054;
+    --accent-dim: rgba(124,156,186,0.12);
+    --accent-glow: rgba(124,156,186,0.25);
+    --surface-glass: rgba(255,255,255,0.03);
+  }
+  html.light {
+    --bg-primary: #fafaf9;
+    --bg-secondary: #f5f5f4;
+    --bg-tertiary: #e7e5e4;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f5f5f4;
+    --border: #d6d3d1;
+    --border-hover: #a8a29e;
+    --text-primary: #1c1917;
+    --text-secondary: #57534e;
+    --text-tertiary: #78716c;
+    --accent: #4a7a9b;
+    --accent-warm: #b8860b;
+    --accent-dim: rgba(74,122,155,0.08);
+    --accent-glow: rgba(74,122,155,0.15);
+    --surface-glass: rgba(0,0,0,0.02);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.7;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,h2,h3,.serif { font-family: 'Instrument Serif', serif; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Nav */
+  .nav-bar {
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    border-bottom:1px solid var(--border);
+    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    background:rgba(9,9,11,0.85);
+    transition:all .3s ease;
+  }
+  html.light .nav-bar { background:rgba(250,250,249,0.85); }
+  .nav-inner { max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:.875rem 2rem; }
+  .nav-brand { display:flex;align-items:center;gap:.75rem;font-family:'Instrument Serif',serif;font-size:1.125rem;color:var(--text-primary);text-decoration:none; }
+  .nav-brand .dot { width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent-glow); }
+  .nav-links { display:flex;align-items:center;gap:1.5rem;list-style:none; }
+  .nav-links a { color:var(--text-tertiary);text-decoration:none;font-size:.8125rem;font-weight:500;letter-spacing:.02em;transition:color .2s; }
+  .nav-links a:hover { color:var(--text-primary); }
+  .theme-toggle { width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s ease;font-size:.875rem; }
+  .theme-toggle:hover { border-color:var(--border-hover);color:var(--text-primary);transform:scale(1.05); }
+  .mobile-menu-btn { display:none;width:36px;height:36px;border:1px solid var(--border);border-radius:8px;background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;align-items:center;justify-content:center;font-size:.875rem; }
+
+  /* TOC */
+  .toc-sidebar { position:fixed;left:1.5rem;top:50%;transform:translateY(-50%);z-index:50;display:flex;flex-direction:column;gap:.375rem; }
+  .toc-dot { width:8px;height:8px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .3s ease;border:none;padding:0;position:relative; }
+  .toc-dot:hover,.toc-dot.active { background:var(--accent);box-shadow:0 0 10px var(--accent-glow);transform:scale(1.4); }
+  .toc-dot .toc-tooltip { position:absolute;left:1.5rem;top:50%;transform:translateY(-50%);background:var(--bg-tertiary);border:1px solid var(--border);border-radius:6px;padding:.25rem .625rem;font-size:.6875rem;color:var(--text-secondary);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s; }
+  .toc-dot:hover .toc-tooltip { opacity:1; }
+
+  /* Hero */
+  .hero { min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:6rem 2rem 4rem;position:relative;overflow:hidden; }
+  .hero::before { content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 40%, var(--accent-dim) 0%, transparent 70%),radial-gradient(ellipse 40% 30% at 70% 50%, rgba(124,156,186,0.05) 0%, transparent 70%);pointer-events:none; }
+  .hero-label { display:inline-flex;align-items:center;gap:.5rem;padding:.375rem 1rem;border-radius:100px;border:1px solid var(--border);background:var(--surface-glass);font-size:.75rem;font-weight:500;color:var(--text-secondary);letter-spacing:.06em;text-transform:uppercase;margin-bottom:2rem;opacity:0;animation:fadeUp .8s ease .2s forwards; }
+  .hero-title { font-size:clamp(3rem,8vw,6.5rem);line-height:1.05;font-weight:400;letter-spacing:-.02em;margin-bottom:1.5rem;opacity:0;animation:fadeUp .8s ease .4s forwards; }
+  .hero-title em { font-style:italic;color:var(--accent); }
+  .hero-subtitle { font-size:clamp(1rem,2vw,1.25rem);color:var(--text-secondary);max-width:560px;line-height:1.7;opacity:0;animation:fadeUp .8s ease .6s forwards; }
+  .hero-meta { display:flex;gap:2rem;margin-top:3rem;opacity:0;animation:fadeUp .8s ease .8s forwards; }
+  .hero-meta-item { display:flex;flex-direction:column;align-items:center;gap:.25rem; }
+  .hero-meta-item .value { font-family:'Instrument Serif',serif;font-size:1.5rem;color:var(--text-primary); }
+  .hero-meta-item .label { font-size:.6875rem;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.08em; }
+  .scroll-indicator { position:absolute;bottom:2.5rem;display:flex;flex-direction:column;align-items:center;gap:.5rem;color:var(--text-tertiary);font-size:.6875rem;letter-spacing:.1em;text-transform:uppercase;opacity:0;animation:fadeUp .8s ease 1s forwards; }
+  .scroll-indicator i { animation:bounce 2s ease infinite; }
+
+  /* Sections */
+  .section { max-width:1200px;margin:0 auto;padding:6rem 2rem;opacity:0;transform:translateY(30px);transition:opacity .7s ease, transform .7s ease; }
+  .section.visible { opacity:1;transform:translateY(0); }
+  .section-label { display:inline-flex;align-items:center;gap:.5rem;font-size:.6875rem;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1rem; }
+  .section-label i { font-size:.5rem; }
+  .section-title { font-size:clamp(2rem,4vw,3rem);font-weight:400;line-height:1.15;letter-spacing:-.015em;margin-bottom:1.5rem; }
+  .section-desc { font-size:1.0625rem;color:var(--text-secondary);max-width:680px;line-height:1.8; }
+  .divider { max-width:1200px;margin:0 auto;padding:0 2rem; }
+  .divider-line { height:1px;background:linear-gradient(to right, transparent, var(--border), transparent); }
+
+  /* Sound Properties */
+  .sound-props { display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:2.5rem; }
+  .sound-prop { padding:1.75rem;border:1px solid var(--border);border-radius:14px;background:var(--bg-card);text-align:center;transition:all .3s ease;position:relative;overflow:hidden; }
+  .sound-prop:hover { border-color:var(--border-hover);background:var(--bg-card-hover);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.1); }
+  .sound-prop .sp-icon { width:48px;height:48px;border-radius:12px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:var(--accent);font-size:1.125rem; }
+  .sound-prop h4 { font-family:'DM Sans',sans-serif;font-size:.9375rem;font-weight:500;color:var(--text-primary);margin-bottom:.375rem; }
+  .sound-prop p { font-size:.8125rem;color:var(--text-tertiary);line-height:1.65; }
+
+  /* Quote Block */
+  .quote-block { margin-top:2.5rem;padding:2rem 2.5rem;border-left:3px solid var(--accent);background:var(--bg-card);border-radius:0 14px 14px 0;position:relative; }
+  .quote-block::before { content:'\201C';position:absolute;top:.5rem;left:1rem;font-family:'Instrument Serif',serif;font-size:3rem;color:var(--accent);opacity:.3; }
+  .quote-block p { font-size:.9375rem;color:var(--text-secondary);line-height:1.85;font-style:italic; }
+  .quote-block cite { display:block;margin-top:1rem;font-size:.75rem;font-style:normal;color:var(--text-tertiary);letter-spacing:.02em; }
+
+  /* Emotion Cards */
+  .emotion-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;margin-top:2.5rem; }
+  .emotion-card { padding:2rem;border:1px solid var(--border);border-radius:14px;background:var(--bg-card);transition:all .3s ease;position:relative;overflow:hidden; }
+  .emotion-card::before { content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0;transition:opacity .3s; }
+  .emotion-card:hover { border-color:var(--border-hover);transform:translateY(-3px);box-shadow:0 12px 36px rgba(0,0,0,.12); }
+  .emotion-card .em-label { font-family:'JetBrains Mono',monospace;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem; }
+  .emotion-card h4 { font-family:'Instrument Serif',serif;font-size:1.25rem;color:var(--text-primary);margin-bottom:.625rem; }
+  .emotion-card p { font-size:.875rem;color:var(--text-secondary);line-height:1.75; }
+  /* Color accents per emotion */
+  .em-tension::before { background:#ef4444;opacity:.7; }
+  .em-tension .em-label { color:#ef4444; }
+  .em-focus::before { background:#3b82f6;opacity:.7; }
+  .em-focus .em-label { color:#3b82f6; }
+  .em-joy::before { background:#eab308;opacity:.7; }
+  .em-joy .em-label { color:#eab308; }
+  .em-intimacy::before { background:#a855f7;opacity:.7; }
+  .em-intimacy .em-label { color:#a855f7; }
+
+  /* Key Insight */
+  .insight-block { margin-top:2.5rem;padding:2rem;border:1px solid var(--accent);border-radius:14px;background:linear-gradient(135deg,var(--bg-card) 0%,var(--accent-dim) 100%);display:flex;align-items:flex-start;gap:1.25rem; }
+  .insight-icon { width:44px;height:44px;border-radius:10px;background:var(--accent-dim);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:1.125rem;flex-shrink:0; }
+  .insight-block h4 { font-size:1rem;font-weight:500;color:var(--text-primary);margin-bottom:.375rem; }
+  .insight-block p { font-size:.9375rem;color:var(--text-secondary);line-height:1.75; }
+
+  /* Sound Design Categories */
+  .sd-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-top:2.5rem; }
+  .sd-card { padding:1.5rem;border:1px solid var(--border);border-radius:12px;background:var(--bg-card);transition:all .3s ease;text-align:center;position:relative;overflow:hidden; }
+  .sd-card::after { content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent);transform:scaleX(0);transition:transform .3s; }
+  .sd-card:hover { border-color:var(--border-hover);background:var(--bg-card-hover);transform:translateY(-2px); }
+  .sd-card:hover::after { transform:scaleX(1); }
+  .sd-card .sd-icon { width:44px;height:44px;border-radius:10px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;margin:0 auto .875rem;color:var(--accent);font-size:1rem; }
+  .sd-card h4 { font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:500;color:var(--text-primary);margin-bottom:.375rem; }
+  .sd-card p { font-size:.75rem;color:var(--text-tertiary);line-height:1.6; }
+
+  /* Sound Bridge Section */
+  .bridge-grid { display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2.5rem; }
+  .bridge-card { padding:2rem;border:1px solid var(--border);border-radius:14px;background:var(--bg-card);position:relative;overflow:hidden;transition:all .3s ease; }
+  .bridge-card:hover { border-color:var(--border-hover);transform:translateY(-2px); }
+  .bridge-card h4 { font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem; }
+  .bridge-card .bridge-name { font-family:'Instrument Serif',serif;font-size:1.5rem;color:var(--text-primary);margin-bottom:.75rem; }
+  .bridge-card p { font-size:.875rem;color:var(--text-secondary);line-height:1.75; }
+  /* Visual timeline bars */
+  .bridge-visual { margin-top:1.25rem;display:flex;flex-direction:column;gap:.375rem; }
+  .bv-track { display:flex;align-items:center;gap:.5rem;font-size:.625rem;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em; }
+  .bv-track .bv-label { width:40px;text-align:right;flex-shrink:0; }
+  .bv-bar { height:12px;border-radius:3px;position:relative; }
+  .bv-bar-v { background:var(--accent);opacity:.5; }
+  .bv-bar-a { background:var(--accent);opacity:.8; }
+
+  /* Sonic Pi */
+  .tool-card { margin-top:2.5rem;padding:2rem;border:1px solid var(--border);border-radius:14px;background:var(--bg-card);display:flex;align-items:center;gap:1.5rem;transition:all .3s ease;text-decoration:none;color:inherit; }
+  .tool-card:hover { border-color:var(--border-hover);background:var(--bg-card-hover);transform:translateY(-2px); }
+  .tool-icon { width:56px;height:56px;border-radius:14px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:1.375rem;flex-shrink:0; }
+  .tool-card h4 { font-size:1.125rem;font-weight:500;color:var(--text-primary);margin-bottom:.25rem; }
+  .tool-card p { font-size:.875rem;color:var(--text-tertiary); }
+  .tool-card .tool-link { font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--accent);margin-top:.375rem;display:block; }
+
+  /* Music Warning */
+  .music-warning { margin-top:2.5rem;padding:2rem;border:1px solid var(--border);border-radius:14px;background:var(--bg-card);display:flex;align-items:flex-start;gap:1.25rem; }
+  .music-warning .mw-icon { width:44px;height:44px;border-radius:10px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);display:flex;align-items:center;justify-content:center;color:#ef4444;font-size:1rem;flex-shrink:0; }
+  .music-warning p { font-size:.9375rem;color:var(--text-secondary);line-height:1.75;font-style:italic; }
+
+  /* Waveform animation */
+  .waveform { display:flex;align-items:center;gap:3px;height:40px;margin:0 auto; }
+  .waveform .bar { width:3px;border-radius:2px;background:var(--accent);opacity:.5;animation:wave 1.2s ease-in-out infinite; }
+  .waveform .bar:nth-child(1) { height:30%;animation-delay:0s; }
+  .waveform .bar:nth-child(2) { height:60%;animation-delay:.1s; }
+  .waveform .bar:nth-child(3) { height:90%;animation-delay:.2s; }
+  .waveform .bar:nth-child(4) { height:50%;animation-delay:.3s; }
+  .waveform .bar:nth-child(5) { height:80%;animation-delay:.4s; }
+  .waveform .bar:nth-child(6) { height:40%;animation-delay:.5s; }
+  .waveform .bar:nth-child(7) { height:70%;animation-delay:.6s; }
+  .waveform .bar:nth-child(8) { height:35%;animation-delay:.7s; }
+  .waveform .bar:nth-child(9) { height:55%;animation-delay:.8s; }
+  .waveform .bar:nth-child(10) { height:85%;animation-delay:.9s; }
+  .waveform .bar:nth-child(11) { height:45%;animation-delay:1s; }
+  .waveform .bar:nth-child(12) { height:65%;animation-delay:1.1s; }
+  @keyframes wave {
+    0%,100% { transform:scaleY(0.5);opacity:.3; }
+    50% { transform:scaleY(1);opacity:.8; }
+  }
+
+  /* Homework */
+  .hw-hero { margin-top:2.5rem;padding:2.5rem;border:1px solid var(--accent);border-radius:16px;background:linear-gradient(135deg,var(--bg-card) 0%,var(--accent-dim) 100%);position:relative;overflow:hidden; }
+  .hw-hero::before { content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(to right,var(--accent),transparent); }
+  .hw-hero-badge { display:inline-flex;align-items:center;gap:.375rem;padding:.25rem .75rem;border-radius:100px;background:var(--accent-dim);border:1px solid var(--accent);font-family:'JetBrains Mono',monospace;font-size:.6875rem;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1rem; }
+  .hw-hero h3 { font-size:clamp(1.5rem,3vw,2rem);font-weight:400;line-height:1.2;margin-bottom:.75rem; }
+  .hw-hero h3 em { color:var(--accent);font-style:italic; }
+  .hw-hero-desc { font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:680px; }
+  .hw-principle { margin-top:2rem;padding:1.5rem;border-radius:12px;background:var(--surface-glass);border:1px solid var(--border);display:flex;align-items:flex-start;gap:1rem; }
+  .hw-principle-icon { width:36px;height:36px;border-radius:8px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:.875rem;flex-shrink:0;margin-top:.125rem; }
+  .hw-principle p { font-size:.9375rem;color:var(--text-secondary);line-height:1.75;font-style:italic; }
+  .hw-principle strong { color:var(--text-primary);font-weight:500;font-style:normal; }
+
+  .hw-steps { margin-top:2.5rem;display:flex;flex-direction:column;gap:0;position:relative; }
+  .hw-steps::before { content:'';position:absolute;left:20px;top:40px;bottom:40px;width:1px;background:var(--border); }
+  .hw-step { display:grid;grid-template-columns:40px 1fr auto;gap:1.25rem;align-items:start;padding:1.25rem 0;position:relative; }
+  .hw-step+.hw-step { border-top:1px solid var(--border); }
+  .hw-step-num { width:40px;height:40px;border-radius:10px;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:600;color:var(--accent);position:relative;z-index:1; }
+  .hw-step-content h4 { font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:500;color:var(--text-primary);margin-bottom:.375rem; }
+  .hw-step-content p { font-size:.875rem;color:var(--text-secondary);line-height:1.75; }
+  .hw-step-content .hw-checklist { margin-top:.75rem;display:flex;flex-direction:column;gap:.375rem; }
+  .hw-checklist-item { display:flex;align-items:flex-start;gap:.625rem;font-size:.8125rem;color:var(--text-secondary);line-height:1.65; }
+  .hw-checklist-item i { color:var(--accent);font-size:.5rem;margin-top:.45em;flex-shrink:0; }
+  .hw-step-time { font-family:'JetBrains Mono',monospace;font-size:.6875rem;color:var(--text-tertiary);background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:.25rem .625rem;white-space:nowrap;flex-shrink:0; }
+  .hw-total-time { margin-top:1.5rem;display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1rem;border-radius:100px;background:var(--accent-dim);border:1px solid var(--accent);font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--accent);letter-spacing:.02em; }
+  .hw-total-time i { font-size:.625rem; }
+
+  .hw-tips-title { font-size:1.125rem;font-weight:400;margin-bottom:.5rem; }
+  .hw-tips-desc { font-size:.875rem;color:var(--text-tertiary);margin-bottom:1.25rem; }
+  .hw-tip-grid { display:flex;flex-direction:column;gap:.75rem; }
+  .hw-tip-row { display:grid;grid-template-columns:200px 1fr;gap:1rem;padding:1.25rem;border:1px solid var(--border);border-radius:12px;background:var(--bg-card);transition:border-color .2s; }
+  .hw-tip-row:hover { border-color:var(--border-hover); }
+  .hw-tip-name { font-size:.875rem;font-weight:500;color:var(--accent); }
+  .hw-tip-desc { font-size:.8125rem;color:var(--text-secondary);line-height:1.7; }
+
+  .hw-submission { margin-top:2.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1.25rem; }
+  .hw-sub-card { padding:1.5rem;border:1px solid var(--border);border-radius:12px;background:var(--bg-card); }
+  .hw-sub-card h4 { font-size:.9375rem;font-weight:500;color:var(--text-primary);margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem; }
+  .hw-sub-card h4 i { color:var(--accent);font-size:.8125rem; }
+  .hw-sub-list { display:flex;flex-direction:column;gap:.5rem; }
+  .hw-sub-list-item { display:flex;align-items:flex-start;gap:.625rem;font-size:.8125rem;color:var(--text-secondary);line-height:1.65; }
+  .hw-sub-list-item i { color:var(--accent);font-size:.5rem;margin-top:.45em;flex-shrink:0; }
+  .hw-warning { margin-top:1.5rem;padding:1rem 1.25rem;border-radius:10px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);display:flex;align-items:center;gap:.75rem;font-size:.8125rem;color:var(--text-secondary); }
+  .hw-warning i { color:#ef4444;font-size:.875rem;flex-shrink:0; }
+  .hw-warning strong { color:var(--text-primary);font-weight:500; }
+
+  .code-inline { font-family:'JetBrains Mono',monospace;font-size:.75rem;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:4px;padding:.125rem .375rem;color:var(--accent); }
+
+  @media(max-width:768px) {
+    .hw-step{grid-template-columns:32px 1fr;gap:1rem;}
+    .hw-step-time{grid-column:2;margin-top:-.5rem;}
+    .hw-steps::before{left:16px;}
+    .hw-step-num{width:32px;height:32px;font-size:.625rem;}
+    .hw-tip-row{grid-template-columns:1fr;}
+    .hw-submission{grid-template-columns:1fr;}
+  }
+
+  /* Footer */
+  .site-footer { max-width:1200px;margin:0 auto;padding:4rem 2rem;text-align:center;border-top:1px solid var(--border); }
+  .site-footer p { font-size:.8125rem;color:var(--text-tertiary);line-height:1.7; }
+  .site-footer .footer-brand { font-family:'Instrument Serif',serif;font-size:1.125rem;color:var(--text-secondary);margin-bottom:.5rem; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)} }
+  @keyframes bounce { 0%,100%{transform:translateY(0)}50%{transform:translateY(4px)} }
+
+  @media(max-width:1024px) {
+    .toc-sidebar{display:none;}
+    .bridge-grid{grid-template-columns:1fr;}
+  }
+  @media(max-width:768px) {
+    .nav-links{display:none;}
+    .mobile-menu-btn{display:flex;}
+    .nav-inner{padding:.75rem 1.25rem;}
+    .section{padding:4rem 1.25rem;}
+    .hero{padding:5rem 1.25rem 3rem;}
+    .emotion-grid{grid-template-columns:1fr;}
+    .sound-props{grid-template-columns:1fr 1fr;}
+    .sd-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media(max-width:480px) {
+    .sound-props{grid-template-columns:1fr;}
+    .sd-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav-bar" id="navbar">
+  <div class="nav-inner">
+    <a href="#hero" class="nav-brand"><span class="dot"></span>Layered Frames</a>
+    <ul class="nav-links">
+      <li><a href="#properties">Properties</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#emotions">Emotions</a></li>
+      <li><a href="#categories">Categories</a></li>
+      <li><a href="#bridges">Bridges</a></li>
+    </ul>
+    <div style="display:flex;gap:.625rem;align-items:center;">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+      <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fa-solid fa-bars"></i></button>
+    </div>
+  </div>
+</nav>
+
+<!-- TOC -->
+<div class="toc-sidebar" id="tocSidebar">
+  <button class="toc-dot active" data-target="hero"><span class="toc-tooltip">Home</span></button>
+  <button class="toc-dot" data-target="properties"><span class="toc-tooltip">Properties</span></button>
+  <button class="toc-dot" data-target="experience"><span class="toc-tooltip">Experience</span></button>
+  <button class="toc-dot" data-target="emotions"><span class="toc-tooltip">Emotions</span></button>
+  <button class="toc-dot" data-target="categories"><span class="toc-tooltip">Categories</span></button>
+  <button class="toc-dot" data-target="bridges"><span class="toc-tooltip">Bridges</span></button>
+  <button class="toc-dot" data-target="tools"><span class="toc-tooltip">Tools</span></button>
+  <button class="toc-dot" data-target="homework"><span class="toc-tooltip">Homework</span></button>
+</div>
+
+<!-- Hero -->
+<section class="hero" id="hero">
+  <div class="hero-label">
+    <i class="fa-solid fa-circle" style="font-size:5px;color:var(--accent);"></i>
+    ARCH 1433 &middot; Layered Frames
+  </div>
+  <h1 class="hero-title"><em>Sound</em></h1>
+  <p class="hero-subtitle">
+    Sound doesn't record the world. It records how a person experiences the world in that moment.
+  </p>
+  <div style="opacity:0;animation:fadeUp .8s ease .7s forwards;margin-top:2rem;">
+    <div class="waveform">
+      <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    </div>
+  </div>
+  <div class="hero-meta">
+    <div class="hero-meta-item"><span class="value">Week 2</span><span class="label">Session</span></div>
+    <div class="hero-meta-item"><span class="value">2026</span><span class="label">Semester</span></div>
+    <div class="hero-meta-item"><span class="value">44,000</span><span class="label">Hz Resolution</span></div>
+  </div>
+  <div class="scroll-indicator"><span>Scroll</span><i class="fa-solid fa-chevron-down"></i></div>
+</section>
+
+<!-- Properties of Sound -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="properties">
+  <div class="section-label"><i class="fa-solid fa-circle"></i> Fundamentals</div>
+  <h2 class="section-title">The Nature of Sound</h2>
+  <p class="section-desc">The sense of sound is the next most prominent awareness we have. Understanding its fundamental properties is the first step to designing with it.</p>
+
+  <div class="sound-props">
+    <div class="sound-prop">
+      <div class="sp-icon"><i class="fa-solid fa-clock"></i></div>
+      <h4>Temporal</h4>
+      <p>Sound takes time — it's temporal by nature. It unfolds, builds, and fades.</p>
+    </div>
+    <div class="sound-prop">
+      <div class="sp-icon"><i class="fa-solid fa-cube"></i></div>
+      <h4>Multi-dimensional</h4>
+      <p>Sound occupies space in pitch, volume, timbre, and direction simultaneously.</p>
+    </div>
+    <div class="sound-prop">
+      <div class="sp-icon"><i class="fa-solid fa-arrows-rotate"></i></div>
+      <h4>Cyclical</h4>
+      <p>Sound is rhythmic by nature — patterns of repetition and variation create meaning.</p>
+    </div>
+    <div class="sound-prop">
+      <div class="sp-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+      <h4>Emotional</h4>
+      <p>Unlike visuals, sound has a direct and immediate connection to our feelings.</p>
+    </div>
+  </div>
+
+  <!-- Comparison stat -->
+  <div class="insight-block" style="margin-top:2rem;">
+    <div class="insight-icon"><i class="fa-solid fa-bolt"></i></div>
+    <div>
+      <h4>Sound Perception vs. Vision</h4>
+      <p>We can detect changes in sound at a rate of <strong style="color:var(--accent);">44,000 times per second</strong>. The finest resolution our eyes can perceive is about <strong>50 frames per second</strong>. Your ears are nearly 1,000× faster than your eyes.</p>
+    </div>
+  </div>
+
+  <!-- Quote -->
+  <div class="quote-block">
+    <p>A child in the dark, gripped with fear, comforts himself by singing under his breath. He walks and halts to his song. Lost, he takes shelter, or orients himself with his little song as best he can. The song is like a rough sketch of a calming and stabilizing, calm and stable, center in the heart of chaos.</p>
+    <cite>— Deleuze &amp; Guattari</cite>
+  </div>
+</section>
+
+<!-- Sound ≠ Reality -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="experience">
+  <div class="section-label"><i class="fa-solid fa-circle"></i> Core Concept</div>
+  <h2 class="section-title">Sound ≠ Reality</h2>
+  <p class="section-desc">Sound in film doesn't need to be accurate. It doesn't need to be a 1:1 copy of the real world. So what is sound for?</p>
+
+  <div class="insight-block">
+    <div class="insight-icon"><i class="fa-solid fa-ear-listen"></i></div>
+    <div>
+      <h4>Sound = How a Character Experiences the World</h4>
+      <p>The physical world stays the same. What changes is the character's relationship with it. Sound design captures that relationship — not the world itself, but <strong style="color:var(--accent);">how someone feels the world in a given moment</strong>.</p>
+    </div>
+  </div>
+
+  <p style="margin-top:2rem;font-size:1rem;color:var(--text-secondary);line-height:1.8;">
+    Same person, same city, same sounds around them. But their emotional state changes everything they hear. Imagine one day, four emotions — each reshaping the entire soundscape around a single character.
+  </p>
+</section>
+
+<!-- Four Emotions -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="emotions">
+  <div class="section-label"><i class="fa-solid fa-circle"></i> Exercise in Perception</div>
+  <h2 class="section-title">One Day, Four Emotions</h2>
+  <p class="section-desc">Four scenes. One world. Four soundscapes. The physical world didn't change — the sound design did.</p>
+
+  <div class="emotion-grid">
+    <div class="emotion-card em-tension">
+      <div class="em-label">Scene 01</div>
+      <h4>Tension — An Exam</h4>
+      <p>The room is full of sounds — air conditioning, pages flipping, chairs creaking. But you're stuck on a question. Anxiety kicks in. Suddenly the clock is deafening. Someone turning a page sounds sharp and irritating. The sounds haven't changed. Your state has.</p>
+    </div>
+    <div class="emotion-card em-focus">
+      <div class="em-label">Scene 02</div>
+      <h4>Focus — Completely Absorbed</h4>
+      <p>You're drawing, writing, designing. You enter the zone. Every sound around you fades, becomes distant and muffled. Your world shrinks to just the sound of your hand moving. Everything else is behind a wall of glass.</p>
+    </div>
+    <div class="emotion-card em-joy">
+      <div class="em-label">Scene 03</div>
+      <h4>Joy — Walking Outside</h4>
+      <p>You push the door open. The world rushes in — wind, voices, rustling leaves, a tram passing. Everything sounds clear, rich, alive. You've opened up again. You're receiving the world.</p>
+    </div>
+    <div class="emotion-card em-intimacy">
+      <div class="em-label">Scene 04</div>
+      <h4>Intimacy — Being Quietly With Someone</h4>
+      <p>A café on a rainy day. The ambient sounds are soft and warm. Rain becomes comfortable white noise. The other person's voice is close and clear. Everything else naturally falls into the background.</p>
+    </div>
+  </div>
+
+  <div class="insight-block" style="margin-top:2rem;">
+    <div class="insight-icon"><i class="fa-solid fa-lightbulb"></i></div>
+    <div>
+      <h4>The Takeaway</h4>
+      <p>Sound design doesn't record the world. It records <strong style="color:var(--accent);">how a person experiences the world in that moment</strong>. Four scenes, one world — but four completely different soundscapes, each shaped by the character's inner state.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Sound Design Categories -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="categories">
+  <div class="section-label"><i class="fa-solid fa-circle"></i> Sound Design Toolkit</div>
+  <h2 class="section-title">Categories of Sound Design</h2>
+  <p class="section-desc">The core building blocks of cinematic sound design. Each serves a specific narrative and emotional function.</p>
+
+  <div class="sd-grid">
+    <div class="sd-card">
+      <div class="sd-icon"><i class="fa-solid fa-wind"></i></div>
+      <h4>Drones &amp; Atmospheres</h4>
+      <p>Set the sentiment or motion — uplifting or intense — for a scene.</p>
+    </div>
+    <div class="sd-card">
+      <div class="sd-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
+      <h4>Risers</h4>
+      <p>Build over time, creating suspense and anticipation with a steep drop.</p>
+    </div>
+    <div class="sd-card">
+      <div class="sd-icon"><i class="fa-solid fa-gauge-simple-high"></i></div>
+      <h4>Slow Motion</h4>
+      <p>Designed to convey the slowing down of time and heightened awareness.</p>
+    </div>
+    <div class="sd-card">
+      <div class="sd-icon"><i class="fa-solid fa-forward-fast"></i></div>
+      <h4>Time-lapse</h4>
+      <p>Convey the rush and speeding up of time passing quickly.</p>
+    </div>
+    <div class="sd-card">
+      <div class="sd-icon"><i class="fa-solid fa-right-left"></i></div>
+      <h4>Transitions</h4>
+      <p>Classic pushes, sat-backs, and hits that bridge between scenes.</p>
+    </div>
+    <div class="sd-card">
+      <div class="sd-icon"><i class="fa-solid fa-leaf"></i></div>
+      <h4>Ambient</h4>
+      <p>Environmental textures like wind, forests, rain, and room tone.</p>
+    </div>
+  </div>
+
+  <!-- Additional techniques -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:1.5rem;">
+    <div class="sd-card">
+      <div class="sd-icon"><i class="fa-solid fa-layer-group"></i></div>
+      <h4>Build Up</h4>
+      <p>Layered intensity. High dynamic range from silence to full power.</p>
+    </div>
+    <div class="sd-card">
+      <div class="sd-icon"><i class="fa-solid fa-volume-high"></i></div>
+      <h4>High Dynamic Range</h4>
+      <p>Dramatic contrast between the quietest and loudest moments.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Sound Bridges -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="bridges">
+  <div class="section-label"><i class="fa-solid fa-circle"></i> Editing Techniques</div>
+  <h2 class="section-title">Sound Bridges</h2>
+  <p class="section-desc">J-Cuts and L-Cuts are essential dialogue sound bridge techniques that create seamless transitions between scenes.</p>
+
+  <div class="bridge-grid">
+    <div class="bridge-card">
+      <h4>Dialogue Sound Bridge</h4>
+      <div class="bridge-name">L-Cut</div>
+      <p>Audio from the current scene continues playing over the visual of the next scene. The viewer sees the new image but still hears the previous speaker — creating emotional carry-over.</p>
+      <div class="bridge-visual">
+        <div class="bv-track"><span class="bv-label">Video</span><div class="bv-bar bv-bar-v" style="width:50%;"></div><div class="bv-bar" style="width:50%;background:var(--border);opacity:.3;"></div></div>
+        <div class="bv-track"><span class="bv-label">Audio</span><div class="bv-bar bv-bar-a" style="width:70%;"></div><div class="bv-bar" style="width:30%;background:var(--border);opacity:.3;"></div></div>
+      </div>
+    </div>
+    <div class="bridge-card">
+      <h4>Dialogue Sound Bridge</h4>
+      <div class="bridge-name">J-Cut</div>
+      <p>Audio from the next scene begins before its visual appears. The viewer hears the upcoming scene while still seeing the current one — building anticipation and pulling them forward.</p>
+      <div class="bridge-visual">
+        <div class="bv-track"><span class="bv-label">Video</span><div class="bv-bar" style="width:30%;background:var(--border);opacity:.3;"></div><div class="bv-bar bv-bar-v" style="width:70%;"></div></div>
+        <div class="bv-track"><span class="bv-label">Audio</span><div class="bv-bar bv-bar-a" style="width:50%;"></div><div class="bv-bar" style="width:50%;background:var(--border);opacity:.3;"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Music warning -->
+  <div class="music-warning">
+    <div class="mw-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <div>
+      <p>Music is like a double-edged sword. Our ears are perceptive, and if you repeat music, people will start to notice and get annoyed. It's like hearing the same song over and over — instead of immersing someone in the interior, you'll drive them away.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Tools -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="tools">
+  <div class="section-label"><i class="fa-solid fa-circle"></i> Tools &amp; Resources</div>
+  <h2 class="section-title">Sound Tools</h2>
+  <p class="section-desc">Creative tools for exploring sound design and music composition.</p>
+
+  <a href="https://sonic-pi.net/" target="_blank" rel="noopener" class="tool-card">
+    <div class="tool-icon"><i class="fa-solid fa-code"></i></div>
+    <div>
+      <h4>Sonic Pi</h4>
+      <p>Code-based live music synthesizer — create sound through code</p>
+      <span class="tool-link">sonic-pi.net</span>
+    </div>
+  </a>
+
+  <a href="https://apps.musedlab.org/aqwertyon/" target="_blank" rel="noopener" class="tool-card">
+    <div class="tool-icon"><i class="fa-solid fa-keyboard"></i></div>
+    <div>
+      <h4>aQWERTYon</h4>
+      <p>Browser-based musical keyboard instrument — play music on your QWERTY keyboard</p>
+      <span class="tool-link">apps.musedlab.org/aqwertyon</span>
+    </div>
+  </a>
+
+  <!-- Expressionism note -->
+  <div class="insight-block" style="margin-top:2rem;">
+    <div class="insight-icon"><i class="fa-solid fa-masks-theater"></i></div>
+    <div>
+      <h4>Expressionism in Sound</h4>
+      <p>Just as harsh shadows and distorted set design can externalize a character's psychological state in visual expressionism, sound can express these internal states as well. Distortion, echo, silence, and amplification all become tools for making the invisible inner world audible.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Homework: Listening to Your Space -->
+<div class="divider"><div class="divider-line"></div></div>
+<section class="section" id="homework">
+  <div class="section-label"><i class="fa-solid fa-circle"></i> Homework</div>
+  <h2 class="section-title">Week 2 Assignment</h2>
+  <p class="section-desc">Due before next class. Approx. 4 hours total.</p>
+
+  <div class="hw-hero">
+    <div class="hw-hero-badge"><i class="fa-solid fa-headphones"></i> Sound Exercise</div>
+    <h3>Listening to Your <em>Space</em></h3>
+    <div class="hw-hero-desc">
+      You've already filmed your space. Now go back — but this time, listen. Record the sonic identity of your space, build a sound palette of its materials and textures, then layer sound onto your existing footage in Premiere Pro. The challenge: making the same visuals feel completely different through sound alone.
+    </div>
+    <div class="hw-principle">
+      <div class="hw-principle-icon"><i class="fa-solid fa-lightbulb"></i></div>
+      <p><strong>Why this matters:</strong> Sound doesn't copy reality — it captures how a person experiences the world in a given moment. The same corridor can feel peaceful or unsettling, intimate or vast, depending on what you hear. As spatial designers, you already sense the acoustic character of a room when you walk into it. This week you make that sensing audible.</p>
+    </div>
+  </div>
+
+  <!-- Steps -->
+  <div class="hw-steps">
+
+    <div class="hw-step">
+      <div class="hw-step-num">01</div>
+      <div class="hw-step-content">
+        <h4>Go Back to Your Space and Listen</h4>
+        <p>Visit your chosen space. Don't film. Sit quietly for five minutes and just listen — room tone, material sounds, distant activity, silence. Notice what you've never noticed before.</p>
+      </div>
+      <div class="hw-step-time"><i class="fa-regular fa-clock"></i> 15 min</div>
+    </div>
+
+    <div class="hw-step">
+      <div class="hw-step-num">02</div>
+      <div class="hw-step-content">
+        <h4>Record a Spatial Sound Portrait</h4>
+        <p>Using your phone, record 1 minute of audio that best captures the "character" of this space. This is audio only — no video needed. Think of it as a <strong>sonic identity card</strong> for your space.</p>
+      </div>
+      <div class="hw-step-time"><i class="fa-regular fa-clock"></i> 15 min</div>
+    </div>
+
+    <div class="hw-step">
+      <div class="hw-step-num">03</div>
+      <div class="hw-step-content">
+        <h4>Build a Sound Palette</h4>
+        <p>Think of this as a material board, but for sound. Record 5–8 individual sound clips from your space, each 10–15 seconds. For example:</p>
+        <div class="hw-checklist">
+          <div class="hw-checklist-item"><i class="fa-solid fa-circle"></i>A door closing, footsteps on the floor</div>
+          <div class="hw-checklist-item"><i class="fa-solid fa-circle"></i>A tap running, a window opening</div>
+          <div class="hw-checklist-item"><i class="fa-solid fa-circle"></i>The hum of an appliance, the creak of a chair</div>
+          <div class="hw-checklist-item"><i class="fa-solid fa-circle"></i>Sounds leaking in from outside</div>
+        </div>
+        <p style="margin-top:.75rem;font-size:.8125rem;color:var(--text-tertiary);">Organise them into a folder with clear file names (e.g. <span class="code-inline">door-close.m4a</span>, <span class="code-inline">footsteps-tile.m4a</span>). These become your raw sonic materials for the weeks ahead.</p>
+      </div>
+      <div class="hw-step-time"><i class="fa-regular fa-clock"></i> 45 min</div>
+    </div>
+
+    <div class="hw-step">
+      <div class="hw-step-num">04</div>
+      <div class="hw-step-content">
+        <h4>Add Sound Layers to Your Week 1 Edit</h4>
+        <p>Open your Week 1 footage in Premiere Pro. Layer at least 3 audio tracks onto it:</p>
+        <div class="hw-checklist">
+          <div class="hw-checklist-item"><i class="fa-solid fa-circle"></i>One layer of room tone or ambient recording from your space</div>
+          <div class="hw-checklist-item"><i class="fa-solid fa-circle"></i>One layer of atmosphere or music (sourced from Artlist — account details in Canvas modules)</div>
+          <div class="hw-checklist-item"><i class="fa-solid fa-circle"></i>One layer where you try a J-cut or L-cut — letting sound arrive before or linger after a visual cut</div>
+        </div>
+        <p style="margin-top:.75rem;font-size:.8125rem;color:var(--text-tertiary);">You can also explore techniques from class: drones, risers, ambient textures, sound bridges. Pick what serves your space — you don't need to use all of them. Your updated edit should be 1–2 minutes.</p>
+      </div>
+      <div class="hw-step-time"><i class="fa-regular fa-clock"></i> 2 hr</div>
+    </div>
+
+    <div class="hw-step">
+      <div class="hw-step-num">05</div>
+      <div class="hw-step-content">
+        <h4>Write a Short Reflection (100 words)</h4>
+        <p>Answer this question: Describe one thing you heard in your space that you never noticed before. How does it change the way you understand this space?</p>
+      </div>
+      <div class="hw-step-time"><i class="fa-regular fa-clock"></i> 15 min</div>
+    </div>
+
+    <div class="hw-step">
+      <div class="hw-step-num">06</div>
+      <div class="hw-step-content">
+        <h4>Instagram Post</h4>
+        <p>Upload a clip (with sound) or your sound portrait to <strong>@layered_frames</strong>. In the caption, describe what your space sounds like in one sentence.</p>
+      </div>
+      <div class="hw-step-time"><i class="fa-regular fa-clock"></i> 10 min</div>
+    </div>
+
+  </div>
+
+  <div class="hw-total-time"><i class="fa-solid fa-clock"></i> Total estimated time: approx. 4 hours</div>
+
+  <!-- Tips -->
+  <div style="margin-top:2.5rem;">
+    <h3 class="hw-tips-title serif">Tips for Your Sound Layers</h3>
+    <p class="hw-tips-desc">Approaches for making sound serve your spatial narrative.</p>
+    <div class="hw-tip-grid">
+      <div class="hw-tip-row">
+        <div class="hw-tip-name">Room Tone as Foundation</div>
+        <div class="hw-tip-desc">Record the "silence" of your space — every room has its own baseline hum. Lay this underneath everything as a bed. It grounds the viewer in the space even when other sounds change.</div>
+      </div>
+      <div class="hw-tip-row">
+        <div class="hw-tip-name">Sound Reveals What Camera Can't</div>
+        <div class="hw-tip-desc">A dripping tap, a distant train, footsteps upstairs — these tell the viewer about scale, material, and life beyond the frame.</div>
+      </div>
+      <div class="hw-tip-row">
+        <div class="hw-tip-name">J-Cut for Spatial Transitions</div>
+        <div class="hw-tip-desc">Let the sound of the next space arrive before the image cuts. The viewer starts "entering" the new space through their ears before their eyes follow.</div>
+      </div>
+      <div class="hw-tip-row">
+        <div class="hw-tip-name">Emotion Through Volume</div>
+        <div class="hw-tip-desc">The relative volume between sounds matters more than the absolute volume of any single sound. Pulling ambient sound down can create focus; bringing it back up can create release.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submission -->
+  <div class="hw-submission">
+    <div class="hw-sub-card">
+      <h4><i class="fa-solid fa-upload"></i> Submission Requirements</h4>
+      <div class="hw-sub-list">
+        <div class="hw-sub-list-item"><i class="fa-solid fa-circle"></i>Spatial sound portrait (1 min, audio file — MP3 or WAV)</div>
+        <div class="hw-sub-list-item"><i class="fa-solid fa-circle"></i>Sound palette folder (5–8 clips, MP3 or WAV, clearly named)</div>
+        <div class="hw-sub-list-item"><i class="fa-solid fa-circle"></i>Updated video edit with sound layers (1–2 min, MP4, 1080p)</div>
+        <div class="hw-sub-list-item"><i class="fa-solid fa-circle"></i>Short reflection (100 words), submitted as PDF or text on Canvas</div>
+        <div class="hw-sub-list-item"><i class="fa-solid fa-circle"></i>Instagram post on @layered_frames with a one-sentence caption</div>
+      </div>
+    </div>
+    <div class="hw-sub-card">
+      <h4><i class="fa-solid fa-calendar"></i> Deadline &amp; Notes</h4>
+      <div class="hw-sub-list">
+        <div class="hw-sub-list-item"><i class="fa-solid fa-circle"></i>Due: before next class session</div>
+        <div class="hw-sub-list-item"><i class="fa-solid fa-circle"></i>Required tool: Adobe Premiere Pro</div>
+        <div class="hw-sub-list-item"><i class="fa-solid fa-circle"></i>No new filming required — focus entirely on sound</div>
+        <div class="hw-sub-list-item"><i class="fa-solid fa-circle"></i>Key techniques: room tone, J-cut/L-cut, layered audio tracks</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hw-warning">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <span><strong>Important:</strong> Use Adobe Premiere Pro for editing. Do NOT use CapCut, iMovie, or other quick-edit apps. No new filming required this week — focus entirely on sound.</span>
+  </div>
+
+</section>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <div class="footer-brand">Layered Frames</div>
+  <p>ARCH 1433 Communications Systems &middot; RMIT University &middot; Semester 1, 2026</p>
+  <p style="margin-top:.5rem;font-size:.75rem;font-style:italic;">Interr(i)or &middot; Sound</p>
+</footer>
+
+<script>
+// Theme
+const toggle=document.getElementById('themeToggle');
+const icon=toggle.querySelector('i');
+function setTheme(light){document.documentElement.classList.toggle('light',light);icon.className=light?'fa-solid fa-sun':'fa-solid fa-moon';localStorage.setItem('theme-w2',light?'light':'dark');}
+const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;
+const saved=localStorage.getItem('theme-w2');
+if(saved){setTheme(saved==='light');}else{setTheme(!prefersDark);}
+toggle.addEventListener('click',()=>{setTheme(!document.documentElement.classList.contains('light'));});
+
+// Scroll reveal
+const sections=document.querySelectorAll('.section');
+const observer=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting)en.target.classList.add('visible');});},{threshold:.08,rootMargin:'0px 0px -50px 0px'});
+sections.forEach(s=>observer.observe(s));
+
+// TOC
+const tocDots=document.querySelectorAll('.toc-dot');
+const tocTargets=Array.from(tocDots).map(d=>document.getElementById(d.dataset.target));
+tocDots.forEach(dot=>{dot.addEventListener('click',()=>{const t=document.getElementById(dot.dataset.target);if(t)t.scrollIntoView({behavior:'smooth'});});});
+const tocObs=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting){tocDots.forEach(d=>d.classList.remove('active'));const dot=document.querySelector(`.toc-dot[data-target="${en.target.id}"]`);if(dot)dot.classList.add('active');}});},{threshold:.3});
+tocTargets.forEach(t=>{if(t)tocObs.observe(t);});
+
+// Nav shadow
+window.addEventListener('scroll',()=>{const nb=document.getElementById('navbar');nb.style.boxShadow=window.scrollY>10?'0 1px 8px rgba(0,0,0,.08)':'none';});
+</script>
+</body>
+</html>
