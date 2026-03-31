@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Layered Frames — Assignment 1 · Mid-Semester Brief</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg-primary:#09090b;--bg-secondary:#111113;--bg-tertiary:#18181b;--bg-card:#141416;--bg-card-hover:#1a1a1e;--border:#27272a;--border-hover:#3f3f46;--text-primary:#fafafa;--text-secondary:#a1a1aa;--text-tertiary:#71717a;--accent:#d4a054;--accent-dim:rgba(212,160,84,0.1);--accent-glow:rgba(212,160,84,0.2);--surface-glass:rgba(255,255,255,0.03);--hd:#4ade80;--d:#60a5fa;--c:#fbbf24;--p:#f97316;--f:#ef4444}
+html.light{--bg-primary:#fafaf9;--bg-secondary:#f5f5f4;--bg-tertiary:#e7e5e4;--bg-card:#ffffff;--bg-card-hover:#f5f5f4;--border:#d6d3d1;--border-hover:#a8a29e;--text-primary:#1c1917;--text-secondary:#57534e;--text-tertiary:#78716c;--accent:#b8860b;--accent-dim:rgba(184,134,11,0.08);--accent-glow:rgba(184,134,11,0.12);--surface-glass:rgba(0,0,0,0.02);--hd:#16a34a;--d:#2563eb;--c:#d97706;--p:#ea580c;--f:#dc2626}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.serif{font-family:'Instrument Serif',serif}
+.mono{font-family:'JetBrains Mono',monospace}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg-primary)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+.nav-bar{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(9,9,11,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:52px}
+html.light .nav-bar{background:rgba(250,250,249,0.88)}
+.nav-brand{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text-secondary);letter-spacing:.06em}.nav-brand span{color:var(--accent)}
+.nav-links{display:flex;gap:1.5rem;align-items:center}.nav-links a{font-size:.8rem;color:var(--text-tertiary);text-decoration:none;transition:color .2s}.nav-links a:hover{color:var(--text-primary)}
+.theme-toggle{background:none;border:1px solid var(--border);color:var(--text-secondary);width:32px;height:32px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}.theme-toggle:hover{border-color:var(--border-hover);color:var(--text-primary)}
+
+.hero{padding:8rem 2rem 2rem;max-width:720px;margin:0 auto;text-align:center}
+.hero-week{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.75rem}
+.hero-title{font-size:2.6rem;line-height:1.15;margin-bottom:1rem;font-weight:400}.hero-title em{font-style:italic;color:var(--accent)}
+.hero-sub{color:var(--text-secondary);font-size:.95rem;max-width:540px;margin:0 auto 1.5rem}
+
+.hero-meta{display:flex;justify-content:center;gap:2rem;flex-wrap:wrap}
+.hero-meta-item{text-align:center}
+.hero-meta-item .val{font-family:'JetBrains Mono',monospace;font-size:1.1rem;color:var(--accent);font-weight:500}
+.hero-meta-item .lbl{font-size:.7rem;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.08em;margin-top:.15rem}
+
+.container{max-width:780px;margin:0 auto;padding:0 2rem}
+
+.section{padding:3.5rem 0;opacity:0;transform:translateY(24px);transition:all .6s cubic-bezier(.22,1,.36,1)}.section.visible{opacity:1;transform:none}
+.section-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem}
+.section-title{font-family:'Instrument Serif',serif;font-size:1.8rem;margin-bottom:.5rem;font-weight:400}
+.section-desc{color:var(--text-secondary);font-size:.9rem;margin-bottom:1.5rem}
+.section-body{color:var(--text-secondary);font-size:.88rem;margin-bottom:1.25rem;line-height:1.8}
+
+.divider{border:none;border-top:1px solid var(--border);margin:0}
+
+.info-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem;transition:border-color .2s}
+.info-card:hover{border-color:var(--border-hover)}
+.info-card h4{font-family:'Instrument Serif',serif;font-size:1.05rem;margin-bottom:.5rem;color:var(--text-primary)}
+.info-card p,.info-card li{font-size:.85rem;color:var(--text-secondary);line-height:1.7}
+.info-card ul{list-style:none;padding:0}.info-card ul li{padding-left:1.2rem;position:relative;margin-bottom:.3rem}
+.info-card ul li::before{content:'';position:absolute;left:0;top:.55rem;width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:.6}
+.info-card .tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--accent);border:1px solid var(--accent-dim);border-radius:4px;padding:.1rem .4rem;margin-right:.4rem;margin-bottom:.3rem}
+.info-card .optional{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--text-tertiary);border:1px solid var(--border);border-radius:4px;padding:.1rem .35rem;margin-left:.4rem;vertical-align:middle}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+@media(max-width:768px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+.quote-block{border-left:2px solid var(--accent);padding:.75rem 1.25rem;margin:1.5rem 0;background:var(--accent-dim);border-radius:0 8px 8px 0}
+.quote-block p{font-family:'Instrument Serif',serif;font-size:1rem;color:var(--text-primary);font-style:italic}
+
+.warning-bar{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:.75rem 1.25rem;margin:1.5rem 0;display:flex;align-items:flex-start;gap:.75rem}
+.warning-bar i{color:var(--f);margin-top:.15rem;flex-shrink:0}
+.warning-bar p{font-size:.85rem;color:var(--text-secondary)}
+
+.weight-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:1rem 0 .5rem;gap:2px}
+.weight-bar div{border-radius:3px;transition:transform .3s}
+.weight-bar div:hover{transform:scaleY(1.6)}
+.weight-legend{display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:1.5rem}
+.weight-legend-item{display:flex;align-items:center;gap:.35rem;font-size:.75rem;color:var(--text-secondary)}
+.weight-legend-item .dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+.rubric-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:1rem;overflow:hidden;transition:border-color .2s}
+.rubric-card:hover{border-color:var(--border-hover)}
+.rubric-header{padding:1rem 1.25rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.rubric-header h4{font-family:'Instrument Serif',serif;font-size:1rem;color:var(--text-primary);display:flex;align-items:center;gap:.5rem}
+.rubric-header .weight{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--accent);border:1px solid var(--accent-dim);border-radius:4px;padding:.1rem .4rem}
+.rubric-header .chevron{color:var(--text-tertiary);transition:transform .3s;font-size:.8rem}
+.rubric-header.open .chevron{transform:rotate(180deg)}
+.rubric-body{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.22,1,.36,1)}
+.rubric-body.open{max-height:600px}
+.rubric-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:1px solid var(--border)}
+@media(max-width:768px){.rubric-grid{grid-template-columns:1fr}}
+.rubric-cell{padding:.75rem 1rem;border-right:1px solid var(--border);border-bottom:1px solid var(--border);font-size:.78rem;color:var(--text-secondary);line-height:1.6}
+.rubric-cell:last-child{border-right:none}
+@media(max-width:768px){.rubric-cell{border-right:none}}
+.rubric-cell .grade{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:500;margin-bottom:.35rem;display:inline-block;padding:.1rem .35rem;border-radius:3px}
+.grade-hd{background:rgba(74,222,128,0.12);color:var(--hd)}.grade-d{background:rgba(96,165,250,0.12);color:var(--d)}
+.grade-c{background:rgba(251,191,36,0.12);color:var(--c)}.grade-p{background:rgba(249,115,22,0.12);color:var(--p)}
+.grade-f{background:rgba(239,68,68,0.12);color:var(--f)}
+
+.deadline-banner{background:var(--bg-card);border:1px solid var(--accent-dim);border-radius:12px;padding:1.5rem;text-align:center;margin:2rem 0}
+.deadline-banner .date{font-family:'Instrument Serif',serif;font-size:1.5rem;color:var(--accent)}
+.deadline-banner .sub{font-size:.8rem;color:var(--text-tertiary);margin-top:.25rem}
+
+.footer{text-align:center;padding:3rem 2rem;color:var(--text-tertiary);font-size:.75rem;border-top:1px solid var(--border)}.footer span{color:var(--accent)}
+@media(max-width:640px){.hero-title{font-size:2rem}.section-title{font-size:1.4rem}.nav-links a.hide-mobile{display:none}.hero-meta{gap:1rem}}
+</style>
+</head>
+<body>
+<nav class="nav-bar">
+  <div class="nav-brand">LAYERED<span>_</span>FRAMES</div>
+  <div class="nav-links">
+    <a href="#film" class="hide-mobile">Film</a>
+    <a href="#pitch" class="hide-mobile">Pitch deck</a>
+    <a href="#rubric" class="hide-mobile">Rubric</a>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"><i class="fas fa-moon" id="theme-icon"></i></button>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-week">Assignment 01</div>
+  <h1 class="hero-title">Mid-Semester <em>Brief</em></h1>
+  <p class="hero-sub">Explore the technical and creative aspects of spatial narrative filmmaking, focusing on thoughtful use of camera, sound, editing, and colour grading to communicate space through moving image.</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item"><div class="val">30%</div><div class="lbl">Course weight</div></div>
+    <div class="hero-meta-item"><div class="val">2–3 min</div><div class="lbl">Film length</div></div>
+    <div class="hero-meta-item"><div class="val">Week 6</div><div class="lbl">Due</div></div>
+    <div class="hero-meta-item"><div class="val">10 Apr</div><div class="lbl">Deadline</div></div>
+  </div>
+</header>
+
+<div class="container">
+
+<div class="quote-block">
+  <p>You are not required to create a strictly narrative or linear film. Your project may be abstract, experimental, or narrative-driven as you prefer.</p>
+</div>
+
+<!-- PART 1: FILM -->
+<section class="section" id="film">
+  <div class="section-label"><i class="fas fa-film"></i> Part 1</div>
+  <h2 class="section-title">Short film (2–3 minutes)</h2>
+  <p class="section-desc">Submit a refined and cohesive short film that clearly demonstrates the filmmaking techniques you've explored over the past weeks.</p>
+
+  <div class="info-card">
+    <h4><i class="fas fa-video" style="color:var(--accent);margin-right:.4rem;font-size:.85rem"></i> Cinematography</h4>
+    <ul>
+      <li>Shot primarily in landscape (horizontal) orientation. Portrait clips allowed as intentional inserts only.</li>
+      <li>Deliberate use of camera techniques: pan, tilt, handheld, static, tracking shots.</li>
+      <li>Consideration of framing and composition to support your narrative or spatial concept.</li>
+    </ul>
+  </div>
+
+  <div class="info-card">
+    <h4><i class="fas fa-cut" style="color:var(--accent);margin-right:.4rem;font-size:.85rem"></i> Editing</h4>
+    <ul>
+      <li>Clear and purposeful editing choices that shape how the viewer experiences space and time.</li>
+      <li>Avoid overly simple editing (such as a single continuous music track over uncut footage).</li>
+      <li>Demonstrate intentional, varied cuts and pacing.</li>
+    </ul>
+  </div>
+
+  <div class="info-card">
+    <h4><i class="fas fa-headphones" style="color:var(--accent);margin-right:.4rem;font-size:.85rem"></i> Sound design</h4>
+    <ul>
+      <li>Thoughtful layered audio tracks enhancing your visual narrative.</li>
+      <li>Effective use of ambient sounds, effects, transitions, and music.</li>
+    </ul>
+  </div>
+
+  <div class="info-card">
+    <h4><i class="fas fa-palette" style="color:var(--accent);margin-right:.4rem;font-size:.85rem"></i> Colour grading</h4>
+    <ul>
+      <li>Purposeful colour grading choices that enhance mood and storytelling.</li>
+    </ul>
+  </div>
+
+  <div class="grid-2">
+    <div class="info-card">
+      <h4><i class="fas fa-lightbulb" style="color:var(--accent);margin-right:.4rem;font-size:.85rem"></i> Lighting <span class="optional">optional</span></h4>
+      <ul>
+        <li>Awareness of how natural and artificial light shapes the spaces you film.</li>
+        <li>Experimentation with lighting direction, quality, or colour covered in class.</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h4><i class="fas fa-wand-magic-sparkles" style="color:var(--accent);margin-right:.4rem;font-size:.85rem"></i> AI tools <span class="optional">optional</span></h4>
+      <ul>
+        <li>You may incorporate AI-generated or AI-enhanced elements (e.g., Runway, Kling).</li>
+        <li>If used, briefly note what tools and how they contributed in your pitch deck.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="warning-bar">
+    <i class="fas fa-triangle-exclamation"></i>
+    <div>
+      <p><strong>Quality expectations:</strong> Your film should demonstrate genuine spatial exploration, not something shot in 10 minutes in a single spot. We expect variation in locations or spatial perspectives, a range of camera movements, and layered sound design with multiple audio tracks.</p>
+    </div>
+  </div>
+
+  <div class="info-card">
+    <h4><i class="fas fa-user" style="color:var(--accent);margin-right:.4rem;font-size:.85rem"></i> Solo work & footage sharing</h4>
+    <ul>
+      <li>This is an individual assignment. Every student must submit their own film.</li>
+      <li>You may share up to approximately 1 minute of raw footage from Week 1 group filming with classmates.</li>
+      <li>The remaining footage must be your own. Your editing, sound design, and colour grading must be entirely individual.</li>
+      <li>Identical or near-identical edits will not be accepted.</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- PART 2: PITCH DECK -->
+<section class="section" id="pitch">
+  <div class="section-label"><i class="fas fa-presentation-screen"></i> Part 2</div>
+  <h2 class="section-title">Pitch deck</h2>
+  <p class="section-desc">Prepare a concise presentation that supports your film. You will present it in person during class in Week 6.</p>
+
+  <div class="grid-2">
+    <div class="info-card"><h4>Title & logline</h4><p>A concise summary capturing your project's essence.</p></div>
+    <div class="info-card"><h4>Mood board</h4><p>Visual references establishing tone, style, and colour palette.</p></div>
+    <div class="info-card"><h4>Story / concept</h4><p>Outline of your narrative or conceptual framework.</p></div>
+    <div class="info-card"><h4>Location & characters</h4><p>Briefly outline locations and characters involved, if relevant.</p></div>
+    <div class="info-card"><h4>Technical choices</h4><p>Highlight notable techniques: camera movements, colour grading approach, sound design, AI tools if applicable.</p></div>
+    <div class="info-card"><h4>Reflection</h4><p>Discuss challenges encountered during production and your solutions.</p></div>
+  </div>
+
+  <div class="info-card">
+    <h4><i class="fas fa-book-open" style="color:var(--accent);margin-right:.4rem;font-size:.85rem"></i> References or inspirations <span class="optional">optional</span></h4>
+    <p>Films, media, or spaces that influenced your work.</p>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ASSESSMENT WEIGHT -->
+<section class="section" id="rubric">
+  <div class="section-label"><i class="fas fa-chart-bar"></i> Assessment</div>
+  <h2 class="section-title">Rubric & weighting</h2>
+  <p class="section-desc">Click each criterion to see the full grading descriptors.</p>
+
+  <div class="weight-bar">
+    <div style="flex:20;background:var(--hd)" title="Cinematography & Lighting 20%"></div>
+    <div style="flex:20;background:var(--d)" title="Editing 20%"></div>
+    <div style="flex:20;background:var(--c)" title="Sound Design 20%"></div>
+    <div style="flex:15;background:var(--p)" title="Colour Grading 15%"></div>
+    <div style="flex:10;background:var(--accent)" title="Mood Board 10%"></div>
+    <div style="flex:10;background:var(--text-tertiary)" title="Project Info 10%"></div>
+    <div style="flex:5;background:var(--border-hover)" title="Organisation 5%"></div>
+  </div>
+  <div class="weight-legend">
+    <div class="weight-legend-item"><div class="dot" style="background:var(--hd)"></div>Cinematography 20%</div>
+    <div class="weight-legend-item"><div class="dot" style="background:var(--d)"></div>Editing 20%</div>
+    <div class="weight-legend-item"><div class="dot" style="background:var(--c)"></div>Sound 20%</div>
+    <div class="weight-legend-item"><div class="dot" style="background:var(--p)"></div>Colour 15%</div>
+    <div class="weight-legend-item"><div class="dot" style="background:var(--accent)"></div>Mood board 10%</div>
+    <div class="weight-legend-item"><div class="dot" style="background:var(--text-tertiary)"></div>Project info 10%</div>
+    <div class="weight-legend-item"><div class="dot" style="background:var(--border-hover)"></div>Organisation 5%</div>
+  </div>
+
+  <!-- Rubric 1 -->
+  <div class="rubric-card">
+    <div class="rubric-header" onclick="toggleRubric(this)">
+      <h4>Cinematography & lighting <span class="weight">20%</span></h4>
+      <i class="fas fa-chevron-down chevron"></i>
+    </div>
+    <div class="rubric-body">
+      <div class="rubric-grid">
+        <div class="rubric-cell"><div class="grade grade-hd">HD 80–100</div><br>Outstanding control of camera movement, framing, and composition across varied spatial settings. Landscape orientation used consistently. Lighting awareness clearly enhances the spatial narrative.</div>
+        <div class="rubric-cell"><div class="grade grade-d">D 70–79</div><br>Competent camera handling across more than one spatial setting, with some creative lighting awareness. Minor inconsistencies.</div>
+        <div class="rubric-cell"><div class="grade grade-c">C 60–69</div><br>Some spatial variation but may feel repetitive or limited to one location. Lighting awareness is basic or unevenly applied.</div>
+        <div class="rubric-cell"><div class="grade grade-p">P 50–59</div><br>Limited choices with little spatial variation. May rely heavily on portrait orientation. Minimal intentionality.</div>
+        <div class="rubric-cell"><div class="grade grade-f">F 0–49</div><br>Minimal or absent. No meaningful spatial exploration. Little evidence of learning.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rubric 2 -->
+  <div class="rubric-card">
+    <div class="rubric-header" onclick="toggleRubric(this)">
+      <h4>Editing <span class="weight">20%</span></h4>
+      <i class="fas fa-chevron-down chevron"></i>
+    </div>
+    <div class="rubric-body">
+      <div class="rubric-grid">
+        <div class="rubric-cell"><div class="grade grade-hd">HD 80–100</div><br>Editing choices powerfully shape the viewer's experience of space and time. Pacing, rhythm, and cut placement are deliberate.</div>
+        <div class="rubric-cell"><div class="grade grade-d">D 70–79</div><br>Generally purposeful with effective pacing. Some moments may feel uneven, but overall supports the narrative.</div>
+        <div class="rubric-cell"><div class="grade grade-c">C 60–69</div><br>Functional but lacks variety or intentionality. Does not actively enhance the spatial experience.</div>
+        <div class="rubric-cell"><div class="grade grade-p">P 50–59</div><br>Minimal or poorly considered. Relies on overly simple approaches with little variation.</div>
+        <div class="rubric-cell"><div class="grade grade-f">F 0–49</div><br>No meaningful editing evident. Footage appears unstructured or assembled without purpose.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rubric 3 -->
+  <div class="rubric-card">
+    <div class="rubric-header" onclick="toggleRubric(this)">
+      <h4>Sound design <span class="weight">20%</span></h4>
+      <i class="fas fa-chevron-down chevron"></i>
+    </div>
+    <div class="rubric-body">
+      <div class="rubric-grid">
+        <div class="rubric-cell"><div class="grade grade-hd">HD 80–100</div><br>Skillfully layered across multiple tracks. Ambient sound, effects, and music reinforce mood and spatial atmosphere. Mixing is clean.</div>
+        <div class="rubric-cell"><div class="grade grade-d">D 70–79</div><br>Multiple tracks and generally effective, though some uneven mixing or abrupt transitions may appear.</div>
+        <div class="rubric-cell"><div class="grade grade-c">C 60–69</div><br>Some layering but lacks depth. May rely too heavily on a single music track.</div>
+        <div class="rubric-cell"><div class="grade grade-p">P 50–59</div><br>Poorly executed or minimal. Essentially a single audio track with no meaningful layering.</div>
+        <div class="rubric-cell"><div class="grade grade-f">F 0–49</div><br>Negligible or missing. No clear attempt at layered sound design.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rubric 4 -->
+  <div class="rubric-card">
+    <div class="rubric-header" onclick="toggleRubric(this)">
+      <h4>Colour grading <span class="weight">15%</span></h4>
+      <i class="fas fa-chevron-down chevron"></i>
+    </div>
+    <div class="rubric-body">
+      <div class="rubric-grid">
+        <div class="rubric-cell"><div class="grade grade-hd">HD 80–100</div><br>Greatly enhances mood and spatial atmosphere; skillfully applied and consistent throughout.</div>
+        <div class="rubric-cell"><div class="grade grade-d">D 70–79</div><br>Present and mostly consistent; minor mismatches. Contributes to the film's tone.</div>
+        <div class="rubric-cell"><div class="grade grade-c">C 60–69</div><br>Minimal or inconsistent. Some attempts, but outcomes vary in quality.</div>
+        <div class="rubric-cell"><div class="grade grade-p">P 50–59</div><br>Little to no grading, or very poor application. Images often look raw or mismatched.</div>
+        <div class="rubric-cell"><div class="grade grade-f">F 0–49</div><br>Virtually no effort; content remains unmodified from original source.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rubric 5 -->
+  <div class="rubric-card">
+    <div class="rubric-header" onclick="toggleRubric(this)">
+      <h4>Mood board & visual identity <span class="weight">10%</span></h4>
+      <i class="fas fa-chevron-down chevron"></i>
+    </div>
+    <div class="rubric-body">
+      <div class="rubric-grid">
+        <div class="rubric-cell"><div class="grade grade-hd">HD 80–100</div><br>Strongly aligns with the project's intended tone, colours, and spatial themes. Cohesive and highly indicative of the final vision.</div>
+        <div class="rubric-cell"><div class="grade grade-d">D 70–79</div><br>Cohesive and consistent, generally reflecting the project's aesthetic. Minor gaps.</div>
+        <div class="rubric-cell"><div class="grade grade-c">C 60–69</div><br>Uneven or loosely tied to the project's style. Some relevant images but lacks coherence.</div>
+        <div class="rubric-cell"><div class="grade grade-p">P 50–59</div><br>Minimal effort; visuals may not represent the stated theme or tone.</div>
+        <div class="rubric-cell"><div class="grade grade-f">F 0–49</div><br>Missing or unclear, fails to communicate any visual direction.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rubric 6 -->
+  <div class="rubric-card">
+    <div class="rubric-header" onclick="toggleRubric(this)">
+      <h4>Key project info & reflection <span class="weight">10%</span></h4>
+      <i class="fas fa-chevron-down chevron"></i>
+    </div>
+    <div class="rubric-body">
+      <div class="rubric-grid">
+        <div class="rubric-cell"><div class="grade grade-hd">HD 80–100</div><br>Clearly outlines story/concept, locations, and key technical choices. Reflection is thoughtful, identifying specific challenges and solutions.</div>
+        <div class="rubric-cell"><div class="grade grade-d">D 70–79</div><br>Outlines most key elements. Core idea and reflection are understandable.</div>
+        <div class="rubric-cell"><div class="grade grade-c">C 60–69</div><br>Basic outline but missing clarity in key areas. Reflection is superficial or generic.</div>
+        <div class="rubric-cell"><div class="grade grade-p">P 50–59</div><br>Very brief or unclear. Reflection is minimal, lacking specific insights.</div>
+        <div class="rubric-cell"><div class="grade grade-f">F 0–49</div><br>No meaningful information about narrative or technical approach. No evidence of reflection.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rubric 7 -->
+  <div class="rubric-card">
+    <div class="rubric-header" onclick="toggleRubric(this)">
+      <h4>Organisation & cohesion <span class="weight">5%</span></h4>
+      <i class="fas fa-chevron-down chevron"></i>
+    </div>
+    <div class="rubric-body">
+      <div class="rubric-grid">
+        <div class="rubric-cell"><div class="grade grade-hd">HD 80–100</div><br>Well-structured, flows logically, presented in a professional, visually appealing manner.</div>
+        <div class="rubric-cell"><div class="grade grade-d">D 70–79</div><br>Organised and understandable, though minor layout or flow issues may appear.</div>
+        <div class="rubric-cell"><div class="grade grade-c">C 60–69</div><br>Some structure present, but layout or flow feels fragmented.</div>
+        <div class="rubric-cell"><div class="grade grade-p">P 50–59</div><br>Difficult to follow; information presented haphazardly or lacking clear flow.</div>
+        <div class="rubric-cell"><div class="grade grade-f">F 0–49</div><br>Disorganised or incomplete, hard to identify key points.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- DEADLINE & RESOURCES -->
+<section class="section" id="resources">
+  <div class="section-label"><i class="fas fa-calendar"></i> Submission</div>
+  <h2 class="section-title">Deadline & resources</h2>
+
+  <div class="deadline-banner">
+    <div class="date">Friday 10 April · Week 6</div>
+    <div class="sub">Present your film and pitch deck in person during class</div>
+  </div>
+
+  <div class="grid-3">
+    <div class="info-card" style="text-align:center">
+      <h4><i class="fas fa-play-circle" style="color:var(--accent);margin-right:.3rem"></i> Premiere Pro</h4>
+      <p><a href="https://helpx.adobe.com/premiere-pro/tutorials.html" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">Adobe Learn</a></p>
+    </div>
+    <div class="info-card" style="text-align:center">
+      <h4><i class="fas fa-music" style="color:var(--accent);margin-right:.3rem"></i> Sound & music</h4>
+      <p>Artlist.io<br><span style="font-size:.7rem;color:var(--text-tertiary)">Login on Canvas</span></p>
+    </div>
+    <div class="info-card" style="text-align:center">
+      <h4><i class="fas fa-camera" style="color:var(--accent);margin-right:.3rem"></i> Equipment</h4>
+      <p><a href="https://rmit.libguides.com/av-loan" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">AV Loan RMIT</a></p>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer class="footer"><span>LAYERED_FRAMES</span> · ARCH 1433 · RMIT University · 2026</footer>
+
+<script>
+function toggleTheme(){document.documentElement.classList.toggle('light');const l=document.documentElement.classList.contains('light');localStorage.setItem('theme-a1',l?'light':'dark');document.getElementById('theme-icon').className=l?'fas fa-sun':'fas fa-moon'}
+(function(){const s=localStorage.getItem('theme-a1');if(s==='light'){document.documentElement.classList.add('light');document.getElementById('theme-icon').className='fas fa-sun'}})();
+
+const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible')})},{threshold:.1});
+document.querySelectorAll('.section').forEach(s=>obs.observe(s));
+
+function toggleRubric(header){
+  header.classList.toggle('open');
+  const body=header.nextElementSibling;
+  body.classList.toggle('open');
+}
+</script>
+</body>
+</html>
