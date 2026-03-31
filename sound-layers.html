@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sound Layer Designer — Layered Frames</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e10;
+    --bg2: #16161a;
+    --bg3: #1e1e24;
+    --text: #e2e0d8;
+    --text2: #9a9890;
+    --text3: #5e5d58;
+    --accent: #c8a46e;
+    --accent2: #e8c88a;
+    --room-tone: #5a8f7a;
+    --foley: #c87a5a;
+    --atmosphere: #6a7ab8;
+    --music: #9a6aaa;
+    --transition: #b89a5a;
+    --border: rgba(255,255,255,0.06);
+    --border2: rgba(255,255,255,0.1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  .header { margin-bottom: 48px; }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .header h1 span { color: var(--accent); }
+  .header p {
+    font-size: 14px;
+    color: var(--text2);
+    margin-top: 10px;
+    line-height: 1.6;
+    max-width: 540px;
+  }
+
+  .input-section { margin-bottom: 40px; }
+  .input-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .scene-input {
+    width: 100%;
+    min-height: 100px;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    padding: 16px 18px;
+    resize: vertical;
+    line-height: 1.6;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .scene-input::placeholder { color: var(--text3); }
+  .scene-input:focus { border-color: var(--accent); }
+
+  .examples {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .example-chip {
+    font-size: 12px;
+    color: var(--text2);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .example-chip:hover {
+    color: var(--text);
+    border-color: var(--border2);
+    background: rgba(255,255,255,0.05);
+  }
+
+  .gen-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 12px 28px;
+    background: var(--accent);
+    color: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .gen-btn:hover { background: var(--accent2); }
+  .gen-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .gen-btn svg { width: 16px; height: 16px; }
+
+  .loading {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--text2);
+  }
+  .loading.show { display: flex; }
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .results { display: none; }
+  .results.show { display: block; }
+
+  .scene-summary {
+    padding: 18px 20px;
+    background: var(--bg2);
+    border-radius: 10px;
+    border-left: 3px solid var(--accent);
+    margin-bottom: 32px;
+  }
+  .scene-summary .label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .scene-summary p {
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  .layer-group { margin-bottom: 28px; }
+  .layer-group-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .layer-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+  .layer-group-title {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+  .layer-group-desc {
+    font-size: 12px;
+    color: var(--text3);
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .layer-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    background: var(--bg2);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s;
+  }
+  .layer-item:hover { border-color: var(--border2); }
+
+  .layer-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .layer-info { flex: 1; min-width: 0; }
+  .layer-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .layer-detail {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.4;
+  }
+
+  .layer-volume {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .vol-bar {
+    width: 60px;
+    height: 6px;
+    background: var(--bg);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .vol-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+  }
+  .vol-label {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text3);
+    min-width: 28px;
+    text-align: right;
+  }
+
+  .tip-box {
+    margin-top: 32px;
+    padding: 18px 20px;
+    background: rgba(106, 122, 184, 0.08);
+    border: 1px solid rgba(106, 122, 184, 0.15);
+    border-radius: 10px;
+  }
+  .tip-box .label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--atmosphere);
+    margin-bottom: 8px;
+  }
+  .tip-box p {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  .error-msg {
+    display: none;
+    margin-top: 20px;
+    padding: 14px 18px;
+    background: rgba(200, 80, 60, 0.1);
+    border: 1px solid rgba(200, 80, 60, 0.2);
+    border-radius: 8px;
+    font-size: 13px;
+    color: #d08070;
+  }
+  .error-msg.show { display: block; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  .footer {
+    margin-top: 48px;
+    font-size: 12px;
+    color: var(--text3);
+    text-align: center;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .layer-group { animation: fadeUp 0.4s ease both; }
+  .layer-group:nth-child(2) { animation-delay: 0.08s; }
+  .layer-group:nth-child(3) { animation-delay: 0.16s; }
+  .layer-group:nth-child(4) { animation-delay: 0.24s; }
+  .layer-group:nth-child(5) { animation-delay: 0.32s; }
+
+  .key-section { margin-bottom: 32px; }
+  .key-section.saved { display: none; }
+  .key-badge {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--room-tone);
+    margin-bottom: 24px;
+    cursor: pointer;
+  }
+  .key-badge.show { display: flex; }
+  .key-badge:hover { color: var(--text2); }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="header">
+    <h1>Sound Layer <span>Designer</span></h1>
+    <p>Describe your scene — the space, the mood, what's happening — and get a layered sound design breakdown you can build in Premiere Pro.</p>
+  </div>
+
+  <div class="key-section" id="keySection">
+    <label class="input-label">API key</label>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input type="password" class="scene-input" id="apiKeyInput" placeholder="Paste your API key here" style="min-height:auto;padding:10px 14px;font-size:13px;font-family:'DM Mono',monospace;">
+      <button class="gen-btn" onclick="saveKey()" style="margin:0;white-space:nowrap;padding:10px 20px;">Save</button>
+    </div>
+    <p style="font-size:12px;color:var(--text3);margin-top:8px;">Your key is stored locally in this browser only.</p>
+  </div>
+
+  <div class="key-badge" id="keyBadge" onclick="resetKey()">✓ API key saved — click to change</div>
+
+  <div class="input-section">
+    <label class="input-label">Describe your scene</label>
+    <textarea class="scene-input" id="sceneInput" placeholder="e.g. A student studying alone in a quiet apartment at night. Rain outside. They're focused but slightly anxious about an upcoming deadline..."></textarea>
+    <div class="examples">
+      <div class="example-chip" onclick="fillExample(this)">Quiet library at dusk</div>
+      <div class="example-chip" onclick="fillExample(this)">Crowded morning tram</div>
+      <div class="example-chip" onclick="fillExample(this)">Empty stairwell in a university building</div>
+      <div class="example-chip" onclick="fillExample(this)">Kitchen at home, cooking dinner</div>
+      <div class="example-chip" onclick="fillExample(this)">Walking through Melbourne CBD in rain</div>
+    </div>
+    <button class="gen-btn" id="genBtn" onclick="generate()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+      Generate sound layers
+    </button>
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <span>Analysing your scene...</span>
+    </div>
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <div class="results" id="results"></div>
+
+  <div class="footer">Layered Frames — ARCH 1433 Communication Systems — RMIT 2025</div>
+</div>
+
+<script>
+function saveKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) return;
+  localStorage.setItem('sl_api_key', key);
+  checkKey();
+}
+
+function resetKey() {
+  localStorage.removeItem('sl_api_key');
+  document.getElementById('keySection').style.display = '';
+  document.getElementById('keyBadge').classList.remove('show');
+  document.getElementById('apiKeyInput').value = '';
+}
+
+function checkKey() {
+  const key = localStorage.getItem('sl_api_key');
+  if (key) {
+    document.getElementById('keySection').style.display = 'none';
+    document.getElementById('keyBadge').classList.add('show');
+  }
+}
+
+checkKey();
+
+const COLORS = {
+  'Room Tone':    { bg: 'rgba(90,143,122,0.15)', dot: '#5a8f7a', fill: '#5a8f7a' },
+  'Foley':        { bg: 'rgba(200,122,90,0.15)',  dot: '#c87a5a', fill: '#c87a5a' },
+  'Atmosphere':   { bg: 'rgba(106,122,184,0.15)', dot: '#6a7ab8', fill: '#6a7ab8' },
+  'Music':        { bg: 'rgba(154,106,170,0.15)', dot: '#9a6aaa', fill: '#9a6aaa' },
+  'Transition':   { bg: 'rgba(184,154,90,0.15)',  dot: '#b89a5a', fill: '#b89a5a' },
+};
+
+const ICONS = {
+  'Room Tone':  '◎',
+  'Foley':      '◉',
+  'Atmosphere': '◌',
+  'Music':      '♪',
+  'Transition': '⟿',
+};
+
+function fillExample(el) {
+  document.getElementById('sceneInput').value = el.textContent;
+  document.getElementById('sceneInput').focus();
+}
+
+async function generate() {
+  const input = document.getElementById('sceneInput').value.trim();
+  if (!input) return;
+
+  const btn = document.getElementById('genBtn');
+  const loading = document.getElementById('loading');
+  const results = document.getElementById('results');
+  const errorMsg = document.getElementById('errorMsg');
+
+  btn.disabled = true;
+  loading.classList.add('show');
+  results.classList.remove('show');
+  errorMsg.classList.remove('show');
+
+  const prompt = `You are a sound design assistant for film students studying spatial narrative. A student describes a scene. Your job is to generate a layered sound design breakdown.
+
+Return ONLY valid JSON, no markdown, no backticks, no preamble. Use this exact structure:
+{
+  "scene_analysis": "A brief 1-2 sentence interpretation of the scene's spatial and emotional character.",
+  "layers": [
+    {
+      "category": "Room Tone",
+      "sounds": [
+        { "name": "Sound name", "detail": "Brief description of what this sounds like and why it matters for this scene", "volume": 40 }
+      ]
+    }
+  ],
+  "tip": "One practical sound design tip specific to this scene that the student can apply in Premiere Pro."
+}
+
+Categories must be from: "Room Tone", "Foley", "Atmosphere", "Music", "Transition".
+- Room Tone: The baseline ambient sound of the space (air conditioning hum, room resonance, distant city drone, etc.)
+- Foley: Sounds created by physical actions and objects in the scene (footsteps, door creaks, typing, cup on table, etc.)
+- Atmosphere: Broader environmental and emotional textures (rain, wind, distant traffic, crowd murmur, birds, etc.)
+- Music: Musical elements if appropriate (drone, score suggestion, diegetic music from a radio, etc.)
+- Transition: Sound bridge or transition sounds if the scene involves movement between spaces (door opening, echo shift, etc.)
+
+Volume is 0-100 representing suggested relative mix level.
+Generate 2-4 sounds per category. Only include categories that are relevant. Always include Room Tone and Foley. Atmosphere is almost always relevant. Music and Transition are optional.
+
+The student's scene description:
+"${input}"`;
+
+  try {
+    const apiKey = localStorage.getItem('sl_api_key');
+    if (!apiKey) {
+      errorMsg.textContent = 'Please enter your API key first.';
+      errorMsg.classList.add('show');
+      btn.disabled = false;
+      loading.classList.remove('show');
+      return;
+    }
+
+    const fetchPromise = fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('TIMEOUT')), 30000)
+    );
+
+    const response = await Promise.race([fetchPromise, timeoutPromise]);
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error?.message || 'Server returned ' + response.status);
+    }
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error.message || 'API error');
+    }
+
+    const text = data.content.map(b => b.text || '').join('');
+    const clean = text.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
+
+    renderResults(result);
+  } catch (err) {
+    if (err.message === 'TIMEOUT') {
+      errorMsg.textContent = 'Request timed out. Please try again.';
+    } else {
+      errorMsg.textContent = 'Something went wrong: ' + err.message + '. Please try again.';
+    }
+    errorMsg.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    loading.classList.remove('show');
+  }
+}
+
+function renderResults(data) {
+  const results = document.getElementById('results');
+  let html = '';
+
+  html += `<div class="scene-summary">
+    <div class="label">Scene analysis</div>
+    <p>${data.scene_analysis}</p>
+  </div>`;
+
+  data.layers.forEach(layer => {
+    const cat = layer.category;
+    const c = COLORS[cat] || COLORS['Atmosphere'];
+    const icon = ICONS[cat] || '◎';
+
+    html += `<div class="layer-group">
+      <div class="layer-group-header">
+        <div class="layer-dot" style="background:${c.dot}"></div>
+        <div class="layer-group-title" style="color:${c.dot}">${cat}</div>
+        <div class="layer-group-desc">${layer.sounds.length} layers</div>
+      </div>`;
+
+    layer.sounds.forEach(s => {
+      html += `<div class="layer-item">
+        <div class="layer-icon" style="background:${c.bg};color:${c.dot}">${icon}</div>
+        <div class="layer-info">
+          <div class="layer-name">${s.name}</div>
+          <div class="layer-detail">${s.detail}</div>
+        </div>
+        <div class="layer-volume">
+          <div class="vol-bar">
+            <div class="vol-fill" style="width:${s.volume}%;background:${c.fill}"></div>
+          </div>
+          <div class="vol-label">${s.volume}%</div>
+        </div>
+      </div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  if (data.tip) {
+    html += `<div class="tip-box">
+      <div class="label">Premiere Pro tip</div>
+      <p>${data.tip}</p>
+    </div>`;
+  }
+
+  results.innerHTML = html;
+  results.classList.add('show');
+}
+</script>
+
+</body>
+</html>
