@@ -314,6 +314,105 @@
     resize: none;
     outline: none;
   }
+
+  /* Landing screen */
+  .landing {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .landing-card {
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    animation: fadeIn 0.5s ease;
+  }
+  .landing-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+  .landing-card h1 {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 32px;
+    font-weight: 400;
+    color: #f0e6d6;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .landing-card .landing-sub {
+    font-size: 13px;
+    color: #6b6358;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+  .landing-card p.landing-desc {
+    font-size: 14.5px;
+    color: #8a7d6f;
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+  .landing-input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: #e8dfd4;
+    font-size: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+    letter-spacing: 0.02em;
+    margin-bottom: 16px;
+  }
+  .landing-input::placeholder {
+    color: #4a443c;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0;
+  }
+  .landing-input:focus {
+    border-color: rgba(212,184,150,0.4);
+  }
+  .landing-go {
+    width: 100%;
+    padding: 14px 24px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #8a7147, #6b5a3e);
+    color: #f0e6d6;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .landing-go:hover {
+    background: linear-gradient(135deg, #9a8157, #7b6a4e);
+    transform: translateY(-1px);
+  }
+  .landing-go:disabled {
+    background: rgba(255,255,255,0.06);
+    color: #4a443c;
+    cursor: default;
+    transform: none;
+  }
+  .landing-error {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #c8503c;
+    min-height: 20px;
+  }
+  .landing-footer {
+    margin-top: 32px;
+    font-size: 11px;
+    color: #3a3530;
+    line-height: 1.5;
+  }
 </style>
 </head>
 <body>
@@ -321,10 +420,10 @@
 
 <script>
 // ============================================================
-// ⚠️  CONFIGURATION — EDIT THESE VALUES
+// ⚠️  CONFIGURATION
 // ============================================================
-const API_KEY = "YOUR_ANTHROPIC_API_KEY_HERE";  // <-- 把你的 Anthropic API key 贴在这里
-const MODEL   = "claude-sonnet-4-20250514";
+let API_KEY = "";  // Set by student on the welcome screen
+const MODEL  = "claude-sonnet-4-20250514";
 // ============================================================
 
 const SYSTEM_PROMPT = `You are a World-Building Guide for a university spatial design course called "Layered Frames." Your job is to help students construct a rich, original world and a character that lives in it — step by step, through conversation.
@@ -596,7 +695,81 @@ function closeModal() {
 }
 
 // ── Init ──
-document.addEventListener('DOMContentLoaded', () => {
+function showLanding() {
+  document.getElementById('app').innerHTML = `
+    <div class="landing">
+      <div class="landing-card">
+        <div class="landing-icon">🌍</div>
+        <h1>World Builder</h1>
+        <div class="landing-sub">Layered Frames</div>
+        <p class="landing-desc">Build a world for your character, step by step.<br>Enter the access key provided by your instructor to begin.</p>
+        <input type="password" class="landing-input" id="key-input" placeholder="Paste API key here" autocomplete="off" spellcheck="false">
+        <button class="landing-go" id="go-btn" disabled onclick="validateAndStart()">Enter World Builder</button>
+        <div class="landing-error" id="landing-error"></div>
+        <div class="landing-footer">Your key is only stored in memory and will be cleared when you close this page.</div>
+      </div>
+    </div>
+  `;
+
+  const keyInput = document.getElementById('key-input');
+  const goBtn = document.getElementById('go-btn');
+
+  keyInput.addEventListener('input', () => {
+    goBtn.disabled = !keyInput.value.trim();
+  });
+  keyInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && keyInput.value.trim()) validateAndStart();
+  });
+  keyInput.focus();
+}
+
+async function validateAndStart() {
+  const keyInput = document.getElementById('key-input');
+  const errEl = document.getElementById('landing-error');
+  const goBtn = document.getElementById('go-btn');
+  const key = keyInput.value.trim();
+
+  if (!key) return;
+
+  goBtn.disabled = true;
+  goBtn.textContent = 'Connecting...';
+  errEl.textContent = '';
+
+  try {
+    // Quick validation: send a tiny request to check the key works
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 10,
+        messages: [{ role:"user", content:"hi" }],
+      })
+    });
+
+    if (!resp.ok) {
+      const errData = await resp.json().catch(() => ({}));
+      if (resp.status === 401) throw new Error("Invalid API key. Please check and try again.");
+      throw new Error(errData.error?.message || `Error ${resp.status}`);
+    }
+
+    // Key works — store and launch
+    API_KEY = key;
+    showChat();
+
+  } catch (err) {
+    errEl.textContent = err.message;
+    goBtn.disabled = false;
+    goBtn.textContent = 'Enter World Builder';
+  }
+}
+
+function showChat() {
   document.getElementById('app').innerHTML = `
     <div class="header">
       <div class="header-left">
@@ -633,11 +806,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // API key check
-  if (API_KEY === "YOUR_ANTHROPIC_API_KEY_HERE") {
-    chatArea().innerHTML += '<div class="error-msg">⚠️ API key not configured. Please edit the HTML file and replace YOUR_ANTHROPIC_API_KEY_HERE with your Anthropic API key.</div>';
-  }
-});
+  inputEl().focus();
+}
+
+document.addEventListener('DOMContentLoaded', showLanding);
 </script>
 </body>
 </html>
