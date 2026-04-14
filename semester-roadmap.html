@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Layered Frames — Semester Roadmap</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e10;
+    --bg-card: #18181c;
+    --bg-card-hover: #1e1e24;
+    --text: #e8e4df;
+    --text-muted: #8a8580;
+    --text-dim: #5a5550;
+    --border: rgba(255,255,255,0.06);
+    --border-hover: rgba(255,255,255,0.12);
+
+    --ai: #c084fc;
+    --ai-dim: rgba(192,132,252,0.12);
+    --ai-glow: rgba(192,132,252,0.25);
+
+    --ae: #38bdf8;
+    --ae-dim: rgba(56,189,248,0.12);
+    --ae-glow: rgba(56,189,248,0.25);
+
+    --live: #f59e0b;
+    --live-dim: rgba(245,158,11,0.12);
+    --live-glow: rgba(245,158,11,0.25);
+
+    --accent: #e8e4df;
+    --danger: #93a3b8;
+    --danger-dim: rgba(147,163,184,0.08);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 60px 24px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(192,132,252,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+
+  .hero h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 400;
+    line-height: 1.15;
+    margin-bottom: 12px;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--ai);
+  }
+
+  .hero-sub {
+    font-size: 15px;
+    color: var(--text-muted);
+    max-width: 540px;
+    margin: 0 auto 32px;
+    line-height: 1.7;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .legend-dot.ai { background: var(--ai); box-shadow: 0 0 8px var(--ai-glow); }
+  .legend-dot.ae { background: var(--ae); box-shadow: 0 0 8px var(--ae-glow); }
+  .legend-dot.live { background: var(--live); box-shadow: 0 0 8px var(--live-glow); }
+
+  /* ── Timeline ── */
+  .timeline {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 24px 40px;
+    position: relative;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--border-hover) 5%, var(--border-hover) 85%, transparent);
+    transform: translateX(-50%);
+  }
+
+  @media (max-width: 700px) {
+    .timeline::before { left: 20px; }
+  }
+
+  /* ── Week Card ── */
+  .week-card {
+    position: relative;
+    margin-bottom: 24px;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: slideIn 0.5s ease forwards;
+  }
+
+  .week-card:nth-child(1) { animation-delay: 0.1s; }
+  .week-card:nth-child(2) { animation-delay: 0.2s; }
+  .week-card:nth-child(3) { animation-delay: 0.3s; }
+  .week-card:nth-child(4) { animation-delay: 0.4s; }
+  .week-card:nth-child(5) { animation-delay: 0.5s; }
+  .week-card:nth-child(6) { animation-delay: 0.6s; }
+  .week-card:nth-child(7) { animation-delay: 0.7s; }
+  .week-card:nth-child(8) { animation-delay: 0.8s; }
+
+  @keyframes slideIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .week-node {
+    position: absolute;
+    left: 50%;
+    top: 24px;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--text-dim);
+    z-index: 2;
+    transition: all 0.3s;
+  }
+
+  .week-card:hover .week-node {
+    border-color: var(--text);
+    box-shadow: 0 0 12px rgba(255,255,255,0.15);
+  }
+
+  .week-card.final .week-node {
+    width: 18px;
+    height: 18px;
+    border-color: var(--ai);
+    background: var(--ai);
+    box-shadow: 0 0 20px var(--ai-glow);
+  }
+
+  @media (max-width: 700px) {
+    .week-node { left: 20px; }
+  }
+
+  .card-body {
+    width: calc(50% - 40px);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s;
+    cursor: default;
+  }
+
+  .card-body:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+  }
+
+  .week-card:nth-child(odd) .card-body { margin-left: calc(50% + 40px); }
+  .week-card:nth-child(even) .card-body { margin-left: 0; }
+
+  @media (max-width: 700px) {
+    .week-card:nth-child(odd) .card-body,
+    .week-card:nth-child(even) .card-body {
+      margin-left: 48px;
+      width: calc(100% - 56px);
+    }
+  }
+
+  .card-week-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+
+  .card-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 20px;
+    font-weight: 400;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.65;
+    margin-bottom: 14px;
+  }
+
+  /* ── Pillar Tags ── */
+  .pillars {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  .pill.ai { background: var(--ai-dim); color: var(--ai); }
+  .pill.ae { background: var(--ae-dim); color: var(--ae); }
+  .pill.live { background: var(--live-dim); color: var(--live); }
+
+  /* ── Deliverable ── */
+  .deliverable {
+    font-size: 12px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+
+  .deliverable strong {
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  /* ── Locked Cards ── */
+  .week-card.locked .card-body {
+    filter: blur(3px);
+    opacity: 0.3;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .week-card.locked .week-node {
+    border-color: var(--text-dim);
+    opacity: 0.3;
+  }
+
+  .locked-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    z-index: 3;
+  }
+
+  .week-card:nth-child(odd) .locked-overlay { justify-content: flex-end; padding-right: calc(50% - 200px); }
+  .week-card:nth-child(even) .locked-overlay { justify-content: flex-start; padding-left: calc(50% - 200px); }
+
+  @media (max-width: 700px) {
+    .week-card:nth-child(odd) .locked-overlay,
+    .week-card:nth-child(even) .locked-overlay {
+      justify-content: center;
+      padding: 0 48px;
+    }
+  }
+
+  .locked-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    background: rgba(14,14,16,0.8);
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+
+  .locked-badge svg {
+    width: 13px;
+    height: 13px;
+    opacity: 0.6;
+  }
+
+  /* ── Chain Arrow ── */
+  .chain-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .chain-hint svg {
+    flex-shrink: 0;
+  }
+
+  /* ── Final Card ── */
+  .week-card.final .card-body {
+    background: linear-gradient(135deg, rgba(192,132,252,0.08), rgba(56,189,248,0.05), rgba(245,158,11,0.05));
+    border-color: rgba(192,132,252,0.2);
+  }
+
+  .week-card.final .card-title {
+    font-size: 24px;
+  }
+
+  /* ── Warning ── */
+  .warning {
+    max-width: 720px;
+    margin: 20px auto 60px;
+    padding: 0 24px;
+    opacity: 0;
+    animation: slideIn 0.5s ease 1s forwards;
+  }
+
+  .warning-box {
+    background: var(--danger-dim);
+    border: 1px solid rgba(147,163,184,0.15);
+    border-radius: 12px;
+    padding: 24px 28px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .warning-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    color: var(--danger);
+    margin-top: 2px;
+  }
+
+  .warning-text h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--danger);
+    margin-bottom: 6px;
+  }
+
+  .warning-text p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  /* ── Stacked Bar ── */
+  .bar-section {
+    max-width: 720px;
+    margin: 0 auto 60px;
+    padding: 0 24px;
+    opacity: 0;
+    animation: slideIn 0.5s ease 1.1s forwards;
+  }
+
+  .bar-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .bar-subtitle {
+    font-size: 13px;
+    color: var(--text-dim);
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .bar-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .bar-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    width: 44px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 28px;
+    display: flex;
+    border-radius: 6px;
+    overflow: hidden;
+    gap: 2px;
+  }
+
+  .bar-seg {
+    height: 100%;
+    transition: all 0.6s ease;
+    position: relative;
+    min-width: 0;
+  }
+
+  .bar-seg.ai { background: var(--ai); opacity: 0.7; }
+  .bar-seg.ae { background: var(--ae); opacity: 0.7; }
+  .bar-seg.live { background: var(--live); opacity: 0.7; }
+  .bar-seg.empty { background: rgba(255,255,255,0.03); }
+
+  .bar-row:hover .bar-seg { opacity: 1; }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding: 40px 24px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-label">Layered Frames 2026 — Second Half</div>
+  <h1>Your Film is Built<br><em>Week by Week</em></h1>
+  <p class="hero-sub">
+    Weeks 6–13 form a chain. Each week's homework becomes next week's raw material. Stay with the rhythm, and your final film will come together naturally.
+  </p>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot live"></div>Live Filming</div>
+    <div class="legend-item"><div class="legend-dot ai"></div>AI Generation</div>
+    <div class="legend-item"><div class="legend-dot ae"></div>After Effects</div>
+  </div>
+</div>
+
+<!-- Timeline -->
+<div class="timeline" id="timeline"></div>
+
+<!-- Note -->
+<div class="warning">
+  <div class="warning-box">
+    <svg class="warning-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 16v-4"/><path d="M12 8h.01"/>
+    </svg>
+    <div class="warning-text">
+      <h3>A note on how this assignment works</h3>
+      <p>
+        Your final film is made up of many building blocks created across Weeks 6 to 12: live footage, AI-generated sequences, AE composites, a title sequence, and sound design. Each week's work becomes the raw material for the next. Staying on track each week means you'll arrive at Week 13 with a complete set of assets, ready to polish rather than panic.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Stacked Bar Chart -->
+<div class="bar-section">
+  <div class="bar-title">Skill Intensity by Week</div>
+  <div class="bar-subtitle">How the three pillars shift across the semester</div>
+  <div class="bar-chart" id="barChart"></div>
+</div>
+
+<div class="footer">ARCH 1433 — COMMUNICATIONS SYSTEMS — RMIT 2026</div>
+
+<script>
+const weeks = [
+  {
+    week: 6,
+    title: "Script, Storyboard & Scene Shoot",
+    desc: "Write your script, draw your storyboard, and go to your chosen space to capture photos and video clips. These are the raw ingredients for everything that follows.",
+    pillars: ["live"],
+    deliverable: "Script + storyboard (with AI/AE annotations) · 5+ scene photos · 2-3 video clips · mood board",
+    chain: "Your photos feed Week 7's AI generation"
+  },
+  {
+    week: 7,
+    title: "AI Characters & Scene Concepts",
+    desc: "Generate your character's turnaround sheet and feed your Week 6 photos into AI tools to explore how your space could transform. Then begin learning AE basics with your A1 footage.",
+    pillars: ["ai", "ae"],
+    deliverable: "Character turnaround sheet · 5+ AI scene concepts · prompt log · AE practice (10s clip)",
+    chain: "Characters + scenes define Week 8's object"
+  },
+  {
+    week: 8,
+    title: "Signature Object & AE Compositing",
+    desc: "Design a signature object that belongs in your world — a key, a mirror, a device. Build it in 3D or photograph a physical prop. Learn AE motion tracking to place it in your filmed space.",
+    pillars: ["ae", "ai"],
+    deliverable: "Object model/photos · 15-30s AE composite clip · asset inventory checklist",
+    chain: "Your composite becomes a scene in Week 9's edit"
+  },
+  {
+    week: 9,
+    title: "Title Sequence & First Assembly",
+    desc: "Design your title sequence in AE. Then open Premiere Pro and lay every asset on the timeline for the first time — live footage, AI clips, AE composites. See your film's skeleton.",
+    pillars: ["ae", "live"],
+    deliverable: "Title sequence (10s+) · rough cut with all asset types · revision checklist",
+    chain: "Your rough cut screens in Week 10"
+  },
+  {
+    week: 10,
+    title: "Screening & Sound Design",
+    desc: "Screen your rough cut to the class. Receive structured peer feedback. Then refine your edit — add sound layers, unify colour grading across all three source types.",
+    pillars: ["live", "ai", "ae"],
+    deliverable: "Near-final cut · pitch deck draft · creator's note draft",
+    chain: "Near-final cut screens in Week 11"
+  },
+  {
+    week: 11,
+    title: "Final Review & Polish",
+    desc: "Last round of peer feedback on your near-final cut. Final revisions to edit, sound, colour, and AE composites. Complete your pitch deck and creator's note.",
+    pillars: ["live", "ai", "ae"],
+    deliverable: "Polished cut · final pitch deck · final creator's note",
+    chain: "Everything feeds the final submission"
+  },
+  {
+    week: "12",
+    title: "Buffer & Final Adjustments",
+    desc: "Final refinements. Export your film, finalise your pitch deck, proofread your creator's note. Prepare for submission.",
+    pillars: ["live", "ai", "ae"],
+    deliverable: "Final export check · all documents complete",
+    chain: "Submit in Week 13"
+  },
+  {
+    week: 13,
+    title: "Final Submission",
+    desc: "Submit your completed Spatial Transformation Film (3–5 min) together with your pitch deck and creator's note. Your film must contain live footage, AI-generated sequences, and AE composites.",
+    pillars: ["live", "ai", "ae"],
+    deliverable: "Final film (H.264, 1080p) · pitch deck (PDF, 10-12 pages) · creator's note (150 words)",
+    chain: null,
+    isFinal: true
+  }
+];
+
+const barData = [
+  { week: "W6",  live: 90, ai: 5,  ae: 5 },
+  { week: "W7",  live: 10, ai: 60, ae: 30 },
+  { week: "W8",  live: 10, ai: 25, ae: 65 },
+  { week: "W9",  live: 25, ai: 10, ae: 65 },
+  { week: "W10", live: 30, ai: 20, ae: 20 },
+  { week: "W11", live: 25, ai: 25, ae: 25 },
+  { week: "W12", live: 30, ai: 30, ae: 30 },
+  { week: "W13", live: 33, ai: 33, ae: 34 },
+];
+
+// Render timeline
+const tl = document.getElementById('timeline');
+weeks.forEach((w, i) => {
+  const isLocked = (typeof w.week === 'number' ? w.week : parseInt(w.week)) >= 8;
+  const card = document.createElement('div');
+  card.className = 'week-card' + (w.isFinal ? ' final' : '') + (isLocked ? ' locked' : '');
+
+  const pillarsHTML = w.pillars.map(p =>
+    `<span class="pill ${p}">${p === 'ai' ? 'AI' : p === 'ae' ? 'After Effects' : 'Live Filming'}</span>`
+  ).join('');
+
+  const chainHTML = w.chain && !isLocked ? `
+    <div class="chain-hint">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+      </svg>
+      ${w.chain}
+    </div>
+  ` : '';
+
+  const lockedHTML = isLocked ? `
+    <div class="locked-overlay">
+      <div class="locked-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        Coming soon
+      </div>
+    </div>
+  ` : '';
+
+  card.innerHTML = `
+    <div class="week-node"></div>
+    ${lockedHTML}
+    <div class="card-body">
+      <div class="card-week-label">Week ${w.week}</div>
+      <div class="card-title">${w.title}</div>
+      <div class="pillars">${pillarsHTML}</div>
+      <div class="card-desc">${w.desc}</div>
+      <div class="deliverable"><strong>Deliverables:</strong> ${w.deliverable}</div>
+      ${chainHTML}
+    </div>
+  `;
+  tl.appendChild(card);
+});
+
+// Render bar chart
+const bc = document.getElementById('barChart');
+barData.forEach((d, i) => {
+  const row = document.createElement('div');
+  row.className = 'bar-row';
+  row.style.opacity = '0';
+  row.style.animation = `slideIn 0.4s ease ${1.2 + i * 0.08}s forwards`;
+
+  const empty = 100 - d.live - d.ai - d.ae;
+
+  row.innerHTML = `
+    <div class="bar-label">${d.week}</div>
+    <div class="bar-track">
+      <div class="bar-seg live" style="width:${d.live}%"></div>
+      <div class="bar-seg ai" style="width:${d.ai}%"></div>
+      <div class="bar-seg ae" style="width:${d.ae}%"></div>
+      ${empty > 0 ? `<div class="bar-seg empty" style="width:${empty}%"></div>` : ''}
+    </div>
+  `;
+  bc.appendChild(row);
+});
+</script>
+
+</body>
+</html>
