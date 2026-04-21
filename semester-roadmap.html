@@ -609,7 +609,7 @@ const barData = [
 // Render timeline
 const tl = document.getElementById('timeline');
 weeks.forEach((w, i) => {
-  const isLocked = (typeof w.week === 'number' ? w.week : parseInt(w.week)) >= 8;
+  const isLocked = (typeof w.week === 'number' ? w.week : parseInt(w.week)) >= 9;
   const card = document.createElement('div');
   card.className = 'week-card' + (w.isFinal ? ' final' : '') + (isLocked ? ' locked' : '');
 
