@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poster Prompt Coach — Layered Frames</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0c0e;
+    --bg2: #141418;
+    --bg3: #1c1c22;
+    --bg4: #24242c;
+    --text: #ece9df;
+    --text2: #a39f95;
+    --text3: #6a665e;
+    --text4: #45423c;
+    --accent: #d4624a;
+    --accent2: #f0a878;
+    --accent3: #8b3a28;
+    --gold: #c8a46e;
+    --green: #6a9b7e;
+    --red: #c25a4a;
+    --border: rgba(255,255,255,0.06);
+    --border2: rgba(255,255,255,0.1);
+    --border3: rgba(255,255,255,0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* ============ LANDING ============ */
+  .landing {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 28px;
+  }
+  .landing-inner { max-width: 540px; width: 100%; }
+  .landing-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .landing-tag::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .landing h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(44px, 7vw, 72px);
+    line-height: 0.95;
+    letter-spacing: -1.5px;
+    color: var(--text);
+    margin-bottom: 20px;
+    font-weight: 400;
+  }
+  .landing h1 em { font-style: italic; color: var(--accent); }
+  .landing > .landing-inner > p {
+    font-size: 16px;
+    color: var(--text2);
+    line-height: 1.7;
+    margin-bottom: 28px;
+  }
+  .landing > .landing-inner > p strong { color: var(--text); font-weight: 500; }
+
+  .key-input-group {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .key-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 10px;
+    display: block;
+  }
+  .key-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s ease;
+    margin-bottom: 12px;
+  }
+  .key-input:focus { border-color: var(--accent); }
+  .key-input::placeholder { color: var(--text4); }
+
+  .start-btn {
+    width: 100%;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+  }
+  .start-btn:hover { background: var(--accent2); }
+  .start-btn:disabled {
+    background: var(--bg3);
+    color: var(--text3);
+    cursor: not-allowed;
+  }
+
+  .key-error {
+    color: var(--red);
+    font-size: 13px;
+    margin-top: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    display: none;
+  }
+  .key-error.show { display: block; }
+
+  .privacy-note {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text4);
+    text-align: center;
+    margin-top: 20px;
+    line-height: 1.6;
+  }
+
+  /* ============ APP ============ */
+  .app {
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+  .app.active { display: flex; }
+
+  .app-header {
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(12px);
+    background: rgba(12, 12, 14, 0.85);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .header-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1;
+  }
+  .header-title em { font-style: italic; color: var(--accent); }
+
+  .progress-pills { display: flex; gap: 4px; }
+  .pill {
+    width: 18px;
+    height: 4px;
+    background: var(--bg3);
+    border-radius: 2px;
+    transition: all 0.4s ease;
+  }
+  .pill.active { background: var(--accent); }
+
+  .reset-btn {
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .reset-btn:hover { background: var(--bg2); color: var(--text); }
+
+  /* ============ CHAT ============ */
+  .chat-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 0;
+  }
+  .chat-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  .msg {
+    margin-bottom: 28px;
+    animation: msgIn 0.4s ease;
+  }
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg-role {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .msg.assistant .msg-role { color: var(--gold); }
+  .msg.user .msg-role { color: var(--accent); }
+  .msg-role::before {
+    content: '';
+    width: 16px;
+    height: 1px;
+  }
+  .msg.assistant .msg-role::before { background: var(--gold); }
+  .msg.user .msg-role::before { background: var(--accent); }
+
+  .msg-content {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  .msg.user .msg-content {
+    background: var(--bg2);
+    border-left: 2px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+  }
+  .msg-content strong { color: var(--text); font-weight: 600; }
+  .msg-content em { color: var(--accent2); font-style: italic; }
+  .msg-content code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg3);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 0.9em;
+    color: var(--accent2);
+  }
+
+  /* ============ OPTION CARDS ============ */
+  .options-container {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .option-card {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .option-card:hover {
+    background: var(--bg3);
+    border-color: var(--accent3);
+    transform: translateY(-3px);
+  }
+  .option-card.disabled {
+    cursor: default;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  .option-card.selected {
+    border-color: var(--accent);
+    background: rgba(212, 98, 74, 0.06);
+    opacity: 1;
+  }
+  .option-card.selected::before {
+    content: '✓';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 18px;
+    height: 18px;
+    background: var(--accent);
+    color: var(--bg);
+    border-radius: 50%;
+    font-size: 11px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .option-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0;
+  }
+  .option-letter {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Instrument Serif', serif;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--gold);
+    flex-shrink: 0;
+    transition: all 0.25s ease;
+  }
+  .option-card:hover .option-letter,
+  .option-card.selected .option-letter {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+  .option-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.2px;
+    line-height: 1.3;
+  }
+  .option-body {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.55;
+    margin: 0;
+    padding: 0;
+    flex: 1;
+  }
+  .option-why {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    line-height: 1.5;
+    padding: 8px 0 0;
+    margin: 0;
+    font-style: italic;
+    border-top: 1px dashed var(--border);
+  }
+
+  .custom-btn {
+    background: transparent;
+    border: 1px dashed var(--border3);
+    color: var(--text3);
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    text-align: center;
+  }
+  .custom-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  .custom-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .custom-input-box {
+    background: var(--bg2);
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .custom-input-box textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    line-height: 1.5;
+    outline: none;
+    resize: vertical;
+    min-height: 60px;
+    margin-bottom: 10px;
+  }
+  .custom-input-box textarea:focus { border-color: var(--accent); }
+  .custom-input-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  /* Loading dots */
+  .typing-dots {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px 0;
+  }
+  .typing-dots span {
+    width: 6px;
+    height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: dot 1.4s infinite ease-in-out;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dot {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  /* ============ FINAL PROMPT BLOCK ============ */
+  .final-prompt {
+    background: linear-gradient(180deg, var(--bg2) 0%, var(--bg3) 100%);
+    border: 1px solid var(--accent3);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 24px 0;
+  }
+  .final-prompt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .final-prompt-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--text);
+  }
+  .final-prompt-title em { font-style: italic; color: var(--accent); }
+  .final-prompt-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .final-prompt-body {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 18px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+  }
+  .final-prompt-body::-webkit-scrollbar { width: 6px; }
+  .final-prompt-body::-webkit-scrollbar-track { background: transparent; }
+  .final-prompt-body::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+
+  .final-prompt-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover { background: var(--accent2); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border2);
+  }
+  .btn-secondary:hover { background: var(--bg2); color: var(--text); }
+  .btn-sm { padding: 8px 14px; font-size: 12px; }
+
+  /* ============ COMPOSER ============ */
+  .composer {
+    border-top: 1px solid var(--border);
+    background: rgba(12, 12, 14, 0.85);
+    backdrop-filter: blur(12px);
+    padding: 16px 28px 20px;
+  }
+  .composer.hidden { display: none; }
+  .composer-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+  }
+  .composer textarea {
+    flex: 1;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    padding: 14px 16px;
+    line-height: 1.5;
+    outline: none;
+    resize: none;
+    min-height: 50px;
+    max-height: 200px;
+    transition: border-color 0.2s ease;
+  }
+  .composer textarea:focus { border-color: var(--accent); }
+  .composer textarea::placeholder { color: var(--text4); }
+  .send-btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .send-btn:hover { background: var(--accent2); }
+  .send-btn:disabled {
+    background: var(--bg3);
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  .send-btn svg { width: 18px; height: 18px; }
+  .composer-hint {
+    max-width: 720px;
+    margin: 8px auto 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text4);
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  /* ============ TOAST ============ */
+  .toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: var(--accent);
+    color: var(--bg);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 300;
+    transition: transform 0.3s ease;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 720px) {
+    .app-header { padding: 16px 20px; flex-wrap: wrap; gap: 12px; }
+    .progress-pills { order: 3; flex-basis: 100%; }
+    .chat-inner { padding: 0 20px; }
+    .composer { padding: 12px 20px 16px; }
+    .final-prompt-actions { flex-direction: column; }
+    .btn { width: 100%; justify-content: center; }
+    .option-body, .option-why { padding-left: 0; }
+    .options-container { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LANDING ============ -->
+<div class="landing" id="landing">
+  <div class="landing-inner">
+    <div class="landing-tag">Layered Frames · Assignment 2 · AI-Powered Tool</div>
+    <h1>Poster Prompt<br><em>Coach.</em></h1>
+    <p>Tell Claude one sentence about your film. Claude will <strong>imagine three poster directions for each layer</strong> — you click the one you like, or write your own. In about 5 minutes you'll have a polished GPT Image 2 prompt to paste into ChatGPT.</p>
+
+    <div class="key-input-group">
+      <label class="key-label">Your Anthropic API Key</label>
+      <input type="password" class="key-input" id="apiKey" placeholder="sk-ant-api03-..." autocomplete="off">
+      <button class="start-btn" id="startBtn" onclick="validateAndStart()">Validate & Start</button>
+      <div class="key-error" id="keyError"></div>
+    </div>
+
+    <p class="privacy-note">
+      Your API key is stored only in this browser tab's memory. It is never saved, logged, or sent anywhere except to Anthropic's API.
+    </p>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div class="app" id="app">
+  <header class="app-header">
+    <div class="header-left">
+      <div class="header-title">Poster <em>Coach</em></div>
+    </div>
+    <div class="progress-pills">
+      <div class="pill" data-step="1"></div>
+      <div class="pill" data-step="2"></div>
+      <div class="pill" data-step="3"></div>
+      <div class="pill" data-step="4"></div>
+      <div class="pill" data-step="5"></div>
+    </div>
+    <button class="reset-btn" onclick="resetSession()">Start Over</button>
+  </header>
+
+  <div class="chat-area" id="chatArea">
+    <div class="chat-inner" id="chatInner"></div>
+  </div>
+
+  <div class="composer" id="composer">
+    <div class="composer-inner">
+      <textarea id="composerText" placeholder="Type your reply..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+    <div class="composer-hint">⏎ to send · Shift+⏎ for new line</div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+const SYSTEM_PROMPT = `You are the **Poster Prompt Coach** for "Layered Frames" — a 13-week spatial narrative film course at RMIT University taught by Tiger. Your students are second-year interior design undergraduates working on Assignment 2: a 5-minute Spatial Transformation Film. They need a poster for their Pitch Deck.
+
+## Your job: PROPOSE, don't interrogate
+
+Most students don't have time for long Q&A. Your strategy is to **imagine three complete options at every layer** — they click one, or write their own. Total session should take ~5 minutes.
+
+## The Five Layers
+
+1. **Subject Anchor** — One sentence about the film (the ONLY layer requiring open input)
+2. **Composition Type** — One archetype: Character Close-Up / Atmospheric Space / Minimal Symbol / Double Exposure / Collage Narrative
+3. **Visual Elements** — People + Space + Signature Object (each with 2-3 distinctive adjectives), all bundled
+4. **Mood, Color & Light** — 3-4 mood keywords + 3-4 colors with explicit ratios summing to 100% + light direction + color + what it passes through, all bundled
+5. **Text Layout** — Title (English), tagline, director credit, optional festival/year, all bundled
+
+## Layer 1 — Open input (the only typing layer)
+
+Just ask: "Tell me about your film in one sentence — when, where, who, what's happening?"
+
+After they answer, briefly confirm ("Got it — a story about...") and move to Layer 2 with options.
+
+## Layers 2-5 — Always propose 3 options
+
+For each layer, output exactly 3 fully-formed, immediately-usable options. Format:
+
+[Optional 1-sentence intro, e.g. "Three directions that fit your story:"]
+
+<OPTION letter="A">
+<title>Short title (3-5 words)</title>
+<body>Detailed, fully-formed description (1-3 sentences). Be SPECIFIC — give real adjectives, percentages, directions, colors. Make it ready-to-use, not a category to pick from.</body>
+<why>One sentence connecting this option to THEIR specific film</why>
+</OPTION>
+
+<OPTION letter="B">
+<title>...</title>
+<body>...</body>
+<why>...</why>
+</OPTION>
+
+<OPTION letter="C">
+<title>...</title>
+<body>...</body>
+<why>...</why>
+</OPTION>
+
+## Critical rules for options
+
+- **Always exactly 3 options.** Never 2, never 4.
+- **Make them DISTINCT.** Three different visual strategies, not three variations of the same idea.
+- **Be SPECIFIC.** "Warm tones" is bad. "Candle yellow 70% + deep indigo 20% + book gold 10%" is good.
+- **Connect to THEIR film.** Each "why" should mention something specific from their L1 sentence.
+- **Be bold and imaginative.** Push beyond obvious choices. Surprise them.
+- **Don't add a "customize" option** — the interface adds it automatically.
+
+## Layer-specific guidance for option content
+
+**Layer 2 (Composition):**
+Pick 3 of the 5 archetypes that best fit their story. In <body>, describe HOW their specific film would look in this composition (not what the archetype means in general).
+
+**Layer 3 (Visual Elements):**
+Each option = ONE complete bundle: People + Space + Signature Object together. Three different aesthetic directions (e.g., melancholic / surreal / documentary).
+
+**Layer 4 (Mood, Color & Light):**
+Each option bundles ALL three: mood keywords + color ratios + light setup. Make them visually distinct (e.g., warm cinematic / cool moonlight / high-contrast neo-noir).
+
+**Layer 5 (Text):**
+Each option = full text package: title styling + tagline + director credit + optional festival line. Three different tones (poetic / minimal / bold).
+
+## Layer tracking
+
+At the start of EVERY message, output a layer tag: <LAYER>1</LAYER> through <LAYER>5</LAYER>, or <LAYER>FINAL</LAYER> when delivering the final prompt. The interface uses these to update progress dots.
+
+## When student responds
+
+- They click an option (you'll receive "I choose [B]: [title] — [body]") OR write their own.
+- Acknowledge briefly (one short sentence: "Nice choice." / "Got it.") then move to next layer.
+- DO NOT ask follow-up questions unless their custom answer is too vague to use.
+
+## Final output (after all 5 layers)
+
+Generate the **complete GPT Image 2 prompt** in English, wrapped in <FINAL_PROMPT>...</FINAL_PROMPT> tags.
+
+Format:
+- Open: "A vertical (2:3) cinematic film poster..."
+- Clean paragraphs by concept (composition / visual elements / light / color / mood / text layout)
+- Specify text positions precisely (Top center / Mid lower / Bottom left, etc.)
+- End: "Style: cinematic film poster, festival-grade, 35mm film grain, intentional shadows, polished typography, print-ready ultra-high resolution."
+- For Minimal Symbol composition: add an "Avoid: ..." line at the very end
+
+Before the final prompt, write 1 short sentence in your own voice. Don't over-explain.
+
+## Style for everything you say
+
+- Keep prose SHORT (1-3 sentences usually).
+- Be a confident coach. You know what makes good posters.
+- Plain English (international students).
+- Warm but precise. Never make them feel stupid.
+
+## Start
+
+<LAYER>1</LAYER>
+
+Open with a warm short greeting and the single L1 question. No options yet — they need to tell you about their film first.`;
+
+// ============ STATE ============
+let apiKey = '';
+let conversationHistory = [];
+let isStreaming = false;
+
+// ============ API KEY VALIDATION ============
+async function validateAndStart() {
+  const input = document.getElementById('apiKey');
+  const errorEl = document.getElementById('keyError');
+  const btn = document.getElementById('startBtn');
+  const key = input.value.trim();
+
+  errorEl.classList.remove('show');
+
+  if (!key.startsWith('sk-ant-')) {
+    errorEl.textContent = 'API key should start with "sk-ant-"';
+    errorEl.classList.add('show');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Validating...';
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 10,
+        messages: [{ role: 'user', content: 'Hi' }]
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `Error ${response.status}`);
+    }
+
+    apiKey = key;
+    document.getElementById('landing').style.display = 'none';
+    document.getElementById('app').classList.add('active');
+    startConversation();
+  } catch (err) {
+    errorEl.textContent = err.message.includes('authentication') || err.message.includes('401')
+      ? 'Invalid API key. Please check and try again.'
+      : `Validation failed: ${err.message}`;
+    errorEl.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Validate & Start';
+  }
+}
+
+// ============ CONVERSATION ============
+async function startConversation() {
+  conversationHistory = [];
+  await callClaude("Hi, I'm ready to start.");
+}
+
+async function sendMessage() {
+  const composer = document.getElementById('composerText');
+  const text = composer.value.trim();
+  if (!text || isStreaming) return;
+
+  addMessage('user', text);
+  composer.value = '';
+  autoResize(composer);
+
+  await callClaude(text);
+}
+
+async function callClaude(userMessage) {
+  conversationHistory.push({ role: 'user', content: userMessage });
+
+  isStreaming = true;
+  document.getElementById('sendBtn').disabled = true;
+
+  const msgEl = addMessage('assistant', '', true);
+  const contentEl = msgEl.querySelector('.msg-content');
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4096,
+        system: SYSTEM_PROMPT,
+        stream: true,
+        messages: conversationHistory
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `API error ${response.status}`);
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+    let buffer = '';
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6);
+          if (data === '[DONE]') continue;
+          try {
+            const event = JSON.parse(data);
+            if (event.type === 'content_block_delta' && event.delta?.text) {
+              fullText += event.delta.text;
+              renderStreamingMessage(contentEl, fullText);
+              scrollToBottom();
+            }
+          } catch (e) { /* ignore */ }
+        }
+      }
+    }
+
+    conversationHistory.push({ role: 'assistant', content: fullText });
+
+    // Update progress
+    const layerMatch = fullText.match(/<LAYER>([^<]+)<\/LAYER>/);
+    if (layerMatch) {
+      const layer = layerMatch[1];
+      if (layer === 'FINAL') {
+        document.querySelectorAll('.pill').forEach(p => p.classList.add('active'));
+      } else {
+        const num = parseInt(layer);
+        if (!isNaN(num) && num >= 1 && num <= 5) {
+          for (let i = 1; i <= num; i++) {
+            document.querySelector(`.pill[data-step="${i}"]`)?.classList.add('active');
+          }
+        }
+      }
+    }
+
+    renderFinalMessage(contentEl, fullText);
+    toggleComposer(fullText);
+
+  } catch (err) {
+    contentEl.innerHTML = `<span style="color: var(--red);">Error: ${err.message}</span>`;
+    conversationHistory.pop();
+  } finally {
+    isStreaming = false;
+    document.getElementById('sendBtn').disabled = false;
+    scrollToBottom();
+  }
+}
+
+// ============ RENDERING ============
+function addMessage(role, content, isLoading = false) {
+  const inner = document.getElementById('chatInner');
+  const msg = document.createElement('div');
+  msg.className = `msg ${role}`;
+
+  const roleLabel = document.createElement('div');
+  roleLabel.className = 'msg-role';
+  roleLabel.textContent = role === 'user' ? 'You' : 'Coach';
+
+  const contentEl = document.createElement('div');
+  contentEl.className = 'msg-content';
+
+  if (isLoading) {
+    contentEl.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+  } else {
+    contentEl.innerHTML = formatText(content);
+  }
+
+  msg.appendChild(roleLabel);
+  msg.appendChild(contentEl);
+  inner.appendChild(msg);
+  scrollToBottom();
+  return msg;
+}
+
+// During streaming: show only text BEFORE the first <OPTION> or <FINAL_PROMPT>
+function renderStreamingMessage(el, text) {
+  let cleaned = text.replace(/<LAYER>[^<]+<\/LAYER>/g, '').trim();
+  const optStart = cleaned.indexOf('<OPTION');
+  const finalStart = cleaned.indexOf('<FINAL_PROMPT');
+
+  let cutAt = -1;
+  if (optStart >= 0 && finalStart >= 0) cutAt = Math.min(optStart, finalStart);
+  else if (optStart >= 0) cutAt = optStart;
+  else if (finalStart >= 0) cutAt = finalStart;
+
+  if (cutAt >= 0) {
+    cleaned = cleaned.slice(0, cutAt).trim();
+    el.innerHTML = (cleaned ? formatText(cleaned) + '<br>' : '') + '<div class="typing-dots" style="margin-top:8px;"><span></span><span></span><span></span></div>';
+  } else {
+    el.innerHTML = formatText(cleaned);
+  }
+}
+
+// After streaming completes: parse OPTION blocks and FINAL_PROMPT
+function renderFinalMessage(el, text) {
+  let cleaned = text.replace(/<LAYER>[^<]+<\/LAYER>/g, '').trim();
+
+  // Final prompt block
+  const promptMatch = cleaned.match(/<FINAL_PROMPT>([\s\S]+?)<\/FINAL_PROMPT>/);
+  if (promptMatch) {
+    const beforePrompt = cleaned.slice(0, promptMatch.index).trim();
+    const afterPrompt = cleaned.slice(promptMatch.index + promptMatch[0].length).trim();
+    const promptText = promptMatch[1].trim();
+
+    el.innerHTML = '';
+    if (beforePrompt) {
+      const intro = document.createElement('div');
+      intro.innerHTML = formatText(beforePrompt);
+      intro.style.marginBottom = '16px';
+      el.appendChild(intro);
+    }
+
+    const finalBlock = document.createElement('div');
+    finalBlock.className = 'final-prompt';
+    finalBlock.innerHTML = `
+      <div class="final-prompt-header">
+        <div class="final-prompt-title">Your <em>Final Prompt</em></div>
+        <div class="final-prompt-tag">Ready to Copy</div>
+      </div>
+      <div class="final-prompt-body">${escapeHtml(promptText)}</div>
+      <div class="final-prompt-actions">
+        <button class="btn" onclick="copyPrompt(this)">Copy to Clipboard</button>
+        <a href="https://chatgpt.com/" target="_blank" class="btn btn-secondary">Open ChatGPT ↗</a>
+      </div>
+    `;
+    el.appendChild(finalBlock);
+
+    if (afterPrompt) {
+      const after = document.createElement('div');
+      after.innerHTML = formatText(afterPrompt);
+      after.style.marginTop = '16px';
+      el.appendChild(after);
+    }
+    return;
+  }
+
+  // Option blocks
+  const optRegex = /<OPTION letter="([^"]+)">\s*<title>([\s\S]*?)<\/title>\s*<body>([\s\S]*?)<\/body>\s*<why>([\s\S]*?)<\/why>\s*<\/OPTION>/g;
+  const matches = [...cleaned.matchAll(optRegex)];
+
+  if (matches.length > 0) {
+    const firstStart = cleaned.indexOf('<OPTION');
+    const lastEnd = cleaned.lastIndexOf('</OPTION>') + '</OPTION>'.length;
+    const intro = cleaned.slice(0, firstStart).trim();
+    const after = cleaned.slice(lastEnd).trim();
+
+    el.innerHTML = '';
+
+    if (intro) {
+      const introEl = document.createElement('div');
+      introEl.innerHTML = formatText(intro);
+      el.appendChild(introEl);
+    }
+
+    const container = document.createElement('div');
+    container.className = 'options-container';
+
+    matches.forEach(m => {
+      const [, letter, title, body, why] = m;
+      const card = createOptionCard(letter.trim(), title.trim(), body.trim(), why.trim());
+      container.appendChild(card);
+    });
+
+    const customBtn = document.createElement('button');
+    customBtn.className = 'custom-btn';
+    customBtn.textContent = '+ Write my own';
+    customBtn.onclick = () => openCustomInput(container);
+    container.appendChild(customBtn);
+
+    el.appendChild(container);
+
+    if (after) {
+      const afterEl = document.createElement('div');
+      afterEl.innerHTML = formatText(after);
+      afterEl.style.marginTop = '16px';
+      el.appendChild(afterEl);
+    }
+    return;
+  }
+
+  el.innerHTML = formatText(cleaned);
+}
+
+function createOptionCard(letter, title, body, why) {
+  const card = document.createElement('div');
+  card.className = 'option-card';
+  card.innerHTML = `
+    <div class="option-header">
+      <div class="option-letter">${escapeHtml(letter)}</div>
+      <div class="option-title">${escapeHtml(title)}</div>
+    </div>
+    <div class="option-body">${escapeHtml(body)}</div>
+    <div class="option-why">${escapeHtml(why)}</div>
+  `;
+  card.dataset.letter = letter;
+  card.dataset.title = title;
+  card.dataset.body = body;
+  card.onclick = () => selectOption(card);
+  return card;
+}
+
+function selectOption(card) {
+  if (isStreaming) return;
+  const container = card.closest('.options-container');
+  container.querySelectorAll('.option-card').forEach(c => {
+    if (c !== card) c.classList.add('disabled');
+  });
+  card.classList.add('selected');
+
+  const customBtn = container.querySelector('.custom-btn');
+  if (customBtn) customBtn.style.display = 'none';
+  const customBox = container.querySelector('.custom-input-box');
+  if (customBox) customBox.style.display = 'none';
+
+  const letter = card.dataset.letter;
+  const title = card.dataset.title;
+  const body = card.dataset.body;
+  const message = `I choose [${letter}] ${title}: ${body}`;
+  const displayMsg = `[${letter}] ${title}\n\n${body}`;
+
+  addMessage('user', displayMsg);
+  callClaude(message);
+}
+
+function openCustomInput(container) {
+  if (isStreaming) return;
+  const customBtn = container.querySelector('.custom-btn');
+
+  const box = document.createElement('div');
+  box.className = 'custom-input-box';
+  box.innerHTML = `
+    <textarea placeholder="Write your own idea..." rows="3"></textarea>
+    <div class="custom-input-actions">
+      <button class="btn btn-secondary btn-sm" type="button">Cancel</button>
+      <button class="btn btn-sm" type="button">Send</button>
+    </div>
+  `;
+  customBtn.replaceWith(box);
+  const textarea = box.querySelector('textarea');
+  textarea.focus();
+
+  const buttons = box.querySelectorAll('button');
+  buttons[0].onclick = () => cancelCustom(box);
+  buttons[1].onclick = () => submitCustom(box);
+
+  textarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      submitCustom(box);
+    }
+  });
+}
+
+function cancelCustom(box) {
+  const container = box.parentElement;
+  const newBtn = document.createElement('button');
+  newBtn.className = 'custom-btn';
+  newBtn.textContent = '+ Write my own';
+  newBtn.onclick = () => openCustomInput(container);
+  box.replaceWith(newBtn);
+}
+
+function submitCustom(box) {
+  const text = box.querySelector('textarea').value.trim();
+  if (!text || isStreaming) return;
+
+  const container = box.parentElement;
+  container.querySelectorAll('.option-card').forEach(c => c.classList.add('disabled'));
+  box.remove();
+
+  addMessage('user', text);
+  callClaude(text);
+}
+
+// Hide composer when there are options waiting (student should click instead of type)
+function toggleComposer(text) {
+  const hasOptions = /<OPTION letter=/.test(text);
+  const hasFinal = /<FINAL_PROMPT>/.test(text);
+  const composer = document.getElementById('composer');
+  if (hasOptions && !hasFinal) {
+    composer.classList.add('hidden');
+  } else {
+    composer.classList.remove('hidden');
+  }
+}
+
+function formatText(text) {
+  return escapeHtml(text)
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>');
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function copyPrompt(btn) {
+  const promptBody = btn.closest('.final-prompt').querySelector('.final-prompt-body');
+  const text = promptBody.textContent;
+
+  // Try modern clipboard API first
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => {
+      onCopySuccess(btn);
+    }).catch(() => {
+      fallbackCopy(text, btn);
+    });
+  } else {
+    fallbackCopy(text, btn);
+  }
+}
+
+function fallbackCopy(text, btn) {
+  // Fallback: create temporary textarea and use document.execCommand
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.top = '0';
+  textarea.style.left = '0';
+  textarea.style.opacity = '0';
+  textarea.style.pointerEvents = 'none';
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  let success = false;
+  try {
+    success = document.execCommand('copy');
+  } catch (err) { /* ignore */ }
+  document.body.removeChild(textarea);
+
+  if (success) {
+    onCopySuccess(btn);
+  } else {
+    // Last resort: select the text in the prompt body so user can copy manually
+    const range = document.createRange();
+    range.selectNodeContents(btn.closest('.final-prompt').querySelector('.final-prompt-body'));
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    btn.textContent = 'Selected — press ⌘C / Ctrl+C';
+    setTimeout(() => { btn.textContent = 'Copy to Clipboard'; }, 4000);
+  }
+}
+
+function onCopySuccess(btn) {
+  showToast();
+  btn.textContent = '✓ Copied';
+  setTimeout(() => { btn.textContent = 'Copy to Clipboard'; }, 2000);
+}
+
+function showToast() {
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+function scrollToBottom() {
+  const area = document.getElementById('chatArea');
+  setTimeout(() => { area.scrollTop = area.scrollHeight; }, 50);
+}
+
+// ============ COMPOSER ============
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+// ============ RESET ============
+function resetSession() {
+  if (!confirm('Start over? This will clear your current conversation.')) return;
+  document.getElementById('chatInner').innerHTML = '';
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  document.getElementById('composer').classList.remove('hidden');
+  conversationHistory = [];
+  startConversation();
+}
+
+// ============ INIT ============
+document.getElementById('apiKey').focus();
+document.getElementById('apiKey').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') validateAndStart();
+});
+</script>
+
+</body>
+</html>
