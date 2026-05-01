@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The AI Film Workflow — Layered Frames</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e10;
+    --bg-card: #18181c;
+    --bg-card-hover: #1e1e24;
+    --bg-soft: rgba(255,255,255,0.02);
+    --text: #e8e4df;
+    --text-muted: #8a8580;
+    --text-dim: #5a5550;
+    --border: rgba(255,255,255,0.06);
+    --border-hover: rgba(255,255,255,0.14);
+
+    --s1: #f59e0b;
+    --s2: #c084fc;
+    --s3: #38bdf8;
+    --s4: #34d399;
+    --s5: #fb7185;
+    --s6: #a78bfa;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.65;
+  }
+
+  .hero {
+    padding: 80px 24px 40px;
+    text-align: center;
+    max-width: 920px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(192,132,252,0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .hero-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+
+  .hero h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(36px, 6vw, 56px);
+    font-weight: 400;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 em { font-style: italic; color: var(--s2); }
+
+  .hero-sub {
+    font-size: 15px;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto 32px;
+    line-height: 1.7;
+  }
+
+  .overview {
+    max-width: 1100px;
+    margin: 0 auto 80px;
+    padding: 0 24px;
+  }
+
+  .pipeline-bar {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 8px;
+  }
+
+  @media (max-width: 800px) {
+    .pipeline-bar { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 480px) {
+    .pipeline-bar { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .pipeline-step {
+    padding: 16px 12px;
+    border-radius: 10px;
+    text-align: center;
+    transition: all 0.3s;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid transparent;
+  }
+
+  .pipeline-step:hover {
+    background: rgba(255,255,255,0.03);
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+  }
+
+  .pipe-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .pipeline-step.s1 .pipe-num { color: var(--s1); }
+  .pipeline-step.s2 .pipe-num { color: var(--s2); }
+  .pipeline-step.s3 .pipe-num { color: var(--s3); }
+  .pipeline-step.s4 .pipe-num { color: var(--s4); }
+  .pipeline-step.s5 .pipe-num { color: var(--s5); }
+  .pipeline-step.s6 .pipe-num { color: var(--s6); }
+
+  .pipe-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 16px;
+    color: var(--text);
+  }
+
+  .section {
+    max-width: 920px;
+    margin: 0 auto 100px;
+    padding: 0 24px;
+    scroll-margin-top: 40px;
+  }
+
+  .section-header {
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  .s1-tag { background: rgba(245,158,11,0.12); color: var(--s1); }
+  .s2-tag { background: rgba(192,132,252,0.12); color: var(--s2); }
+  .s3-tag { background: rgba(56,189,248,0.12); color: var(--s3); }
+  .s4-tag { background: rgba(52,211,153,0.12); color: var(--s4); }
+  .s5-tag { background: rgba(251,113,133,0.12); color: var(--s5); }
+  .s6-tag { background: rgba(167,139,250,0.12); color: var(--s6); }
+
+  .section-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 36px;
+    font-weight: 400;
+    line-height: 1.15;
+    margin-bottom: 12px;
+  }
+
+  .section-tagline {
+    font-size: 15px;
+    color: var(--text-muted);
+    font-style: italic;
+    line-height: 1.7;
+  }
+
+  .block { margin-bottom: 32px; }
+
+  .block h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    font-weight: 400;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  .block p {
+    font-size: 14.5px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 14px;
+  }
+
+  .block p strong { color: var(--text); font-weight: 500; }
+  .block p em { color: var(--text); font-style: italic; }
+
+  .tools {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .tool {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text-muted);
+  }
+
+  .prompt-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 16px 0;
+  }
+
+  .prompt-card-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  .prompt-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.7;
+    background: var(--bg);
+    padding: 14px 18px;
+    border-radius: 8px;
+    white-space: pre-wrap;
+    border-left: 2px solid var(--text-dim);
+  }
+
+  .s1 .prompt-text { border-left-color: var(--s1); }
+  .s2 .prompt-text { border-left-color: var(--s2); }
+  .s3 .prompt-text { border-left-color: var(--s3); }
+  .s4 .prompt-text { border-left-color: var(--s4); }
+  .s5 .prompt-text { border-left-color: var(--s5); }
+  .s6 .prompt-text { border-left-color: var(--s6); }
+
+  .tips {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  @media (max-width: 600px) {
+    .tips { grid-template-columns: 1fr; }
+  }
+
+  .tip {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    transition: all 0.3s;
+  }
+
+  .tip:hover {
+    background: var(--bg-card);
+    border-color: var(--border-hover);
+  }
+
+  .tip-icon {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 10px;
+    color: var(--text-muted);
+  }
+
+  .tip h4 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 17px;
+    font-weight: 400;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .tip p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .callout {
+    background: linear-gradient(135deg, rgba(192,132,252,0.06), rgba(56,189,248,0.04));
+    border: 1px solid rgba(192,132,252,0.18);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 24px 0;
+  }
+
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--s2);
+    margin-bottom: 8px;
+  }
+
+  .callout p {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.75;
+    margin: 0;
+  }
+
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  @media (max-width: 600px) {
+    .compare { grid-template-columns: 1fr; }
+  }
+
+  .compare-item {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+
+  .compare-item.bad { border-color: rgba(239,68,68,0.2); }
+  .compare-item.good { border-color: rgba(52,211,153,0.2); }
+
+  .compare-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .compare-item.bad .compare-label { color: #ef4444; }
+  .compare-item.good .compare-label { color: var(--s4); }
+
+  .compare-text {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  .three-sentences {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0;
+  }
+
+  .sentence-row {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sentence-row:last-child { border-bottom: none; }
+
+  .sentence-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 32px;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .s1 .sentence-num { color: var(--s1); }
+  .s5 .sentence-num { color: var(--s5); }
+
+  .sentence-content h5 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+
+  .sentence-content p {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.65;
+    margin-bottom: 6px;
+  }
+
+  .sentence-content em {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-style: normal;
+    color: var(--text-muted);
+    background: var(--bg);
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 4px;
+  }
+
+  .principle {
+    background: rgba(245,158,11,0.05);
+    border-left: 3px solid var(--s1);
+    padding: 18px 24px;
+    margin: 24px 0;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .principle p {
+    font-family: 'Instrument Serif', serif;
+    font-size: 20px;
+    font-style: italic;
+    color: var(--text);
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+
+  .principle span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .final-note {
+    max-width: 720px;
+    margin: 0 auto 80px;
+    padding: 0 24px;
+  }
+
+  .final-note-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px;
+    text-align: center;
+  }
+
+  .final-note-box h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 26px;
+    font-weight: 400;
+    margin-bottom: 14px;
+  }
+
+  .final-note-box p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    max-width: 540px;
+    margin: 0 auto;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 40px 24px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1.5px;
+  }
+
+  html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">Layered Frames — Week 7</div>
+  <h1>The Complete<br><em>AI Film Workflow</em></h1>
+  <p class="hero-sub">
+    A six-step pipeline from a feeling in your head to a finished film. Most people start with a prompt — that's the wrong move. Start with a feeling. Then build everything else on top.
+  </p>
+</div>
+
+<div class="overview">
+  <div class="pipeline-bar">
+    <a href="#step1" class="pipeline-step s1">
+      <div class="pipe-num">01</div>
+      <div class="pipe-name">Story</div>
+    </a>
+    <a href="#step2" class="pipeline-step s2">
+      <div class="pipe-num">02</div>
+      <div class="pipe-name">Character</div>
+    </a>
+    <a href="#step3" class="pipeline-step s3">
+      <div class="pipe-num">03</div>
+      <div class="pipe-name">World</div>
+    </a>
+    <a href="#step4" class="pipeline-step s4">
+      <div class="pipe-num">04</div>
+      <div class="pipe-name">Keyframes</div>
+    </a>
+    <a href="#step5" class="pipeline-step s5">
+      <div class="pipe-num">05</div>
+      <div class="pipe-name">Video</div>
+    </a>
+    <a href="#step6" class="pipeline-step s6">
+      <div class="pipe-num">06</div>
+      <div class="pipe-name">Sound + Edit</div>
+    </a>
+  </div>
+</div>
+
+<!-- STEP 1 -->
+<div class="section s1" id="step1">
+  <div class="section-header">
+    <span class="section-num s1-tag">Step 01 — Foundation</span>
+    <h2 class="section-title">Story First, Prompt Later</h2>
+    <p class="section-tagline">The biggest mistake in AI filmmaking is starting with a prompt. Start with a feeling.</p>
+  </div>
+
+  <div class="principle">
+    <p>"What's a story with real emotional stakes? Something an audience actually feels. Not what looks cool — what's a story worth telling?"</p>
+    <span>— On starting a short film</span>
+  </div>
+
+  <div class="block">
+    <h3>The three-sentence story</h3>
+    <p>Before you touch any AI tool, you need to be able to describe your film in <strong>three sentences</strong>. That's your entire foundation. Three sentences that lock in:</p>
+  </div>
+
+  <div class="three-sentences">
+    <div class="sentence-row">
+      <div class="sentence-num">01</div>
+      <div class="sentence-content">
+        <h5>The character</h5>
+        <p>Who is this about? What's their internal state at the start of the film?</p>
+        <em>"A cop who suffers from depression."</em>
+      </div>
+    </div>
+    <div class="sentence-row">
+      <div class="sentence-num">02</div>
+      <div class="sentence-content">
+        <h5>The location</h5>
+        <p>Where does this happen? Or, in your case, what space is being transformed?</p>
+        <em>"His shift takes him through a locker room, a patrol car, and his apartment."</em>
+      </div>
+    </div>
+    <div class="sentence-row">
+      <div class="sentence-num">03</div>
+      <div class="sentence-content">
+        <h5>The moment</h5>
+        <p>What happens that matters? What shifts? This is the emotional pivot, not the plot.</p>
+        <em>"It's his birthday, and the people closest to him try to break through."</em>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>The three-scene structure</h3>
+    <p>Once you have your three-sentence foundation, break it into <strong>three scenes</strong>. That's all a short film needs.</p>
+    <p><strong>Scene 1 — Setup.</strong> Quiet, intimate. Establish the character's world and emotional state.</p>
+    <p><strong>Scene 2 — Midpoint.</strong> Something shifts. Tension or movement enters the world.</p>
+    <p><strong>Scene 3 — Climax.</strong> The moment everything turns. The emotional payoff.</p>
+    <p>Don't over-engineer the structure. If you have more than three scenes for a 3-minute film, you probably have too much.</p>
+  </div>
+
+  <div class="block">
+    <h3>Use Claude as a co-writer, not a script generator</h3>
+    <p>Don't ask Claude to write a script cold. Ask it to <strong>brainstorm concepts</strong> first. Give it your three sentences and ask for variations and angles. Pick one, then have Claude write the actual script.</p>
+    <p>Same goes for prompts — if you only have a vague feeling for a shot, describe it to Claude in plain words and ask it to convert that feeling into a structured prompt. Claude is better at writing prompts than you are.</p>
+  </div>
+
+  <div class="tools">
+    <span class="tool">Claude</span>
+    <span class="tool">Google Doc</span>
+    <span class="tool">Pen + paper</span>
+  </div>
+
+  <div class="prompt-card">
+    <div class="prompt-card-label">Prompt template — concept brainstorm</div>
+    <div class="prompt-text">Here's the foundation of my short film:
+- Character: [your one sentence]
+- Location: [your one sentence]
+- Moment: [your one sentence]
+
+Give me 5 different ways this story could unfold.
+For each, give me:
+- The opening scene
+- The midpoint shift
+- The closing image
+- The emotional ending in one word</div>
+  </div>
+
+  <div class="prompt-card">
+    <div class="prompt-card-label">Prompt template — scene-by-scene script</div>
+    <div class="prompt-text">Based on the concept I picked, write me a [duration] film in 3 scenes.
+For each scene give me:
+- Scene number and location
+- The emotional beat (one sentence)
+- 4-6 shots with: shot type, camera movement, action
+- Any dialogue or voiceover
+- The shot that ends the scene
+
+Keep dialogue minimal. Show, don't tell.</div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-label">The whole point</div>
+    <p>If you can't describe your film in three sentences, AI can't help you make it. The clearer your foundation, the better every single step that follows.</p>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="section s2" id="step2">
+  <div class="section-header">
+    <span class="section-num s2-tag">Step 02 — Casting</span>
+    <h2 class="section-title">Character Creation</h2>
+    <p class="section-tagline">Build your character once, lock it in, reference it forever.</p>
+  </div>
+
+  <div class="block">
+    <h3>What you're producing</h3>
+    <p>A reusable character reference your AI tools will pull from in every shot. There are two levels of this — pick the one that fits your tool and your needs.</p>
+  </div>
+
+  <div class="block">
+    <h3>Level 1 — Character Turnaround Sheet</h3>
+    <p>A single image showing your character from multiple angles on a clean background. This is the universal method that works in every tool. Generate it once, save it, drag it into every video generation.</p>
+  </div>
+
+  <div class="tools">
+    <span class="tool">Nano Banana Pro</span>
+    <span class="tool">Runway References</span>
+    <span class="tool">Midjourney</span>
+  </div>
+
+  <div class="prompt-card">
+    <div class="prompt-card-label">Prompt template — character turnaround</div>
+    <div class="prompt-text">Character turnaround sheet, [character name].
+Multiple angles on white background: front view, 3/4 view, side view, back view.
+Same character throughout, consistent design.
+
+[Age], [build], [face shape, distinctive features].
+[Hair: length, colour, texture, style].
+[Clothing: every visible item, colour, fabric, fit].
+[A reference actor or character if it helps anchor the look].
+
+Lighting: even, neutral studio light. Sharp focus. Photorealistic.</div>
+  </div>
+
+  <div class="block">
+    <h3>Level 2 — Train a personal Character ID</h3>
+    <p>Some tools (like Higgsfield's Soul Cinema, or Runway's Character feature) let you <strong>train the AI on a specific face</strong> by uploading 15-20 photos. This creates a persistent character ID you can drop into any scene. The more variety in your training photos — different angles, different lighting, different expressions — the better the consistency.</p>
+    <p>This is how you put yourself, a friend, or a specific person into your film as a recurring character.</p>
+  </div>
+
+  <div class="compare">
+    <div class="compare-item bad">
+      <div class="compare-label">Vague approach</div>
+      <div class="compare-text">"A 28-year-old man with brown hair"<br><br>→ AI gives you 100 different people. No two shots will match.</div>
+    </div>
+    <div class="compare-item good">
+      <div class="compare-label">Anchored approach</div>
+      <div class="compare-text">A trained character ID + a turnaround sheet + every prompt referencing both.<br><br>→ Same person across every shot, every angle, every scene.</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>Multiple characters in the same world</h3>
+    <p>Generate Character A first. Then when generating Character B, <strong>upload Character A's image as a reference</strong>. This forces the AI to match the lighting, colour temperature, and atmosphere — so the two characters look like they belong in the same film, not two different films stitched together.</p>
+  </div>
+
+  <div class="tips">
+    <div class="tip">
+      <svg class="tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      <h4>Re-do the turnaround when the character changes</h4>
+      <p>If your character gets soaked, bloodied, or holds a new prop — make a new turnaround. Don't try to prompt the change every shot. Lock the new look once.</p>
+    </div>
+    <div class="tip">
+      <svg class="tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      <h4>Save as a named asset</h4>
+      <p>Right-click your turnaround in your AI tool and save it as a named asset (e.g. "Character: Maya"). You'll drag it into every video generation from here on.</p>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="section s3" id="step3">
+  <div class="section-header">
+    <span class="section-num s3-tag">Step 03 — World</span>
+    <h2 class="section-title">Scene, Props & Lighting</h2>
+    <p class="section-tagline">A consistent world is built from a consistent set of references. Three of them.</p>
+  </div>
+
+  <div class="block">
+    <h3>What you're producing</h3>
+    <p>Three reference assets that together define your world: a <strong>scene reference</strong> (where), a <strong>prop sheet</strong> (what's in it), and a <strong>lighting brief</strong> (how light behaves). Your character lives inside this triangle.</p>
+  </div>
+
+  <div class="tools">
+    <span class="tool">Nano Banana Pro</span>
+    <span class="tool">Your Week 6 photos</span>
+    <span class="tool">Pinterest / film stills</span>
+  </div>
+
+  <div class="block">
+    <h3>Use your real footage as the anchor</h3>
+    <p>Your Week 6 photos are gold. AI scene generation works dramatically better when it has a real space to reference than when it's generating from text alone. Upload your photos as reference, then prompt the transformation you want.</p>
+  </div>
+
+  <div class="prompt-card">
+    <div class="prompt-card-label">Prompt template — scene transformation</div>
+    <div class="prompt-text">Reference image: [your Week 6 photo of the space]
+
+Transform this space: [keep the structure / proportions / perspective].
+Change: [time of day / season / state / atmosphere].
+Add: [elements specific to your world].
+Remove: [anything that breaks the world].
+
+Lighting: [direction, quality, colour temperature].
+Mood: [one or two adjectives].
+Style: cinematic, [film reference if helpful].</div>
+  </div>
+
+  <div class="block">
+    <h3>Build a prop sheet</h3>
+    <p>Just like character consistency, environments need <strong>prop consistency</strong>. If your scene has specific objects in it — a bottle, a key, a poster on the wall — generate a prop sheet showing those objects clearly. Reference it alongside your character sheet in every shot that takes place in that environment.</p>
+    <p>This is the difference between an environment that looks the same across shots and one where the audience subconsciously notices things shifting between cuts.</p>
+  </div>
+
+  <div class="block">
+    <h3>Build a lighting brief</h3>
+    <p>Don't describe lighting differently in every prompt. Write it once, reuse it everywhere. Find 2-3 reference images (real photos or film stills) with the lighting you want, then have AI extract the lighting logic into a paragraph you can paste into every shot.</p>
+  </div>
+
+  <div class="prompt-card">
+    <div class="prompt-card-label">Prompt template — lighting brief from references</div>
+    <div class="prompt-text">Look at these 3 reference images. Extract the lighting style:
+- Where is the key light coming from?
+- What's the colour temperature (warm / cool / neutral)?
+- How harsh or soft is the light?
+- Are there practical light sources visible (lamps, screens, windows)?
+- What is the overall mood the lighting creates?
+
+Write me a 3-sentence lighting brief I can paste into every shot prompt.</div>
+  </div>
+
+  <div class="block">
+    <h3>Multi-image composite for tricky locations</h3>
+    <p>If your real space doesn't quite match your vision, take 3 photos of similar spaces from different angles, upload all three to the AI, and ask it to generate a composite that pulls the best qualities from each. This gives you one strong location reference instead of three weak ones.</p>
+  </div>
+
+  <div class="callout">
+    <div class="callout-label">Pipeline insight</div>
+    <p>Every video generation from here on will use the same four inputs: your character (turnaround or trained ID), your scene reference, your prop sheet, and your lighting brief. This is what gives your film visual consistency.</p>
+  </div>
+</div>
+
+<!-- STEP 4 -->
+<div class="section s4" id="step4">
+  <div class="section-header">
+    <span class="section-num s4-tag">Step 04 — Visualisation</span>
+    <h2 class="section-title">Storyboard & Keyframes</h2>
+    <p class="section-tagline">Generate every frame as a still before you generate any video.</p>
+  </div>
+
+  <div class="block">
+    <h3>What you're producing</h3>
+    <p>A storyboard where each shot is represented by a <strong>finalised still image</strong> — the exact frame you want as the first frame of each video clip. These keyframes use your character + scene + prop + lighting references combined with shot-specific prompts.</p>
+  </div>
+
+  <div class="tools">
+    <span class="tool">Nano Banana Pro</span>
+    <span class="tool">Google Doc</span>
+    <span class="tool">Runway Frames</span>
+  </div>
+
+  <div class="block">
+    <h3>Why generate stills before videos</h3>
+    <p>Video generations are expensive in time and credits. Stills are cheap. If you've locked the keyframe as a still you love, the video has a strong starting point. If your still is mediocre, the video will be worse.</p>
+  </div>
+
+  <div class="block">
+    <h3>The "describe, then reference" technique</h3>
+    <p>This is the single most underrated prompting trick in AI film. When you write a prompt that uses references, <strong>describe the image first, then drop the reference</strong>. Don't lead with the reference.</p>
+    <p>Why? It anchors the AI to what you're actually trying to describe before it pulls from the reference. The reference becomes a stylistic guide, not a copy-paste source. The results are noticeably better.</p>
+  </div>
+
+  <div class="compare">
+    <div class="compare-item bad">
+      <div class="compare-label">Reference first</div>
+      <div class="compare-text">"[character.png] My character enters a dark room and looks around."<br><br>→ AI tends to copy the reference image's pose and lighting too literally.</div>
+    </div>
+    <div class="compare-item good">
+      <div class="compare-label">Describe first, then reference</div>
+      <div class="compare-text">"My character enters a dark room and looks around — reference [character.png] for appearance only."<br><br>→ AI uses the reference as a guide while building the new scene from scratch.</div>
+    </div>
+  </div>
+
+  <div class="prompt-card">
+    <div class="prompt-card-label">Prompt template — keyframe generation</div>
+    <div class="prompt-text">Shot [number] — [shot type, e.g. extreme close-up, low-angle wide]
+Subject: [who/what is in frame doing what]
+Composition: [where they are in the frame, what surrounds them]
+Action: [the exact moment captured — frozen action]
+Camera angle: [eye-level / low / high / overhead]
+
+Lighting: [paste your lighting brief]
+Mood: [one adjective]
+Style: cinematic, [aesthetic keywords from your world]
+
+References (used as visual guides only):
+- Character: [character turnaround]
+- Environment: [scene reference]
+- Props: [prop sheet]
+
+No text, no captions, no watermark.</div>
+  </div>
+
+  <div class="block">
+    <h3>The simple storyboard system</h3>
+    <p>You don't need expensive software. Open a Google Doc. Paste your script. Drop each finalised keyframe under its corresponding line of action or dialogue. That's your storyboard. <strong>Only put the final version in the Doc</strong> — keep alternates in a separate folder so you don't get confused later.</p>
+  </div>
+
+  <div class="tips">
+    <div class="tip">
+      <svg class="tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+      <h4>Don't chase perfection</h4>
+      <p>If a keyframe is 80% there, accept it and move on. Don't burn 2 hours on a single shot. You can refine in the next pass.</p>
+    </div>
+    <div class="tip">
+      <svg class="tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <h4>Real product / real space refs</h4>
+      <p>If you're showing a specific real object (a brand product, a recognisable building), upload a photo of it as a reference. AI invents details when it doesn't have one.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-label">Reality check</div>
+    <p>If a keyframe is wrong, the video will be wrong. Fix problems at the still stage — it's 50× cheaper.</p>
+  </div>
+</div>
+
+<!-- STEP 5 -->
+<div class="section s5" id="step5">
+  <div class="section-header">
+    <span class="section-num s5-tag">Step 05 — Motion</span>
+    <h2 class="section-title">Video Generation</h2>
+    <p class="section-tagline">Turn your keyframes into moving images. This is where the work multiplies.</p>
+  </div>
+
+  <div class="block">
+    <h3>What you're producing</h3>
+    <p>A library of short video clips (typically 5–10 seconds each) generated from your keyframes. Each clip becomes one shot in your final edit.</p>
+  </div>
+
+  <div class="tools">
+    <span class="tool">Kling 3.0</span>
+    <span class="tool">Seedance 2.0</span>
+    <span class="tool">Runway Gen-4</span>
+    <span class="tool">Veo 3.1</span>
+    <span class="tool">Higgsfield Cinema Studio</span>
+  </div>
+
+  <div class="block">
+    <h3>Three approaches, depending on the shot</h3>
+    <p><strong>Image-to-video (single keyframe).</strong> Upload one keyframe + a motion prompt. The AI animates the still. Good for simple shots where you don't care about the exact ending.</p>
+    <p><strong>First frame + last frame.</strong> Upload two keyframes — your shot's beginning and end. The AI fills in the motion between them. Best for transformation shots, precise camera moves, and any moment where the ending matters as much as the beginning.</p>
+    <p><strong>Multi-shot in one generation.</strong> Some tools let you string multiple shots together in a single generation — different angles and camera movements within the same scene. Sweet spot is 5–7 shots in 15 seconds.</p>
+  </div>
+
+  <div class="block">
+    <h3>The three-sentence motion prompt</h3>
+    <p>For image-to-video, keep prompts short and structural. Three sentences cover everything you need:</p>
+  </div>
+
+  <div class="three-sentences">
+    <div class="sentence-row">
+      <div class="sentence-num">01</div>
+      <div class="sentence-content">
+        <h5>Lock the expression / state</h5>
+        <p>What is the character feeling? Set the emotion before any action begins.</p>
+        <em>"The character looks exhausted, eyes barely open, slightly slumped."</em>
+      </div>
+    </div>
+    <div class="sentence-row">
+      <div class="sentence-num">02</div>
+      <div class="sentence-content">
+        <h5>Sequence the action</h5>
+        <p>Use connective words like "then" to make the order explicit. Use concrete physical verbs, not vague mood words.</p>
+        <em>"They blink slowly, then turn their head to the left, then lift the cup."</em>
+      </div>
+    </div>
+    <div class="sentence-row">
+      <div class="sentence-num">03</div>
+      <div class="sentence-content">
+        <h5>Tie the camera to the action</h5>
+        <p>State explicitly what the camera is doing — and what it's not doing. This prevents AI drift.</p>
+        <em>"The camera is locked on a tripod, no cuts, no zooms, slight handheld breathing only."</em>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>The first frame + last frame technique</h3>
+    <p>Generate two stills with the same composition, character, and framing — but with the transformation already applied to the second one. Upload both. Write a short prompt describing what changes between them. The AI animates the in-between.</p>
+  </div>
+
+  <div class="prompt-card">
+    <div class="prompt-card-label">Prompt template — first frame + last frame</div>
+    <div class="prompt-text">First frame: [character in initial state]
+Last frame: [character in transformed state]
+
+Transition: [what physically changes between frames].
+Pacing: [gradual / sudden / in waves].
+Camera: [locked / slight movement / specific motion].
+
+The change is [restrained / dramatic]. Background stays consistent.</div>
+  </div>
+
+  <div class="block">
+    <h3>The screenshot trick (continuity hack)</h3>
+    <p>When a video generates a great shot from an angle you didn't have a keyframe for, <strong>take a screenshot of that frame and use it as the start frame for your next generation</strong>. This is how you build continuity across shots without re-generating environments from scratch. The same technique works for multi-shot chaining: end of clip 1 becomes the start of clip 2.</p>
+  </div>
+
+  <div class="block">
+    <h3>Generate B-roll to let scenes breathe</h3>
+    <p>Don't only generate the shots in your storyboard. Generate <strong>B-roll</strong> — short atmospheric shots that don't carry the story but make scenes feel real. A radio crackling. A street viewed from a window. Hands on a steering wheel. These cost almost nothing to generate (simple prompts work) and they're what separate "AI demo" from "actual film."</p>
+  </div>
+
+  <div class="block">
+    <h3>Reject the "perfect AI" look</h3>
+    <p>AI defaults to glossy, plastic-looking footage. If you want your film to feel grounded, you have to <strong>actively prompt against perfection</strong>. Add anti-polish keywords to break the synthetic feel.</p>
+  </div>
+
+  <div class="prompt-card">
+    <div class="prompt-card-label">Anti-perfection keywords</div>
+    <div class="prompt-text">Phone footage quality, slightly imperfect lighting,
+handheld camera shake, natural skin texture, film grain,
+no 3D-render look, no smooth CG skin, no perfect symmetry,
+candid documentary feel, lived-in environment, slight motion blur.</div>
+  </div>
+
+  <div class="block">
+    <h3>Give each scene its own visual identity</h3>
+    <p>Don't make every scene look the same. Pick different visual references for different scenes — Scene 1 might lean on the cool, institutional palette of <em>The Social Network</em>; Scene 2 might borrow the warm, surveillance-tinted look of <em>End of Watch</em>; Scene 3 might shift to the soft domestic glow of a Wes Anderson interior. Different colour grading, different camera feel, different lens choices. Your scenes will still belong to the same film because the character, props, and arc carry through.</p>
+  </div>
+
+  <div class="tips">
+    <div class="tip">
+      <svg class="tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+      <h4>Multiple takes are normal</h4>
+      <p>Even with perfect prompts, generations vary. Plan to generate each shot 2–4 times and pick the best. This is the AI equivalent of multiple takes on set.</p>
+    </div>
+    <div class="tip">
+      <svg class="tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 17h6M12 3v14M5 21h14"/></svg>
+      <h4>Add "no music" to long prompts</h4>
+      <p>Some video models auto-generate background music. If you want clean audio (or no audio), explicitly include "no music, no soundtrack" in your prompt.</p>
+    </div>
+    <div class="tip">
+      <svg class="tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+      <h4>Don't fix small flaws — cut around them</h4>
+      <p>If a clip has a 1-second glitch but the rest is perfect, just trim the glitch in editing. Don't waste credits regenerating.</p>
+    </div>
+    <div class="tip">
+      <svg class="tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+      <h4>Bad takes are part of it</h4>
+      <p>You'll generate clips that don't work. That's not failure, that's the process. Run it, look, tweak the prompt, run it again. Iteration is the skill.</p>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 6 -->
+<div class="section s6" id="step6">
+  <div class="section-header">
+    <span class="section-num s6-tag">Step 06 — Assembly</span>
+    <h2 class="section-title">Sound & Editing</h2>
+    <p class="section-tagline">A great edit can save mediocre footage. Mediocre editing kills great footage.</p>
+  </div>
+
+  <div class="block">
+    <h3>What you're producing</h3>
+    <p>The final film: a single video file with all your clips assembled, sound design layered on, music integrated, and colour graded for consistency.</p>
+  </div>
+
+  <div class="tools">
+    <span class="tool">Premiere Pro</span>
+    <span class="tool">DaVinci Resolve</span>
+    <span class="tool">CapCut</span>
+    <span class="tool">After Effects</span>
+    <span class="tool">ElevenLabs</span>
+    <span class="tool">Artlist</span>
+  </div>
+
+  <div class="block">
+    <h3>The order of editing operations</h3>
+    <p><strong>1. Lay everything down in storyboard order.</strong> Don't trim yet. Just see the rough shape of your film.</p>
+    <p><strong>2. Trim aggressively.</strong> AI clips often have weak first or last seconds. Cut them. Most shots can be 30–50% shorter than what you generated.</p>
+    <p><strong>3. Add voiceover.</strong> If you have narration, lock it in early — it dictates pacing.</p>
+    <p><strong>4. Layer sound design.</strong> Ambient track + specific SFX (footsteps, doors, key sounds). This is where AI films fail most often — silent or music-only AI films feel hollow.</p>
+    <p><strong>5. Music, with intent.</strong> Match the music's emotional shape to your film's arc. Don't just paste a track and let it run.</p>
+    <p><strong>6. Final colour grade.</strong> One adjustment layer over everything to unify the look across clips. Then per-clip tweaks for outliers.</p>
+  </div>
+
+  <div class="block">
+    <h3>Use colour to mark transformation</h3>
+    <p>If your film has a tonal shift (lifeless → alive, real → imagined, before → after), use colour temperature to amplify it. Push the "before" cooler, push the "after" warmer (or vice versa). The shift in temperature does emotional work the audience feels without naming.</p>
+  </div>
+
+  <div class="block">
+    <h3>Voice cloning for narration and dialogue</h3>
+    <p>If your film has dialogue, you have two options. Option A: use AI preset voices (ElevenLabs has thousands). Option B: <strong>clone your own voice</strong> — record yourself reading the lines, then use a voice change feature to convert the audio to a different voice while keeping <strong>your timing, emotion, and delivery</strong>. This is how you get natural-sounding performances from AI voices.</p>
+    <p>For pure AI voice generation, ElevenLabs v3's bracket-tag system lets you control emotion line by line:</p>
+  </div>
+
+  <div class="prompt-card">
+    <div class="prompt-card-label">ElevenLabs emotion tagging</div>
+    <div class="prompt-text">[whispered] You weren't supposed to find this.
+[exhausted] Every morning, something tries to kill you.
+[determined] Today is different.
+[fading] Then the door closed.</div>
+  </div>
+
+  <div class="block">
+    <h3>Build sound in three layers</h3>
+    <p><strong>Layer 1 — Ambient bed.</strong> Room tone, wind, distant traffic, refrigerator hum. Whatever the space sounds like when nothing is happening. This layer should run continuously underneath everything else.</p>
+    <p><strong>Layer 2 — Specific SFX.</strong> Footsteps, doors, fabric, mechanical sounds, anything tied to a specific action on screen. These pin the audio to the picture.</p>
+    <p><strong>Layer 3 — Music.</strong> Last to add, first to question. If the music isn't doing emotional work, cut it.</p>
+  </div>
+
+  <div class="callout">
+    <div class="callout-label">Editing principle</div>
+    <p>Nothing is locked until you lock it. If halfway through the edit you realise you're missing a shot, just go back and generate it. The same character, the same lighting, the same world is still sitting in your references — you can produce a new shot in minutes that would have taken a full day on a real set.</p>
+  </div>
+</div>
+
+<!-- Final Note -->
+<div class="final-note">
+  <div class="final-note-box">
+    <h3>Iteration is the skill</h3>
+    <p>
+      Every great AI film comes from running it, looking at it, tweaking one thing, and running it again. Nobody nails it on the first generation. The people whose work you admire didn't get there with better prompts — they got there by iterating more, longer, with more patience.<br><br>
+      Now go write your three sentences.
+    </p>
+  </div>
+</div>
+
+<div class="footer">ARCH 1433 — COMMUNICATIONS SYSTEMS — RMIT 2026</div>
+
+</body>
+</html>
