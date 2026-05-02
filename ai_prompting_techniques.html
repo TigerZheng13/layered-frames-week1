@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Prompting Techniques — Layered Frames</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e10;
+    --bg-card: #18181c;
+    --bg-card-hover: #1e1e24;
+    --bg-soft: rgba(255,255,255,0.02);
+    --text: #e8e4df;
+    --text-muted: #8a8580;
+    --text-dim: #5a5550;
+    --border: rgba(255,255,255,0.06);
+    --border-hover: rgba(255,255,255,0.14);
+
+    --c1: #fb923c;  /* plastic — orange */
+    --c2: #facc15;  /* lighting — yellow */
+    --c3: #34d399;  /* control — green */
+    --c4: #a78bfa;  /* director — purple */
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.65;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 80px 24px 40px;
+    text-align: center;
+    max-width: 920px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(167,139,250,0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .hero-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+
+  .hero h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(36px, 6vw, 56px);
+    font-weight: 400;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 em { font-style: italic; color: var(--c4); }
+
+  .hero-sub {
+    font-size: 15px;
+    color: var(--text-muted);
+    max-width: 620px;
+    margin: 0 auto 32px;
+    line-height: 1.7;
+  }
+
+  /* ── Chapter Nav ── */
+  .nav {
+    max-width: 1100px;
+    margin: 0 auto 80px;
+    padding: 0 24px;
+  }
+
+  .nav-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 8px;
+  }
+
+  @media (max-width: 900px) {
+    .nav-bar { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 500px) {
+    .nav-bar { grid-template-columns: 1fr; }
+  }
+
+  .nav-step {
+    padding: 18px 16px;
+    border-radius: 10px;
+    text-align: center;
+    transition: all 0.3s;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid transparent;
+  }
+
+  .nav-step:hover {
+    background: rgba(255,255,255,0.03);
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+  }
+
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .nav-step.c1 .nav-num { color: var(--c1); }
+  .nav-step.c2 .nav-num { color: var(--c2); }
+  .nav-step.c3 .nav-num { color: var(--c3); }
+  .nav-step.c4 .nav-num { color: var(--c4); }
+
+  .nav-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 17px;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  /* ── Chapter ── */
+  .chapter {
+    max-width: 920px;
+    margin: 0 auto 100px;
+    padding: 0 24px;
+    scroll-margin-top: 40px;
+  }
+
+  .chapter-header {
+    margin-bottom: 48px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .chapter-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  .c1-tag { background: rgba(251,146,60,0.12); color: var(--c1); }
+  .c2-tag { background: rgba(250,204,21,0.12); color: var(--c2); }
+  .c3-tag { background: rgba(52,211,153,0.12); color: var(--c3); }
+  .c4-tag { background: rgba(167,139,250,0.12); color: var(--c4); }
+
+  .chapter-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 38px;
+    font-weight: 400;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .chapter-tagline {
+    font-size: 15px;
+    color: var(--text-muted);
+    font-style: italic;
+    line-height: 1.7;
+    max-width: 700px;
+  }
+
+  /* ── Technique Card ── */
+  .technique {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+    transition: all 0.3s;
+  }
+
+  .technique:hover {
+    border-color: var(--border-hover);
+  }
+
+  .c1 .technique { border-left: 3px solid var(--c1); }
+  .c2 .technique { border-left: 3px solid var(--c2); }
+  .c3 .technique { border-left: 3px solid var(--c3); }
+  .c4 .technique { border-left: 3px solid var(--c4); }
+
+  .technique-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .technique h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 14px;
+  }
+
+  .technique-lead {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.75;
+    margin-bottom: 24px;
+  }
+
+  .technique-lead strong { color: var(--text); font-weight: 500; }
+  .technique-lead em { color: var(--text); font-style: italic; }
+
+  /* ── Before/After Compare ── */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 24px 0;
+  }
+
+  @media (max-width: 700px) {
+    .compare { grid-template-columns: 1fr; }
+  }
+
+  .compare-side {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .compare-side.bad { border-color: rgba(239,68,68,0.25); }
+  .compare-side.good { border-color: rgba(52,211,153,0.25); }
+
+  .compare-head {
+    padding: 10px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .compare-side.bad .compare-head {
+    background: rgba(239,68,68,0.08);
+    color: #ef4444;
+  }
+
+  .compare-side.good .compare-head {
+    background: rgba(52,211,153,0.08);
+    color: #34d399;
+  }
+
+  .compare-body {
+    padding: 14px 16px;
+    background: var(--bg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+    min-height: 90px;
+  }
+
+  .compare-result {
+    padding: 12px 16px;
+    background: var(--bg-soft);
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    border-top: 1px solid var(--border);
+    font-style: italic;
+  }
+
+  /* ── Prompt Card ── */
+  .prompt-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 16px 0;
+    border-left: 2px solid var(--text-dim);
+  }
+
+  .c1 .prompt-card { border-left-color: var(--c1); }
+  .c2 .prompt-card { border-left-color: var(--c2); }
+  .c3 .prompt-card { border-left-color: var(--c3); }
+  .c4 .prompt-card { border-left-color: var(--c4); }
+
+  .prompt-card-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  .prompt-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--text);
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  /* ── Keyword cluster ── */
+  .keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 16px 0;
+  }
+
+  .kw {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 5px 11px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+  }
+
+  .c1 .kw:hover { border-color: var(--c1); color: var(--c1); }
+  .c2 .kw:hover { border-color: var(--c2); color: var(--c2); }
+  .c3 .kw:hover { border-color: var(--c3); color: var(--c3); }
+  .c4 .kw:hover { border-color: var(--c4); color: var(--c4); }
+
+  .kw-zh {
+    color: var(--text-dim);
+    font-size: 10px;
+    margin-left: 4px;
+  }
+
+  /* ── Steps (numbered) ── */
+  .steps {
+    margin: 20px 0;
+  }
+
+  .step-row {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .step-row:last-child { border-bottom: none; }
+
+  .step-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 28px;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .c1 .step-num { color: var(--c1); }
+  .c2 .step-num { color: var(--c2); }
+  .c3 .step-num { color: var(--c3); }
+  .c4 .step-num { color: var(--c4); }
+
+  .step-content h5 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+
+  .step-content p {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  /* ── Pro Tip ── */
+  .pro-tip {
+    background: linear-gradient(135deg, rgba(251,146,60,0.05), rgba(250,204,21,0.03));
+    border: 1px solid rgba(251,146,60,0.18);
+    border-radius: 10px;
+    padding: 16px 22px;
+    margin: 20px 0;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .c2 .pro-tip { background: linear-gradient(135deg, rgba(250,204,21,0.05), rgba(52,211,153,0.03)); border-color: rgba(250,204,21,0.18); }
+  .c3 .pro-tip { background: linear-gradient(135deg, rgba(52,211,153,0.05), rgba(56,189,248,0.03)); border-color: rgba(52,211,153,0.18); }
+  .c4 .pro-tip { background: linear-gradient(135deg, rgba(167,139,250,0.05), rgba(192,132,252,0.03)); border-color: rgba(167,139,250,0.18); }
+
+  .pro-tip-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .c1 .pro-tip-icon { color: var(--c1); }
+  .c2 .pro-tip-icon { color: var(--c2); }
+  .c3 .pro-tip-icon { color: var(--c3); }
+  .c4 .pro-tip-icon { color: var(--c4); }
+
+  .pro-tip-content h5 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+
+  .pro-tip-content p {
+    font-size: 13.5px;
+    color: var(--text);
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  /* ── Lighting ladder table ── */
+  .ladder {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+
+  .ladder-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ladder-row:last-child { border-bottom: none; }
+
+  .ladder-label {
+    padding: 14px 16px;
+    background: var(--bg-soft);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border-right: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+  }
+
+  .ladder-text {
+    padding: 14px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .ladder-row.advanced .ladder-label { color: var(--c2); }
+  .ladder-row.advanced .ladder-text { color: var(--c2); }
+
+  /* ── Final Note ── */
+  .final-note {
+    max-width: 720px;
+    margin: 0 auto 80px;
+    padding: 0 24px;
+  }
+
+  .final-note-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px;
+    text-align: center;
+  }
+
+  .final-note-box h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 26px;
+    font-weight: 400;
+    margin-bottom: 14px;
+  }
+
+  .final-note-box p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    max-width: 540px;
+    margin: 0 auto;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 40px 24px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1.5px;
+  }
+
+  html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-label">Layered Frames — Prompting Techniques</div>
+  <h1>Beyond the<br><em>Plastic Look</em></h1>
+  <p class="hero-sub">
+    Why does your AI footage look fake even when the prompt is detailed? It's not the words — it's the wrong words. Three chapters of techniques to fix what makes AI imagery feel synthetic.
+  </p>
+</div>
+
+<!-- Nav -->
+<div class="nav">
+  <div class="nav-bar">
+    <a href="#chapter1" class="nav-step c4">
+      <div class="nav-num">Chapter 01</div>
+      <div class="nav-name">Director Thinking</div>
+    </a>
+    <a href="#chapter2" class="nav-step c1">
+      <div class="nav-num">Chapter 02</div>
+      <div class="nav-name">Killing the Plastic Look</div>
+    </a>
+    <a href="#chapter3" class="nav-step c2">
+      <div class="nav-num">Chapter 03</div>
+      <div class="nav-name">Controlling Light</div>
+    </a>
+    <a href="#chapter4" class="nav-step c3">
+      <div class="nav-num">Chapter 04</div>
+      <div class="nav-name">Telling AI Where Things Go</div>
+    </a>
+  </div>
+</div>
+
+<!-- ─── CHAPTER 01 — DIRECTOR THINKING ─── -->
+<div class="chapter c4" id="chapter1">
+  <div class="chapter-header">
+    <span class="chapter-num c4-tag">Chapter 01</span>
+    <h2 class="chapter-title">Director Thinking</h2>
+    <p class="chapter-tagline">When AI does the easy work for you, you lose control over the things that actually matter — staging, action, and rhythm. The fix is to take that control back, prompt by prompt. This is the foundation everything else in this guide builds on.</p>
+  </div>
+
+  <!-- Technique 01 -->
+  <div class="technique">
+    <div class="technique-num">Technique 01</div>
+    <h3>Mise-en-scène — Depth, Motivated Light, Parallax</h3>
+    <p class="technique-lead">
+      "Mise-en-scène" is the cinema term for <em>how the director arranges everything inside the frame</em>. When AI does it for you, you get a "safe" composition — flat, centred, lifeless. To take it back, you need to control three things: the depth of the space, where the light comes from, and how the camera moves through it.
+    </p>
+
+    <div class="steps">
+      <div class="step-row">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h5>Z-axis depth — build a room, not a wallpaper</h5>
+          <p>Most beginners only describe X and Y axes (what's on the left, what's on the right, how tall the character is). This produces a flat sticker. Force three layers in your prompt: <strong>foreground (something obstructing), midground (where the action happens), background (environmental info)</strong>. Three layers makes the frame a room, not a poster.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h5>Motivated lighting — every light has a source</h5>
+          <p>Don't write "dim lighting" or "moody lighting." Write <strong>where the light is coming from</strong>. Cool moonlight through left-side venetian blinds? A warm desk lamp lighting only half the character's face? Indoor light has politics — it picks sides, it carves the room, it tells the audience how to feel. Outdoor diffuse light written for an indoor scene is what creates AI's flat, characterless interiors.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h5>Parallax movement — the camera passes through space</h5>
+          <p>Most students prompt camera moves as <em>"pan right"</em> or <em>"zoom in"</em> — but to AI, those are just stretching a 2D image. They produce that plastic "fake camera" feel. Once you have layered depth, prompt <strong>truck right</strong> (the camera physically moves sideways behind the foreground obstruction). When the camera moves, the foreground blinds and the background bookshelf shift at different speeds — that parallax is the core of cinematic feel.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="prompt-card">
+      <div class="prompt-card-label">Mise-en-scène prompt formula</div>
+      <div class="prompt-text">[Camera position + focal length] + [foreground obstruction / leading lines]
++ [precise midground subject + position] + [motivated indoor light source]
++ [background depth and environment]</div>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side bad">
+        <div class="compare-head">AI-Driven Frame ✗</div>
+        <div class="compare-body">A handsome man, deeply sad, sitting in a dim cluttered room. Cinematic lighting, perfect composition, vintage furniture, oppressive atmosphere. Cinematic colour grade, 8k, masterpiece.</div>
+        <div class="compare-result">→ Character sits like a wooden post. Background is generic. Flat lighting. Looks like a moody wallpaper, not a film.</div>
+      </div>
+      <div class="compare-side good">
+        <div class="compare-head">Director-Driven Frame ✓</div>
+        <div class="compare-body">Over-the-shoulder shot, 75mm medium telephoto. Foreground: blurred cool-toned venetian blind shadow stripes. Midground: a gaunt man sitting at a vintage desk, lit by a warm desk lamp (motivated light: only the left half of his face and the cluttered papers on the desk are illuminated). Background: blurred dim bookshelves and weathered walls. Mood: oppressive, isolated, restrained sadness.</div>
+        <div class="compare-result">→ Three-layer depth. Light has a source and a politics. Drama comes from how the room is staged, not from adjectives.</div>
+      </div>
+    </div>
+
+    <div class="prompt-card">
+      <div class="prompt-card-label">Video prompt — parallax camera move</div>
+      <div class="prompt-text">Maintain the spatial depth and indoor lighting layout.
+The camera trucks slowly to the right, behind the foreground venetian blind shadows.
+The man's gaze stays fixed on the letter on the desk.
+The background bookshelves shift at a different speed than the foreground — natural parallax.</div>
+    </div>
+
+    <div class="ladder">
+      <div class="ladder-row">
+        <div class="ladder-label">Pan</div>
+        <div class="ladder-text">Camera stays still, only rotates. Like turning your neck — your eyes move, your body doesn't. <strong style="color: #ef4444;">No parallax.</strong></div>
+      </div>
+      <div class="ladder-row advanced">
+        <div class="ladder-label">Truck</div>
+        <div class="ladder-text">Camera physically slides sideways through space. Like sitting in a moving car. <strong style="color: var(--c4);">Foreground and background move at different speeds — parallax.</strong></div>
+      </div>
+      <div class="ladder-row">
+        <div class="ladder-label">Zoom</div>
+        <div class="ladder-text">Camera stays still, lens changes focal length. Like using binoculars — you don't get closer, the image just enlarges. <strong style="color: #ef4444;">No parallax. Looks like a TV news effect.</strong></div>
+      </div>
+      <div class="ladder-row advanced">
+        <div class="ladder-label">Dolly</div>
+        <div class="ladder-text">Camera physically moves forward or backward. Like walking toward the subject. <strong style="color: var(--c4);">Foreground grows faster than background — parallax.</strong></div>
+      </div>
+    </div>
+
+    <div class="block">
+      <h3 style="font-size:18px;margin-bottom:8px;">Recommended camera movement vocabulary</h3>
+      <p style="font-size:14px; color: var(--text-muted); line-height:1.7; margin-bottom:14px;">Use the physical-movement words. AI's video models recognise them and will produce real parallax. Avoid the rotation/lens words unless you specifically want a flat or news-style look.</p>
+    </div>
+
+    <div class="keywords">
+      <span class="kw">truck left / truck right<span class="kw-zh">横移</span></span>
+      <span class="kw">dolly in / dolly out<span class="kw-zh">推 / 拉</span></span>
+      <span class="kw">crane up / crane down<span class="kw-zh">升 / 降</span></span>
+      <span class="kw">tracking shot<span class="kw-zh">跟拍</span></span>
+      <span class="kw">push-in<span class="kw-zh">推进</span></span>
+      <span class="kw">pull-back<span class="kw-zh">后拉</span></span>
+      <span class="kw">orbit / arc<span class="kw-zh">环绕</span></span>
+      <span class="kw">handheld<span class="kw-zh">手持</span></span>
+      <span class="kw">steadicam<span class="kw-zh">斯坦尼康</span></span>
+      <span class="kw">locked-off<span class="kw-zh">固定机位</span></span>
+    </div>
+
+    <div class="pro-tip">
+      <svg class="pro-tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="6" width="14" height="12" rx="2"/><path d="M22 8l-6 4 6 4V8z"/>
+      </svg>
+      <div class="pro-tip-content">
+        <h5>The simple rule</h5>
+        <p>If the word describes <strong>the camera body moving through space</strong>, use it (truck, dolly, crane, tracking). If it describes <strong>the lens or the camera rotating in place</strong>, avoid it (pan, tilt, zoom) — unless that's specifically the look you want for a flat or surveillance-style shot.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technique 02 -->
+  <div class="technique">
+    <div class="technique-num">Technique 02</div>
+    <h3>Process Over Result — Direct Muscles, Not Emotions</h3>
+    <p class="technique-lead">
+      The single most common mistake students make is writing the <em>result</em> of an emotion instead of the <em>physical process</em> that produces it. AI doesn't know what "sad" looks like in any specific way — it just stamps a generic sad face. But AI knows exactly what <strong>"eyes losing focus, lips trembling involuntarily, chest rising sharply with suppressed breath"</strong> looks like, because those are physical descriptions it can render.
+    </p>
+
+    <div class="compare">
+      <div class="compare-side bad">
+        <div class="compare-head">Emotion as Result ✗</div>
+        <div class="compare-body">A young woman sits on a hospital corridor bench. After hearing terrible news, she feels extremely sad and despairing, tears streaming down her face. Photorealistic, cinematic light, 8k.</div>
+        <div class="compare-result">→ AI slaps two tears on a wooden expression. The performance is surface-level, with zero emotional impact.</div>
+      </div>
+      <div class="compare-side good">
+        <div class="compare-head">Emotion as Process ✓</div>
+        <div class="compare-body">A young woman sits on a hospital corridor bench, close-up. Her eyes lose focus instantly. Her lips tremble involuntarily, then bite down hard on her lower lip. Her chest rises and falls violently from suppressed breathing. Her eye-rims redden rapidly and fill with tears. Photorealistic, cinematic light, 8k.</div>
+        <div class="compare-result">→ AI controls the four muscle groups (eyes, lips, breath, eye-rims) and delivers a fragile, breaking performance.</div>
+      </div>
+    </div>
+
+    <div class="block">
+      <h3 style="font-size:18px;margin-bottom:8px;">The companion principle: downgrade adjectives, upgrade verbs</h3>
+      <p style="font-size:14px; color: var(--text-muted); line-height:1.7; margin-bottom:14px;">When prompting action, replace adjectives ("lonely", "epic", "beautiful") with high-intensity verbs that fight against physical resistance. The character is no longer a backdrop — they're struggling against the world, and that's where story emerges.</p>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side bad">
+        <div class="compare-head">Adjective Stacking ✗</div>
+        <div class="compare-body">An extremely lonely swordsman stands in a blizzard, the image is beautiful and desolate, epic cinematic feel, perfect composition, snowflakes drifting through the air, 8k.</div>
+        <div class="compare-result">→ AI generates a beautifully framed wooden post. No interaction with the storm. A pretty wallpaper, no story.</div>
+      </div>
+      <div class="compare-side good">
+        <div class="compare-head">Verbs + Resistance ✓</div>
+        <div class="compare-body">A swordsman struggles forward against a blizzard. With frozen hands he firmly presses down his bamboo hat being lifted by the gale, his body tilted heavily forward, leaving deep footprints in the thick snow with each step. The wind and snow lash relentlessly against his clothing. Epic cinematic feel, telephoto compression, cool tones.</div>
+        <div class="compare-result">→ "Lonely" becomes "presses down hat against gale, tilts forward, leaves deep footprints." The character fights the world. Story emerges from action.</div>
+      </div>
+    </div>
+
+    <div class="prompt-card">
+      <div class="prompt-card-label">Action prompt formula</div>
+      <div class="prompt-text">[Subject] + [high-intensity action verb / core action]
++ [physical resistance the action faces]
++ [micro-expression broken into muscle states — never emotion words]</div>
+    </div>
+
+    <div class="pro-tip">
+      <svg class="pro-tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="9" y1="15" x2="15" y2="15"/>
+      </svg>
+      <div class="pro-tip-content">
+        <h5>The four facial control points</h5>
+        <p>For close-up emotional shots, name four muscle groups: <strong>eyes</strong> (focus, redness, tears welling), <strong>lips</strong> (trembling, biting, pressing), <strong>jaw / chest</strong> (clenching, breathing), <strong>brow</strong> (furrowing, lifting). Direct each one. AI will deliver a performance.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technique 03 -->
+  <div class="technique">
+    <div class="technique-num">Technique 03</div>
+    <h3>Edit Over One-Shot — Don't Trust the Perfect 15 Seconds</h3>
+    <p class="technique-lead">
+      Modern video models can generate a flawless 15-second long take from a single prompt. It will look smooth, continuous, technically perfect — and emotionally <strong>flat</strong>. That's because AI runs at a single uniform pace. Real cinema doesn't. Real cinema speeds up and slows down at emotional turning points, and that change in rhythm is what makes the audience <em>feel</em> something. The fix is to stop asking AI to make your film and start asking AI to make <strong>raw material</strong> for you to edit.
+    </p>
+
+    <div class="block">
+      <h3 style="font-size:18px;margin-bottom:8px;">A concrete example</h3>
+      <p style="font-size:14px; color: var(--text-muted); line-height:1.7; margin-bottom:0;">Imagine the scene: <em>"A man walks into a café, orders a coffee, sits down, then suddenly sees an alien spaceship outside the window and stands up in shock."</em></p>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side bad">
+        <div class="compare-head">One Prompt, 15 Seconds ✗</div>
+        <div class="compare-body">A man walks into a café, orders a coffee, sits down, sees an alien spaceship outside the window, then stands up in shock.</div>
+        <div class="compare-result">→ The motion is correct, but the moment of seeing the spaceship lands the same way as ordering coffee. No tension, no impact. Looks like a CCTV recording of an unusual event, not a film.</div>
+      </div>
+      <div class="compare-side good">
+        <div class="compare-head">A-roll + Insert + B-roll ✓</div>
+        <div class="compare-body">Three separate generations, edited together:
+1. Master shot (15s): the full action
+2. Pupil ECU (2s): terrified eyes, dilated pupil
+3. Cutaway (3s): phone falling, hitting floor</div>
+        <div class="compare-result">→ The cut to the pupil interrupts the calm. The falling phone gives the audience a beat to absorb the shock. You've engineered the rhythm.</div>
+      </div>
+    </div>
+
+    <div class="block">
+      <h3 style="font-size:18px;margin-bottom:8px;">The four-step workflow</h3>
+    </div>
+
+    <div class="steps">
+      <div class="step-row">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h5>Generate the master shot (A-roll)</h5>
+          <p>Let AI do what it's good at — produce the smooth 15-second base sequence with the full action: walks in → sits down → sees spaceship → stands up. This is your <strong>raw material</strong>, not your finished shot.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h5>Find the emotional break point — and cut</h5>
+          <p>In your editor, scrub through the A-roll until you find the exact frame where the man <em>first sees</em> the spaceship. <strong>Cut the video there.</strong> Now you have two halves: the calm "before" and the reaction "after."</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h5>Generate the insert — the "stab"</h5>
+          <p>Separately generate a high-impact extreme close-up: <strong>terrified eyes, dilated pupils, frozen expression.</strong> Use Nano Banana Pro to make the still, then convert it to a 2-second video. This shot doesn't exist in the master — you're making it just to interrupt the rhythm.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <h5>Generate the breathing space (B-roll)</h5>
+          <p>Generate one more short clip that lets the shock <em>land</em>. A high-speed shot of <strong>a phone falling from a hand and hitting the floor</strong>. 3 seconds. This is your "breath" — the moment that gives the audience time to feel.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <h3 style="font-size:18px;margin-bottom:8px;">The final edit order</h3>
+    </div>
+
+    <div class="prompt-card">
+      <div class="prompt-card-label">Timeline assembly</div>
+      <div class="prompt-text">A-roll (master, first half)        — man walks in, sits, looks up
+       │
+       ▼ [HARD CUT at emotional break]
+Insert (pupil ECU, 2s)             — terrified eyes, dilated pupil
+       │
+       ▼ [HARD CUT]
+B-roll (phone falling, 3s)         — phone slips, hits floor
+       │
+       ▼ [HARD CUT]
+A-roll (master, second half)       — man stands up in shock</div>
+    </div>
+
+    <div class="pro-tip">
+      <svg class="pro-tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M6 4l4 8-4 8"/><path d="M14 4l4 8-4 8"/>
+      </svg>
+      <div class="pro-tip-content">
+        <h5>The three-shot rhythm pattern</h5>
+        <p><strong>Master shot (A-roll)</strong> establishes — <strong>Extreme close-up (insert)</strong> stabs — <strong>Empty cutaway (B-roll)</strong> breathes. This pattern works for any emotional turning point: a phone call that changes everything, a confrontation, a discovery, a betrayal. Generate the three pieces separately. Edit them together. AI gives you the pieces — <em>you</em> control the rhythm.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── CHAPTER 02 — PLASTIC LOOK ─── -->
+<div class="chapter c1" id="chapter2">
+  <div class="chapter-header">
+    <span class="chapter-num c1-tag">Chapter 02</span>
+    <h2 class="chapter-title">Why Your AI Footage Looks Plastic</h2>
+    <p class="chapter-tagline">The problem is never that AI isn't realistic enough. The problem is that it's <em>too clean</em>. Real cinema is messy — and that mess is exactly what's missing from your prompts.</p>
+  </div>
+
+  <!-- Technique 04 -->
+  <div class="technique">
+    <div class="technique-num">Technique 04</div>
+    <h3>Physical Foreground Occlusion</h3>
+    <p class="technique-lead">
+      AI defaults to placing your subject dead-centre with nothing in front of them. That's why your shots look like wallpaper, not film. Real cinema uses <strong>foreground occlusion</strong> — leaves, pillars, doorframes, shoulders — to tell the audience <em>where the camera is hiding</em>. Without it, the camera reads as a "floating all-knowing eye" instead of a physical object in space.
+    </p>
+
+    <div class="compare">
+      <div class="compare-side bad">
+        <div class="compare-head">Photo Thinking ✗</div>
+        <div class="compare-body">A beautiful girl, wearing a white dress, standing in a forest, highly detailed face, 8k, cinematic lighting.</div>
+        <div class="compare-result">→ Looks like a video-game render or a stock-photo wallpaper. Subject dead-centre, nothing between camera and subject.</div>
+      </div>
+      <div class="compare-side good">
+        <div class="compare-head">Director Thinking ✓</div>
+        <div class="compare-body">Anamorphic lens, low angle. Extreme foreground: massive primal dark green leaves, blurred to the point of being abstract translucent shapes, partially blocking the frame, establishing a hidden voyeuristic POV. Through the gap, a lone woman lost in thought stands in an ancient mist-shrouded forest. Volumetric golden hour light. Strong shallow depth of field. Kodak Portra 400 film grain. Cinematic teal and orange.</div>
+        <div class="compare-result">→ Camera now has a position in physical space. The viewer feels they're peering through something, not just looking at it.</div>
+      </div>
+    </div>
+
+    <div class="prompt-card">
+      <div class="prompt-card-label">Foreground occlusion formula</div>
+      <div class="prompt-text">[Camera spec: lens + sensor] + [extreme foreground blur as narrative medium] + [midground subject + action] + [background environment] + [film stock + colour grading]</div>
+    </div>
+
+    <div class="pro-tip">
+      <svg class="pro-tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
+      </svg>
+      <div class="pro-tip-content">
+        <h5>Don't fake the environment</h5>
+        <p>Don't add "leaves" to an indoor scene or "rain on glass" to a desert. AI will draw it, but the logic breaks and the audience reads it as fake. The foreground must belong to the world.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technique 05 -->
+  <div class="technique">
+    <div class="technique-num">Technique 05</div>
+    <h3>Atmospheric Occlusion — Make the Air Visible</h3>
+    <p class="technique-lead">
+      AI footage often has a <strong>"vacuum feel"</strong> — characters look like they're in a sealed glass dome with the air sucked out. In reality, light <em>always</em> travels through something: dust, mist, smoke, particles. When you see a Makoto Shinkai frame, every shot has glowing motes drifting in light shafts. That's not a special effect. That's how real space looks.
+    </p>
+
+    <div class="compare">
+      <div class="compare-side bad">
+        <div class="compare-head">Vacuum ✗</div>
+        <div class="compare-body">A young man standing by the window of a small office at sunset, Makoto Shinkai 2D anime style, highly detailed, 8k, clean and clear sky.</div>
+        <div class="compare-result">→ Razor sharp, vivid, and emotionally hollow. Character looks pasted onto the background. No air, no breath, no time passing.</div>
+      </div>
+      <div class="compare-side good">
+        <div class="compare-head">With Atmosphere ✓</div>
+        <div class="compare-body">A young man standing by the large window of a small cluttered startup office at golden hour, looking out thoughtfully. Deep shadows, rich warm amber and soft purple grading, cinematic depth. Makoto Shinkai 2D anime movie style. Thick atmospheric haze filling the room. Tyndall effect (god rays) piercing through the windowpane. Microscopic dust motes floating and glowing warmly in the shafts of sunlight in the foreground.</div>
+        <div class="compare-result">→ Light has a path. Air has weight. The room breathes. The image suddenly carries time and emotion.</div>
+      </div>
+    </div>
+
+    <div class="keywords">
+      <span class="kw">atmospheric haze<span class="kw-zh">氛围薄雾</span></span>
+      <span class="kw">volumetric light<span class="kw-zh">体积光</span></span>
+      <span class="kw">Tyndall effect<span class="kw-zh">丁达尔光</span></span>
+      <span class="kw">god rays<span class="kw-zh">耶稣光</span></span>
+      <span class="kw">dust motes<span class="kw-zh">微尘</span></span>
+      <span class="kw">floating particles<span class="kw-zh">漂浮颗粒</span></span>
+      <span class="kw">soft mist<span class="kw-zh">柔雾</span></span>
+      <span class="kw">light shafts<span class="kw-zh">光柱</span></span>
+    </div>
+
+    <div class="pro-tip">
+      <svg class="pro-tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>
+      </svg>
+      <div class="pro-tip-content">
+        <h5>Light without medium = fake light</h5>
+        <p>Writing "cinematic lighting" or "god rays" alone gives you flat, painted-on light. The atmospheric medium (haze, dust, particles) is what makes the light <em>visible</em> in space. Always pair them.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technique 06 -->
+  <div class="technique">
+    <div class="technique-num">Technique 06</div>
+    <h3>Drop the "8K Detail" Obsession</h3>
+    <p class="technique-lead">
+      The single biggest cause of plastic-looking AI footage is the reflex to stack words like <em>8k, ultra detail, sharp focus, clean, hyperrealistic</em>. Every one of those words tells the AI to <strong>strip out atmospheric "imperfection"</strong> — exactly the imperfection that makes real images feel real. The result is sterile video-game CG.
+    </p>
+
+    <div class="compare">
+      <div class="compare-side bad">
+        <div class="compare-head">Sharpness Stacking ✗</div>
+        <div class="compare-body">8k, ultra detailed, sharp focus, hyperrealistic, perfect lighting, clean composition, masterpiece</div>
+        <div class="compare-result">→ AI strips out grain, haze, softness, imperfections. You get a sterile, plastic, "render" look.</div>
+      </div>
+      <div class="compare-side good">
+        <div class="compare-head">Embrace Imperfection ✓</div>
+        <div class="compare-body">Shot on Kodak Portra 400 film, natural film grain, slight motion blur, soft focus falloff, anamorphic lens, lived-in environment, candid feel</div>
+        <div class="compare-result">→ AI keeps the texture, breath, and softness that makes images feel photographed instead of generated.</div>
+      </div>
+    </div>
+
+    <div class="pro-tip">
+      <svg class="pro-tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
+      </svg>
+      <div class="pro-tip-content">
+        <h5>Restraint on sharpness is what gives you cinema</h5>
+        <p>Real film is never razor-sharp everywhere. There's grain, there's softness, there's depth-of-field falloff. Prompt for those, not against them.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── CHAPTER 03 — LIGHTING ─── -->
+<div class="chapter c2" id="chapter3">
+  <div class="chapter-header">
+    <span class="chapter-num c2-tag">Chapter 03</span>
+    <h2 class="chapter-title">Controlling Light Like a Cinematographer</h2>
+    <p class="chapter-tagline">AI doesn't think in physics. It thinks in pixel patterns. That's why "light from the left" rarely works — but precise lighting terminology almost always does.</p>
+  </div>
+
+  <!-- Technique 07 -->
+  <div class="technique">
+    <div class="technique-num">Technique 07</div>
+    <h3>From "Source" to "Effect"</h3>
+    <p class="technique-lead">
+      Most students write lighting prompts as a <em>direction</em> — "light from the left." But AI's left/right detection is unreliable because it doesn't actually understand 3D space. What it <strong>does</strong> understand is named lighting setups (Rembrandt, split, rim) and physical effects (long shadows, high contrast, hard rim). Use these instead.
+    </p>
+
+    <div class="ladder">
+      <div class="ladder-row">
+        <div class="ladder-label">Beginner</div>
+        <div class="ladder-text">light from the left</div>
+      </div>
+      <div class="ladder-row">
+        <div class="ladder-label">Intermediate</div>
+        <div class="ladder-text">side lighting, dramatic shadows on the right side of the face</div>
+      </div>
+      <div class="ladder-row advanced">
+        <div class="ladder-label">Advanced</div>
+        <div class="ladder-text">Rembrandt lighting, chiaroscuro, hard key light, long shadows, dark background, rim light catching the shoulder</div>
+      </div>
+    </div>
+
+    <div class="keywords">
+      <span class="kw">Rim light<span class="kw-zh">轮廓光</span></span>
+      <span class="kw">Backlit<span class="kw-zh">逆光</span></span>
+      <span class="kw">Split lighting<span class="kw-zh">分裂布光</span></span>
+      <span class="kw">Rembrandt lighting<span class="kw-zh">伦勃朗光</span></span>
+      <span class="kw">Chiaroscuro<span class="kw-zh">明暗对比</span></span>
+      <span class="kw">Hard light<span class="kw-zh">硬光</span></span>
+      <span class="kw">Soft fill<span class="kw-zh">柔光补光</span></span>
+      <span class="kw">Practical lights<span class="kw-zh">场景光源</span></span>
+      <span class="kw">Long shadows<span class="kw-zh">长阴影</span></span>
+      <span class="kw">High contrast<span class="kw-zh">高对比度</span></span>
+    </div>
+
+    <div class="pro-tip">
+      <svg class="pro-tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+      </svg>
+      <div class="pro-tip-content">
+        <h5>Pair the term with its effect</h5>
+        <p>Don't just say "Rembrandt lighting." Say "Rembrandt lighting, with a triangle of light on the cheekbone and the rest in shadow." Naming the effect anchors AI to the physics it can actually see in its training data.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technique 08 -->
+  <div class="technique">
+    <div class="technique-num">Technique 08</div>
+    <h3>De-light First, Then Re-light</h3>
+    <p class="technique-lead">
+      When you want to change the lighting of an existing image, painting new light directly over the old light almost never works. The original lighting bleeds through. The professional move is to first ask the AI to <strong>de-light</strong> the image — flatten it back to even, neutral diffuse light — and then build new lighting on that clean baseline.
+    </p>
+
+    <div class="steps">
+      <div class="step-row">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h5>De-light the original</h5>
+          <p>Prompt: <em>"Remove all directional lighting from this image. Return the scene to flat, neutral, evenly-scattered ambient light. Preserve all subjects, props, and composition."</em></p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h5>Mark the new light direction</h5>
+          <p>Open the de-lit image in any drawing tool. Use coloured arrows to indicate where you want each light source to come from. Different colours for different lights.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h5>Re-light with reference</h5>
+          <p>Feed the annotated image back into the AI with a precise prompt referencing your colour-coded arrows.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="prompt-card">
+      <div class="prompt-card-label">Re-lighting prompt example</div>
+      <div class="prompt-text">Apply Rembrandt lighting from the direction of the blue arrow.
+Add a soft fill light from the direction of the red arrow.
+Maintain the existing composition and subjects.
+Remove all arrows from the final output.</div>
+    </div>
+
+    <div class="pro-tip">
+      <svg class="pro-tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="9,11 12,14 22,4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      <div class="pro-tip-content">
+        <h5>Why this works</h5>
+        <p>Diffusion models follow pixel inertia. If the original image has strong shadows on the left, AI will keep painting shadows there even when your prompt says otherwise. Stripping the lighting first gives you a clean canvas.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── CHAPTER 04 — POSITION CONTROL ─── -->
+<div class="chapter c3" id="chapter4">
+  <div class="chapter-header">
+    <span class="chapter-num c3-tag">Chapter 04</span>
+    <h2 class="chapter-title">Telling AI Where Things Should Be</h2>
+    <p class="chapter-tagline">"From left to right" rarely works. AI's text-to-position signal is genuinely weak. But its image-to-position signal is overwhelming. Stop describing positions — start showing them.</p>
+  </div>
+
+  <!-- Technique 09 -->
+  <div class="technique">
+    <div class="technique-num">Technique 09</div>
+    <h3>The Visual Anchor Method</h3>
+    <p class="technique-lead">
+      Diffusion models pay attention to <strong>feature matching</strong> (face shape, fabric texture) far more than <strong>spatial coordinates</strong>. Telling AI "the woman stands on the left and the man on the right" is a weak signal. Showing AI an image with two coloured boxes is a strong one. Three steps:
+    </p>
+
+    <div class="steps">
+      <div class="step-row">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h5>Generate an empty plate</h5>
+          <p>Prompt only the location — no characters, no action. Just the space. This is your scene base.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h5>Annotate by hand</h5>
+          <p>Open the plate in any drawing tool — even your phone's screenshot editor. Draw simple boxes or arrows where you want characters to stand. Crude is fine.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h5>Generate with reference</h5>
+          <p>Feed the annotated plate AND your character image to AI. Prompt: place the character at the marked position. <strong>Always end with: "remove all boxes/arrows from the final image."</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="prompt-card">
+      <div class="prompt-card-label">Single-character placement prompt</div>
+      <div class="prompt-text">Place the character from image 1 at the position marked by the red box in image 2.
+Match the lighting and atmosphere of image 2.
+Blend the character naturally into the scene.
+Remove the red box from the final output.</div>
+    </div>
+  </div>
+
+  <!-- Technique 10 -->
+  <div class="technique">
+    <div class="technique-num">Technique 10</div>
+    <h3>Multi-Character Colour Isolation</h3>
+    <p class="technique-lead">
+      With multiple characters, identical-coloured boxes confuse AI — it can't tell which character goes where. The fix is simple: use <strong>different colours</strong> for each character's marker, then explicitly map each colour to a character in your prompt.
+    </p>
+
+    <div class="prompt-card">
+      <div class="prompt-card-label">Multi-character placement prompt</div>
+      <div class="prompt-text">Place the character from image 2 sitting on the sofa marked with the red box in image 1.
+Place the character from image 3 sitting on the chair marked with the green box in image 1.
+Place the character from image 4 standing naturally at the position marked with the blue box in image 1.
+Relight all characters to match the scene's lighting.
+Remove all boxes from the final output.</div>
+    </div>
+
+    <div class="pro-tip">
+      <svg class="pro-tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="13.5" cy="6.5" r="2.5"/><circle cx="19" cy="13" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="10" cy="18.5" r="2.5"/>
+      </svg>
+      <div class="pro-tip-content">
+        <h5>Stick to high-contrast colours</h5>
+        <p>Red, green, blue, yellow are safe. Avoid similar colours (orange and red, blue and purple) — AI will blend them. Three to four characters max in one frame using this method.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technique 11 -->
+  <div class="technique">
+    <div class="technique-num">Technique 11</div>
+    <h3>Motion Path Control for Video</h3>
+    <p class="technique-lead">
+      The same logic applies to video generation. Want a character to walk a specific path? Don't describe it — <strong>draw the path on the empty plate as an arrow</strong>, feed the annotated image to your video model, and the character will follow the line.
+    </p>
+
+    <div class="prompt-card">
+      <div class="prompt-card-label">Motion path video prompt</div>
+      <div class="prompt-text">The character walks along the path of the red arrow in the image.
+Smooth natural movement, consistent pace.
+No arrows or lines should appear in the generated video.</div>
+    </div>
+
+    <div class="pro-tip">
+      <svg class="pro-tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <div class="pro-tip-content">
+        <h5>Always specify "no arrows in the final video"</h5>
+        <p>This is the single most common mistake. If you forget this line, AI will happily render the red arrow into your final video as a glowing red line on the floor. Add it to a negative prompt or repeat it for safety.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technique 12 -->
+  <div class="technique">
+    <div class="technique-num">Technique 12</div>
+    <h3>Multiple Characters, Different Paths</h3>
+    <p class="technique-lead">
+      For complex video scenes with multiple characters moving differently — one walks left, one walks right, one stays still — combine colour isolation with numbered waypoints (point 1 → point 2). Be brutally explicit in the prompt.
+    </p>
+
+    <div class="prompt-card">
+      <div class="prompt-card-label">Multi-character motion prompt</div>
+      <div class="prompt-text">Three characters in the scene: red marker, green marker, blue marker.
+The green-marked character walks along the arrow from point 1 to point 2.
+The red-marked character walks along the arrow from point 1 to point 2.
+The blue-marked character stays in place, looking around slowly.
+No arrows or markers should appear in the final video.</div>
+    </div>
+
+    <div class="pro-tip">
+      <svg class="pro-tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
+      </svg>
+      <div class="pro-tip-content">
+        <h5>This works in every tool</h5>
+        <p>Visual anchor logic isn't tool-specific. It works in Nano Banana Pro, Midjourney, Kling, Hailuo, Veo, Runway. The annotation method is universal because all these tools share the same underlying weakness with text-based positioning.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Final Note -->
+<div class="final-note">
+  <div class="final-note-box">
+    <h3>The pattern behind everything</h3>
+    <p>
+      Every technique in this guide is a way of <em>taking back control</em> from the algorithm. AI defaults to flat, clean, centred, uniform. You override that by thinking like a director — staging the space, directing the muscles, editing the rhythm — then by using the specific techniques that fight AI's defaults: foreground obstruction, atmospheric haze, named lighting setups, and visual anchors instead of text descriptions of position.
+    </p>
+  </div>
+</div>
+
+<div class="footer">ARCH 1433 — COMMUNICATIONS SYSTEMS — RMIT 2026</div>
+
+</body>
+</html>
