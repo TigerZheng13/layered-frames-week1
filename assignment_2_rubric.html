@@ -9,587 +9,365 @@
   :root {
     --bg: #0e0e10;
     --bg-card: #18181c;
-    --bg-card-hover: #1e1e24;
-    --bg-soft: rgba(255,255,255,0.02);
     --text: #e8e4df;
     --text-muted: #8a8580;
     --text-dim: #5a5550;
     --border: rgba(255,255,255,0.06);
-    --border-hover: rgba(255,255,255,0.14);
-
     --accent: #f59e0b;
-    --accent-soft: rgba(245,158,11,0.12);
-
-    --hd: #34d399;
-    --d: #60a5fa;
-    --c: #facc15;
-    --p: #fb923c;
-    --f: #f87171;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    line-height: 1.65;
-  }
-
-  /* ── Hero ── */
-  .hero {
-    padding: 70px 24px 30px;
-    text-align: center;
-    max-width: 920px;
-    margin: 0 auto;
-    position: relative;
-  }
-
-  .hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 800px;
-    height: 400px;
-    background: radial-gradient(ellipse, rgba(245,158,11,0.05) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: -1;
-  }
-
-  .hero-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 16px;
-  }
-
-  .hero h1 {
-    font-family: 'Instrument Serif', serif;
-    font-size: clamp(34px, 5.5vw, 50px);
-    font-weight: 400;
-    line-height: 1.1;
-    margin-bottom: 16px;
-  }
-
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; line-height: 1.6; padding-bottom: 80px; }
+  .hero { max-width: 1180px; margin: 0 auto; padding: 80px 32px 40px; text-align: center; }
+  .hero-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 16px; }
+  .hero h1 { font-family: 'Instrument Serif', serif; font-size: clamp(36px, 5vw, 54px); font-weight: 400; line-height: 1.1; margin-bottom: 12px; }
   .hero h1 em { font-style: italic; color: var(--accent); }
-
-  .hero-sub {
-    font-size: 15px;
-    color: var(--text-muted);
-    max-width: 620px;
-    margin: 0 auto 36px;
-    line-height: 1.7;
-  }
-
-  /* ── Legend ── */
-  .legend {
-    max-width: 1000px;
-    margin: 0 auto 60px;
-    padding: 0 24px;
-  }
-
-  .legend-row {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 8px;
-  }
-
-  @media (max-width: 800px) {
-    .legend-row { grid-template-columns: repeat(2, 1fr); }
-  }
-
-  @media (max-width: 480px) {
-    .legend-row { grid-template-columns: 1fr; }
-  }
-
-  .legend-cell {
-    padding: 14px 12px;
-    text-align: center;
-    border-radius: 8px;
-  }
-
-  .legend-grade {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-
-  .legend-cell.hd .legend-grade { color: var(--hd); }
-  .legend-cell.d .legend-grade { color: var(--d); }
-  .legend-cell.c .legend-grade { color: var(--c); }
-  .legend-cell.p .legend-grade { color: var(--p); }
-  .legend-cell.f .legend-grade { color: var(--f); }
-
-  .legend-band {
-    font-family: 'Instrument Serif', serif;
-    font-size: 16px;
-    color: var(--text);
-    margin-bottom: 2px;
-  }
-
-  .legend-pct {
-    font-size: 11px;
-    color: var(--text-dim);
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  /* ── Criterion Section ── */
-  .criterion {
-    max-width: 1100px;
-    margin: 0 auto 50px;
-    padding: 0 24px;
-  }
-
-  .criterion-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 20px;
-    margin-bottom: 18px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .criterion-title {
-    font-family: 'Instrument Serif', serif;
-    font-size: 26px;
-    font-weight: 400;
-    line-height: 1.2;
-  }
-
-  .criterion-title-tag {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    margin-right: 10px;
-  }
-
-  .criterion-weight {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
-    color: var(--accent);
-    background: var(--accent-soft);
-    padding: 6px 14px;
-    border-radius: 20px;
-    flex-shrink: 0;
-  }
-
-  .bands {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-  }
-
-  @media (max-width: 1000px) {
-    .bands { grid-template-columns: repeat(2, 1fr); }
-  }
-
-  @media (max-width: 600px) {
-    .bands { grid-template-columns: 1fr; }
-  }
-
-  .band {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 18px 18px;
-    transition: all 0.3s;
-  }
-
-  .band:hover {
-    background: var(--bg-card-hover);
-    border-color: var(--border-hover);
-  }
-
-  .band.hd { border-top: 3px solid var(--hd); }
-  .band.d { border-top: 3px solid var(--d); }
-  .band.c { border-top: 3px solid var(--c); }
-  .band.p { border-top: 3px solid var(--p); }
-  .band.f { border-top: 3px solid var(--f); }
-
-  .band-head {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-
-  .band.hd .band-head { color: var(--hd); }
-  .band.d .band-head { color: var(--d); }
-  .band.c .band-head { color: var(--c); }
-  .band.p .band-head { color: var(--p); }
-  .band.f .band-head { color: var(--f); }
-
-  .band-grade {
-    font-family: 'Instrument Serif', serif;
-    font-size: 16px;
-    color: var(--text);
-    margin-bottom: 10px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .band-text {
-    font-size: 12.5px;
-    color: var(--text-muted);
-    line-height: 1.65;
-  }
-
-  .band-text strong {
-    color: var(--text);
-    font-weight: 500;
-  }
-
-  /* ── Total bar ── */
-  .total-bar {
-    max-width: 1000px;
-    margin: 60px auto 30px;
-    padding: 0 24px;
-  }
-
-  .total-card {
-    background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(192,132,252,0.04));
-    border: 1px solid rgba(245,158,11,0.25);
-    border-radius: 14px;
-    padding: 22px 28px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .total-card-label {
-    font-family: 'Instrument Serif', serif;
-    font-size: 22px;
-    color: var(--text);
-  }
-
-  .total-card-weight {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 22px;
-    color: var(--accent);
-  }
-
-  /* ── Footer ── */
-  .footer {
-    text-align: center;
-    padding: 40px 24px;
-    border-top: 1px solid var(--border);
-    font-size: 11px;
-    color: var(--text-dim);
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 1.5px;
-  }
+  .hero-sub { color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+  .container { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+  .criterion { margin-top: 64px; }
+  .crit-header { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 20px; }
+  .crit-header h2 { font-family: 'Instrument Serif', serif; font-size: 28px; font-weight: 400; }
+  .crit-weight { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--accent); letter-spacing: 1px; }
+  .band-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  @media (max-width: 1000px) { .band-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .band-grid { grid-template-columns: 1fr; } }
+  .band-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 18px 16px; }
+  .band-header { display:flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+  .band-label { font-weight: 600; font-size: 14px; letter-spacing: 0.5px; }
+  .band-grade { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); }
+  .band-text { font-size: 13.5px; color: var(--text-muted); line-height: 1.65; }
+  .summary { margin-top: 80px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 28px; }
+  .summary h3 { font-family: 'Instrument Serif', serif; font-size: 26px; margin-bottom: 16px; }
+  .summary table { width: 100%; border-collapse: collapse; }
+  .summary td { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .summary tr:last-child td { border-bottom: none; font-weight: 600; padding-top: 14px; }
 </style>
 </head>
 <body>
 
-<!-- Hero -->
 <div class="hero">
-  <div class="hero-label">Layered Frames 2026 — Final Project</div>
-  <h1>Assignment 2<br><em>Detailed Rubric</em></h1>
-  <p class="hero-sub">
-    Each criterion is graded on a five-band scale. The total is your Assignment 2 mark, weighted as 50% of your final course grade.
-  </p>
+  <div class="hero-label">ARCH1433 · Assignment 2 · 2026</div>
+  <h1>Rubric — <em>Spatial Transformation Film</em></h1>
+  <p class="hero-sub">Each criterion is graded on a five-band scale. The total is your Assignment 2 mark, weighted as <strong>50%</strong> of your final course grade.</p>
 </div>
 
-<!-- Legend -->
-<div class="legend">
-  <div class="legend-row">
-    <div class="legend-cell hd">
-      <div class="legend-grade">HD</div>
-      <div class="legend-band">Excelling</div>
-      <div class="legend-pct">80–100%</div>
-    </div>
-    <div class="legend-cell d">
-      <div class="legend-grade">D</div>
-      <div class="legend-band">Advancing</div>
-      <div class="legend-pct">70–79%</div>
-    </div>
-    <div class="legend-cell c">
-      <div class="legend-grade">C</div>
-      <div class="legend-band">Developing</div>
-      <div class="legend-pct">60–69%</div>
-    </div>
-    <div class="legend-cell p">
-      <div class="legend-grade">P</div>
-      <div class="legend-band">Commencing</div>
-      <div class="legend-pct">50–59%</div>
-    </div>
-    <div class="legend-cell f">
-      <div class="legend-grade">F</div>
-      <div class="legend-band">Unsatisfactory</div>
-      <div class="legend-pct">0–49%</div>
-    </div>
+<div class="container">
+
+    <section class="criterion">
+      <header class="crit-header">
+        <h2>Film / Cinematography & Composition</h2>
+        <span class="crit-weight">10%</span>
+      </header>
+      <div class="band-grid">
+          <div class="band-card" style="border-top:3px solid #34d399;">
+            <div class="band-header">
+              <span class="band-label" style="color:#34d399;">Excelling</span>
+              <span class="band-grade">HD &middot; 80–100%</span>
+            </div>
+            <p class="band-text">Outstanding control of framing, composition, and camera movement across both live and AI footage. Director thinking is consistently evident — depth, motivated lighting, parallax movement where appropriate. Technical choices feel intentional and cohesive throughout.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #60a5fa;">
+            <div class="band-header">
+              <span class="band-label" style="color:#60a5fa;">Advancing</span>
+              <span class="band-grade">D &middot; 70–79%</span>
+            </div>
+            <p class="band-text">Competent framing and composition across most shots. Some director thinking visible — depth, deliberate camera movement. Minor inconsistencies, but overall a positive impact on spatial storytelling.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #facc15;">
+            <div class="band-header">
+              <span class="band-label" style="color:#facc15;">Developing</span>
+              <span class="band-grade">C &middot; 60–69%</span>
+            </div>
+            <p class="band-text">Some compositional intent but uneven execution. Camera movement may rely on AI defaults (zoom, pan) without considered direction. Framing is functional but not always deliberate. Landscape mostly maintained.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #fb923c;">
+            <div class="band-header">
+              <span class="band-label" style="color:#fb923c;">Commencing</span>
+              <span class="band-grade">P &middot; 50–59%</span>
+            </div>
+            <p class="band-text">Limited compositional thought. Most shots feel like AI defaults or static documentation. Camera and framing show minimal intentionality.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #f87171;">
+            <div class="band-header">
+              <span class="band-label" style="color:#f87171;">Unsatisfactory</span>
+              <span class="band-grade">F &middot; 0–49%</span>
+            </div>
+            <p class="band-text">Cinematography appears arbitrary or absent. Shots show no compositional thought. Orientation choices severely affect clarity. Little evidence of learning.</p>
+          </div>
+      </div>
+    </section>
+
+    <section class="criterion">
+      <header class="crit-header">
+        <h2>Film / Editing & Rhythm</h2>
+        <span class="crit-weight">15%</span>
+      </header>
+      <div class="band-grid">
+          <div class="band-card" style="border-top:3px solid #34d399;">
+            <div class="band-header">
+              <span class="band-label" style="color:#34d399;">Excelling</span>
+              <span class="band-grade">HD &middot; 80–100%</span>
+            </div>
+            <p class="band-text">Editing powerfully shapes the viewer's experience. Pacing breaks at emotional turning points (master → insert → cutaway pattern is visible). AI long takes are broken and re-rhythmed. Rhythm changes feel deliberate and emotionally charged. Cut placement creates a cohesive whole.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #60a5fa;">
+            <div class="band-header">
+              <span class="band-label" style="color:#60a5fa;">Advancing</span>
+              <span class="band-grade">D &middot; 70–79%</span>
+            </div>
+            <p class="band-text">Editing is generally purposeful with effective pacing. Some scenes use insert cuts and rhythm breaks well. AI footage is mostly well-trimmed. Some moments may feel uneven, but overall structure supports the narrative.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #facc15;">
+            <div class="band-header">
+              <span class="band-label" style="color:#facc15;">Developing</span>
+              <span class="band-grade">C &middot; 60–69%</span>
+            </div>
+            <p class="band-text">Editing is functional but uniform. AI footage often plays at original generated length without rhythmic reshaping. Sequence is understandable but doesn't actively shape experience. Few rhythm breaks or inserts.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #fb923c;">
+            <div class="band-header">
+              <span class="band-label" style="color:#fb923c;">Commencing</span>
+              <span class="band-grade">P &middot; 50–59%</span>
+            </div>
+            <p class="band-text">Editing is minimal or poorly considered. Long uncut AI clips dominate the film. Relies on a single rhythm throughout. Little variation in pacing.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #f87171;">
+            <div class="band-header">
+              <span class="band-label" style="color:#f87171;">Unsatisfactory</span>
+              <span class="band-grade">F &middot; 0–49%</span>
+            </div>
+            <p class="band-text">No meaningful editing evident. Film feels like raw AI output or unstructured assembly. No rhythm choices visible.</p>
+          </div>
+      </div>
+    </section>
+
+    <section class="criterion">
+      <header class="crit-header">
+        <h2>Film / Sound Design</h2>
+        <span class="crit-weight">15%</span>
+      </header>
+      <div class="band-grid">
+          <div class="band-card" style="border-top:3px solid #34d399;">
+            <div class="band-header">
+              <span class="band-label" style="color:#34d399;">Excelling</span>
+              <span class="band-grade">HD &middot; 80–100%</span>
+            </div>
+            <p class="band-text">Audio is skillfully layered (ambient bed + specific SFX + music). Mixing is clean. Sound supports the spatial atmosphere throughout the film.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #60a5fa;">
+            <div class="band-header">
+              <span class="band-label" style="color:#60a5fa;">Advancing</span>
+              <span class="band-grade">D &middot; 70–79%</span>
+            </div>
+            <p class="band-text">Multi-layered audio is present and generally effective. Most transitions between source types are smooth. Some uneven moments but overall sound supports the film's spatial feel.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #facc15;">
+            <div class="band-header">
+              <span class="band-label" style="color:#facc15;">Developing</span>
+              <span class="band-grade">C &middot; 60–69%</span>
+            </div>
+            <p class="band-text">Audio shows some layering but feels thin. May rely heavily on a single music track. AI clips and live footage have noticeably different audio quality. Some abrupt edits or volume issues.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #fb923c;">
+            <div class="band-header">
+              <span class="band-label" style="color:#fb923c;">Commencing</span>
+              <span class="band-grade">P &middot; 50–59%</span>
+            </div>
+            <p class="band-text">Audio design is poorly executed or minimal. Essentially a single track with no meaningful layering. Jarring shifts between AI and live audio quality.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #f87171;">
+            <div class="band-header">
+              <span class="band-label" style="color:#f87171;">Unsatisfactory</span>
+              <span class="band-grade">F &middot; 0–49%</span>
+            </div>
+            <p class="band-text">Audio is negligible or missing. No layered or purposeful sound design.</p>
+          </div>
+      </div>
+    </section>
+
+    <section class="criterion">
+      <header class="crit-header">
+        <h2>Film / Colour Grading</h2>
+        <span class="crit-weight">15%</span>
+      </header>
+      <div class="band-grid">
+          <div class="band-card" style="border-top:3px solid #34d399;">
+            <div class="band-header">
+              <span class="band-label" style="color:#34d399;">Excelling</span>
+              <span class="band-grade">HD &middot; 80–100%</span>
+            </div>
+            <p class="band-text">Colour grading is skillfully applied and clearly enhances the film's mood and atmosphere. Tonal choices support the spatial transformation arc and feel intentional throughout.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #60a5fa;">
+            <div class="band-header">
+              <span class="band-label" style="color:#60a5fa;">Advancing</span>
+              <span class="band-grade">D &middot; 70–79%</span>
+            </div>
+            <p class="band-text">Colour grading is present and mostly consistent. Some moments may be uneven, but grading contributes effectively to the film's tone.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #facc15;">
+            <div class="band-header">
+              <span class="band-label" style="color:#facc15;">Developing</span>
+              <span class="band-grade">C &middot; 60–69%</span>
+            </div>
+            <p class="band-text">Some grading attempts visible but inconsistent across the film. Tonal choices are basic and don't always reinforce mood.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #fb923c;">
+            <div class="band-header">
+              <span class="band-label" style="color:#fb923c;">Commencing</span>
+              <span class="band-grade">P &middot; 50–59%</span>
+            </div>
+            <p class="band-text">Little to no grading effort. Footage looks raw, basic, or mismatched in places.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #f87171;">
+            <div class="band-header">
+              <span class="band-label" style="color:#f87171;">Unsatisfactory</span>
+              <span class="band-grade">F &middot; 0–49%</span>
+            </div>
+            <p class="band-text">No grading attempted. Footage appears unmodified from source.</p>
+          </div>
+      </div>
+    </section>
+
+    <section class="criterion">
+      <header class="crit-header">
+        <h2>Film / AI Spatial Imagination</h2>
+        <span class="crit-weight">25%</span>
+      </header>
+      <div class="band-grid">
+          <div class="band-card" style="border-top:3px solid #34d399;">
+            <div class="band-header">
+              <span class="band-label" style="color:#34d399;">Excelling</span>
+              <span class="band-grade">HD &middot; 80–100%</span>
+            </div>
+            <p class="band-text">AI is used with clear creative purpose. Whether the film uses substantial AI sequences or targeted AI effects, the approach fits the story and every AI moment earns its place — transforming the space, deepening mood, or advancing the narrative. Prompts demonstrate strong director thinking: motivated light, considered staging, atmospheric depth. AI imagery feels imagined and personal, not generic.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #60a5fa;">
+            <div class="band-header">
+              <span class="band-label" style="color:#60a5fa;">Advancing</span>
+              <span class="band-grade">D &middot; 70–79%</span>
+            </div>
+            <p class="band-text">AI is used with clear intent and serves the film well. The chosen approach — sequences or effects — suits the story. A few AI moments may feel less considered, but overall the use of AI is purposeful and shows developing director thinking.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #facc15;">
+            <div class="band-header">
+              <span class="band-label" style="color:#facc15;">Developing</span>
+              <span class="band-grade">C &middot; 60–69%</span>
+            </div>
+            <p class="band-text">AI is present, but its purpose is uneven. Some AI moments feel decorative or "demo-like" rather than serving the story. Prompts read as descriptive rather than directorial. AI feels added on rather than integrated into a creative intent.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #fb923c;">
+            <div class="band-header">
+              <span class="band-label" style="color:#fb923c;">Commencing</span>
+              <span class="band-grade">P &middot; 50–59%</span>
+            </div>
+            <p class="band-text">AI use feels arbitrary. Whether substantial or minimal, the AI does not meaningfully serve the spatial story — generations or effects appear without a clear reason. Prompts show little sophistication. AI feels tool-led rather than director-led.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #f87171;">
+            <div class="band-header">
+              <span class="band-label" style="color:#f87171;">Unsatisfactory</span>
+              <span class="band-grade">F &middot; 0–49%</span>
+            </div>
+            <p class="band-text">AI is absent, or used in ways that ignore or contradict the spatial concept. No evidence of creative decision-making behind the AI.</p>
+          </div>
+      </div>
+    </section>
+
+    <section class="criterion">
+      <header class="crit-header">
+        <h2>Pitch Deck / Documentation, Process & Reflection</h2>
+        <span class="crit-weight">10%</span>
+      </header>
+      <div class="band-grid">
+          <div class="band-card" style="border-top:3px solid #34d399;">
+            <div class="band-header">
+              <span class="band-label" style="color:#34d399;">Excelling</span>
+              <span class="band-grade">HD &middot; 80–100%</span>
+            </div>
+            <p class="band-text">Pitch deck communicates the project's vision, process, and reflection with clarity and confidence. Process & Exploration is genuinely documented — abandoned directions, prompt evolutions, real pivot moments. Mood board, world concept, and AI documentation are cohesive. Creator's note (150 words) shows specific choices, real challenges, honest insights. Visually polished and professional.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #60a5fa;">
+            <div class="band-header">
+              <span class="band-label" style="color:#60a5fa;">Advancing</span>
+              <span class="band-grade">D &middot; 70–79%</span>
+            </div>
+            <p class="band-text">Pitch deck covers most key elements with reasonable detail. Process documentation is present, with at least one significant exploration or pivot shown. AI documentation has some depth. Creator's note is thoughtful but may lack specificity in places.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #facc15;">
+            <div class="band-header">
+              <span class="band-label" style="color:#facc15;">Developing</span>
+              <span class="band-grade">C &middot; 60–69%</span>
+            </div>
+            <p class="band-text">Pitch deck covers basics but lacks polish. Some sections feel underdeveloped. Process documentation is minimal — mostly final outputs without the journey. AI documentation lists tools without showing thinking. Creator's note is generic.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #fb923c;">
+            <div class="band-header">
+              <span class="band-label" style="color:#fb923c;">Commencing</span>
+              <span class="band-grade">P &middot; 50–59%</span>
+            </div>
+            <p class="band-text">Pitch deck is brief or unclear. No real process documentation — film appears to have arrived fully-formed. Mood board and concept are weak. Creator's note shows little reflection. Layout is haphazard.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #f87171;">
+            <div class="band-header">
+              <span class="band-label" style="color:#f87171;">Unsatisfactory</span>
+              <span class="band-grade">F &middot; 0–49%</span>
+            </div>
+            <p class="band-text">Pitch deck is missing, incomplete, or fails to communicate the project.</p>
+          </div>
+      </div>
+    </section>
+
+    <section class="criterion">
+      <header class="crit-header">
+        <h2>Live / Final Presentation</h2>
+        <span class="crit-weight">10%</span>
+      </header>
+      <div class="band-grid">
+          <div class="band-card" style="border-top:3px solid #34d399;">
+            <div class="band-header">
+              <span class="band-label" style="color:#34d399;">Excelling</span>
+              <span class="band-grade">HD &middot; 80–100%</span>
+            </div>
+            <p class="band-text">Pitch is articulate, confident, and creative-led. The student takes the audience through their exploration journey — early directions tried, what they abandoned and why, the moment something clicked, key prompts that evolved. They demonstrate genuine learning and intellectual honesty about what didn't work. Time well-used.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #60a5fa;">
+            <div class="band-header">
+              <span class="band-label" style="color:#60a5fa;">Advancing</span>
+              <span class="band-grade">D &middot; 70–79%</span>
+            </div>
+            <p class="band-text">Pitch is clear and mostly creative-focused. References at least one significant pivot, abandoned direction, or evolution in their thinking. Process is visible alongside the final product. Q&A handled competently.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #facc15;">
+            <div class="band-header">
+              <span class="band-label" style="color:#facc15;">Developing</span>
+              <span class="band-grade">C &middot; 60–69%</span>
+            </div>
+            <p class="band-text">Pitch focuses mainly on the final result. Some mention of process but feels surface-level. The student appears to present a finished product rather than a journey of decisions. Logline is unclear or underdeveloped.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #fb923c;">
+            <div class="band-header">
+              <span class="band-label" style="color:#fb923c;">Commencing</span>
+              <span class="band-grade">P &middot; 50–59%</span>
+            </div>
+            <p class="band-text">Pitch feels like first contact with the work. No reference to process, exploration, or iteration. The film is presented as if it appeared fully-formed. May rely entirely on workflow description ("I used Runway, then..."). Q&A poorly handled.</p>
+          </div>
+          <div class="band-card" style="border-top:3px solid #f87171;">
+            <div class="band-header">
+              <span class="band-label" style="color:#f87171;">Unsatisfactory</span>
+              <span class="band-grade">F &middot; 0–49%</span>
+            </div>
+            <p class="band-text">No clear pitch. Severely under-prepared, no process awareness, or fails to communicate the project at all.</p>
+          </div>
+      </div>
+    </section>
+
+  <div class="summary">
+    <h3>Total — 100 points</h3>
+    <table>
+      <tr><td>Cinematography & Composition</td><td style="text-align:right;color:var(--accent);">10%</td></tr><tr><td>Editing & Rhythm</td><td style="text-align:right;color:var(--accent);">15%</td></tr><tr><td>Sound Design</td><td style="text-align:right;color:var(--accent);">15%</td></tr><tr><td>Colour Grading</td><td style="text-align:right;color:var(--accent);">15%</td></tr><tr><td>AI Spatial Imagination</td><td style="text-align:right;color:var(--accent);">25%</td></tr><tr><td>Documentation, Process & Reflection</td><td style="text-align:right;color:var(--accent);">10%</td></tr><tr><td>Final Presentation</td><td style="text-align:right;color:var(--accent);">10%</td></tr>
+      <tr><td><strong>Total</strong></td><td style="text-align:right;color:var(--accent);"><strong>100%</strong></td></tr>
+    </table>
   </div>
 </div>
-
-<!-- Criterion 1 -->
-<div class="criterion">
-  <div class="criterion-header">
-    <h2 class="criterion-title"><span class="criterion-title-tag">Film</span>Cinematography & Composition</h2>
-    <div class="criterion-weight">10%</div>
-  </div>
-  <div class="bands">
-    <div class="band hd">
-      <div class="band-head">HD</div>
-      <div class="band-grade">Excelling</div>
-      <div class="band-text">Outstanding control of framing, composition, and camera movement across both live and AI footage. <strong>Director thinking</strong> is consistently evident — depth, motivated lighting, parallax movement where appropriate. Technical choices feel intentional and cohesive throughout.</div>
-    </div>
-    <div class="band d">
-      <div class="band-head">D</div>
-      <div class="band-grade">Advancing</div>
-      <div class="band-text">Competent framing and composition across most shots. Some director thinking visible (depth, deliberate camera movement). Live and AI shots are mostly aligned visually. Minor inconsistencies but overall positive impact on spatial storytelling.</div>
-    </div>
-    <div class="band c">
-      <div class="band-head">C</div>
-      <div class="band-grade">Developing</div>
-      <div class="band-text">Some compositional intent but uneven execution. Camera movement may rely on AI defaults (zoom, pan) without considered direction. Live and AI shots may not always feel cohesive. Landscape mostly maintained.</div>
-    </div>
-    <div class="band p">
-      <div class="band-head">P</div>
-      <div class="band-grade">Commencing</div>
-      <div class="band-text">Limited compositional thought. Most shots feel like AI defaults or static documentation. Live and AI footage are visibly disconnected. Camera and framing show minimal intentionality.</div>
-    </div>
-    <div class="band f">
-      <div class="band-head">F</div>
-      <div class="band-grade">Unsatisfactory</div>
-      <div class="band-text">Cinematography appears arbitrary or absent. Shots show no compositional thought. Orientation choices severely affect clarity. Little evidence of learning.</div>
-    </div>
-  </div>
-</div>
-
-<!-- Criterion 2 -->
-<div class="criterion">
-  <div class="criterion-header">
-    <h2 class="criterion-title"><span class="criterion-title-tag">Film</span>Editing & Rhythm</h2>
-    <div class="criterion-weight">15%</div>
-  </div>
-  <div class="bands">
-    <div class="band hd">
-      <div class="band-head">HD</div>
-      <div class="band-grade">Excelling</div>
-      <div class="band-text">Editing powerfully shapes the viewer's experience. Pacing breaks at emotional turning points (<strong>master → insert → cutaway</strong> pattern is visible). AI long takes are broken and re-rhythmed. Rhythm changes feel deliberate and emotionally charged. Cut placement creates a cohesive whole.</div>
-    </div>
-    <div class="band d">
-      <div class="band-head">D</div>
-      <div class="band-grade">Advancing</div>
-      <div class="band-text">Editing is generally purposeful with effective pacing. Some scenes use insert cuts and rhythm breaks well. AI footage is mostly well-trimmed. Some moments may feel uneven, but overall structure supports the narrative.</div>
-    </div>
-    <div class="band c">
-      <div class="band-head">C</div>
-      <div class="band-grade">Developing</div>
-      <div class="band-text">Editing is functional but uniform. AI footage often plays at original generated length without rhythmic reshaping. Sequence is understandable but doesn't actively shape experience. Few rhythm breaks or inserts.</div>
-    </div>
-    <div class="band p">
-      <div class="band-head">P</div>
-      <div class="band-grade">Commencing</div>
-      <div class="band-text">Editing is minimal or poorly considered. Long uncut AI clips dominate the film. Relies on a single rhythm throughout. Little variation in pacing.</div>
-    </div>
-    <div class="band f">
-      <div class="band-head">F</div>
-      <div class="band-grade">Unsatisfactory</div>
-      <div class="band-text">No meaningful editing evident. Film feels like raw AI output or unstructured assembly. No rhythm choices visible.</div>
-    </div>
-  </div>
-</div>
-
-<!-- Criterion 3 -->
-<div class="criterion">
-  <div class="criterion-header">
-    <h2 class="criterion-title"><span class="criterion-title-tag">Film</span>Sound Design</h2>
-    <div class="criterion-weight">15%</div>
-  </div>
-  <div class="bands">
-    <div class="band hd">
-      <div class="band-head">HD</div>
-      <div class="band-grade">Excelling</div>
-      <div class="band-text">Audio is skillfully layered (<strong>ambient bed + specific SFX + music</strong>). Mixing is clean. Sound supports the spatial atmosphere throughout the film.</div>
-    </div>
-    <div class="band d">
-      <div class="band-head">D</div>
-      <div class="band-grade">Advancing</div>
-      <div class="band-text">Multi-layered audio is present and generally effective. Most transitions between source types are smooth. Some uneven moments but overall sound supports the film's spatial feel.</div>
-    </div>
-    <div class="band c">
-      <div class="band-head">C</div>
-      <div class="band-grade">Developing</div>
-      <div class="band-text">Audio shows some layering but feels thin. May rely heavily on a single music track. AI clips and live footage have noticeably different audio quality. Some abrupt edits or volume issues.</div>
-    </div>
-    <div class="band p">
-      <div class="band-head">P</div>
-      <div class="band-grade">Commencing</div>
-      <div class="band-text">Audio design is poorly executed or minimal. Essentially a single track with no meaningful layering. Jarring shifts between AI and live audio quality.</div>
-    </div>
-    <div class="band f">
-      <div class="band-head">F</div>
-      <div class="band-grade">Unsatisfactory</div>
-      <div class="band-text">Audio is negligible or missing. No layered or purposeful sound design.</div>
-    </div>
-  </div>
-</div>
-
-<!-- Criterion 4 -->
-<div class="criterion">
-  <div class="criterion-header">
-    <h2 class="criterion-title"><span class="criterion-title-tag">Film</span>Colour Grading</h2>
-    <div class="criterion-weight">15%</div>
-  </div>
-  <div class="bands">
-    <div class="band hd">
-      <div class="band-head">HD</div>
-      <div class="band-grade">Excelling</div>
-      <div class="band-text">Colour grading is skillfully applied and clearly enhances the film's <strong>mood and atmosphere</strong>. Tonal choices support the spatial transformation arc and feel intentional throughout.</div>
-    </div>
-    <div class="band d">
-      <div class="band-head">D</div>
-      <div class="band-grade">Advancing</div>
-      <div class="band-text">Colour grading is present and mostly consistent. Some moments may be uneven, but grading contributes effectively to the film's tone.</div>
-    </div>
-    <div class="band c">
-      <div class="band-head">C</div>
-      <div class="band-grade">Developing</div>
-      <div class="band-text">Some grading attempts visible but inconsistent across the film. Tonal choices are basic and don't always reinforce mood.</div>
-    </div>
-    <div class="band p">
-      <div class="band-head">P</div>
-      <div class="band-grade">Commencing</div>
-      <div class="band-text">Little to no grading effort. Footage looks raw, basic, or mismatched in places.</div>
-    </div>
-    <div class="band f">
-      <div class="band-head">F</div>
-      <div class="band-grade">Unsatisfactory</div>
-      <div class="band-text">No grading attempted. Footage appears unmodified from source.</div>
-    </div>
-  </div>
-</div>
-
-<!-- Criterion 5 -->
-<div class="criterion">
-  <div class="criterion-header">
-    <h2 class="criterion-title"><span class="criterion-title-tag">Film</span>AI Spatial Imagination</h2>
-    <div class="criterion-weight">25%</div>
-  </div>
-  <div class="bands">
-    <div class="band hd">
-      <div class="band-head">HD</div>
-      <div class="band-grade">Excelling</div>
-      <div class="band-text">AI content is creatively conceived and clearly serves the spatial story. Prompts demonstrate strong <strong>director thinking</strong> — motivated light, considered staging, narrative anchoring, foreground occlusion or atmospheric depth where appropriate. AI-generated worlds feel imagined and personal, not generic. The transformation between real and AI space is meaningful.</div>
-    </div>
-    <div class="band d">
-      <div class="band-head">D</div>
-      <div class="band-grade">Advancing</div>
-      <div class="band-text">AI content shows clear creative intent and serves the story well. Prompts demonstrate developing director thinking. Some moments may feel generic, but overall AI content is well-conceived and personal.</div>
-    </div>
-    <div class="band c">
-      <div class="band-head">C</div>
-      <div class="band-grade">Developing</div>
-      <div class="band-text">AI content is present but feels generic or "demo-like." Prompts read as descriptive rather than directorial. AI generations may feel like mood-board outputs rather than scenes from a film.</div>
-    </div>
-    <div class="band p">
-      <div class="band-head">P</div>
-      <div class="band-grade">Commencing</div>
-      <div class="band-text">AI content lacks clear creative intent. Generations feel arbitrary or randomly chosen. Prompts show minimal sophistication. AI feels like tool-led output rather than director-led creation.</div>
-    </div>
-    <div class="band f">
-      <div class="band-head">F</div>
-      <div class="band-grade">Unsatisfactory</div>
-      <div class="band-text">AI content is absent, poorly chosen, or used in ways that contradict the spatial concept. No evidence of prompt craft or directorial thinking.</div>
-    </div>
-  </div>
-</div>
-
-<!-- Criterion 6 -->
-<div class="criterion">
-  <div class="criterion-header">
-    <h2 class="criterion-title"><span class="criterion-title-tag">Pitch Deck</span>Documentation, Process & Reflection</h2>
-    <div class="criterion-weight">10%</div>
-  </div>
-  <div class="bands">
-    <div class="band hd">
-      <div class="band-head">HD</div>
-      <div class="band-grade">Excelling</div>
-      <div class="band-text">Pitch deck communicates the project's vision, process, and reflection with clarity and confidence. <strong>Process &amp; Exploration is genuinely documented</strong> — abandoned directions, prompt evolutions, real pivot moments. Mood board, world concept, and AI documentation are cohesive. Creator's note (150 words) shows specific choices, real challenges, honest insights. Visually polished and professional.</div>
-    </div>
-    <div class="band d">
-      <div class="band-head">D</div>
-      <div class="band-grade">Advancing</div>
-      <div class="band-text">Pitch deck covers most key elements with reasonable detail. Process documentation is present, with at least one significant exploration or pivot shown. AI documentation has some depth. Creator's note is thoughtful but may lack specificity in places.</div>
-    </div>
-    <div class="band c">
-      <div class="band-head">C</div>
-      <div class="band-grade">Developing</div>
-      <div class="band-text">Pitch deck covers basics but lacks polish. Some sections feel underdeveloped. Process documentation is minimal — mostly final outputs without the journey. AI documentation lists tools without showing thinking. Creator's note is generic.</div>
-    </div>
-    <div class="band p">
-      <div class="band-head">P</div>
-      <div class="band-grade">Commencing</div>
-      <div class="band-text">Pitch deck is brief or unclear. No real process documentation — film appears to have arrived fully-formed. Mood board and concept are weak. Creator's note shows little reflection. Layout is haphazard.</div>
-    </div>
-    <div class="band f">
-      <div class="band-head">F</div>
-      <div class="band-grade">Unsatisfactory</div>
-      <div class="band-text">Pitch deck is missing, incomplete, or fails to communicate the project.</div>
-    </div>
-  </div>
-</div>
-
-<!-- Criterion 7 -->
-<div class="criterion">
-  <div class="criterion-header">
-    <h2 class="criterion-title"><span class="criterion-title-tag">Live</span>Final Presentation</h2>
-    <div class="criterion-weight">10%</div>
-  </div>
-  <div class="bands">
-    <div class="band hd">
-      <div class="band-head">HD</div>
-      <div class="band-grade">Excelling</div>
-      <div class="band-text">Pitch is articulate, confident, and creative-led. The student takes the audience through their <strong>exploration journey</strong> — early directions tried, what they abandoned and why, the moment something clicked, key prompts that evolved. They demonstrate genuine learning and intellectual honesty about what didn't work. Time well-used.</div>
-    </div>
-    <div class="band d">
-      <div class="band-head">D</div>
-      <div class="band-grade">Advancing</div>
-      <div class="band-text">Pitch is clear and mostly creative-focused. References at least one significant pivot, abandoned direction, or evolution in their thinking. Process is visible alongside the final product. Q&A handled competently.</div>
-    </div>
-    <div class="band c">
-      <div class="band-head">C</div>
-      <div class="band-grade">Developing</div>
-      <div class="band-text">Pitch focuses mainly on the final result. Some mention of process but feels surface-level. The student appears to present a finished product rather than a journey of decisions. Logline is unclear or underdeveloped.</div>
-    </div>
-    <div class="band p">
-      <div class="band-head">P</div>
-      <div class="band-grade">Commencing</div>
-      <div class="band-text">Pitch feels like first contact with the work. No reference to process, exploration, or iteration. The film is presented as if it appeared fully-formed. May rely entirely on workflow description ("I used Runway, then..."). Q&A poorly handled.</div>
-    </div>
-    <div class="band f">
-      <div class="band-head">F</div>
-      <div class="band-grade">Unsatisfactory</div>
-      <div class="band-text">No clear pitch. Severely under-prepared, no process awareness, or fails to communicate the project at all.</div>
-    </div>
-  </div>
-</div>
-
-<!-- Total -->
-<div class="total-bar">
-  <div class="total-card">
-    <div class="total-card-label">Total</div>
-    <div class="total-card-weight">100%</div>
-  </div>
-</div>
-
-<div class="footer">ARCH 1433 — COMMUNICATIONS SYSTEMS — RMIT 2026</div>
 
 </body>
 </html>
