@@ -1,0 +1,83 @@
+============================================================
+ CANVAS HOMEPAGE — COPY-PASTE PROMPT
+ How to use: fill in the blanks in PART 2, then copy this
+ ENTIRE file and paste it into any AI chat (ChatGPT, Claude,
+ etc.). The AI will reply with HTML. Copy that HTML into
+ Canvas: course > Pages > new/edit > click the < > button
+ (HTML view) > paste > Save > set as Front Page.
+ No API, no install, no Canvas access for the AI needed.
+============================================================
+
+
+----- PART 1: INSTRUCTION TO THE AI (leave this as-is) -----
+
+You are designing a Canvas LMS course homepage.
+
+Output ONE block of HTML that I can paste directly into Canvas's
+HTML source view. Follow these rules exactly:
+
+1. Use ONLY inline styles (style="..." on each tag). Do NOT use
+   <script>, do NOT use <style> blocks, do NOT link external
+   fonts or stylesheets — Canvas removes all of those.
+2. Use only web-safe fonts (e.g. Georgia, Helvetica, Arial,
+   monospace stacks).
+3. Make it visually polished and well-organised: a header/hero,
+   quick-link buttons, an overview, a "what you'll learn" section,
+   a weekly timeline, assessments highlighted, and a contact block.
+4. DO NOT invent any facts. Use ONLY the information in PART 2.
+   If something is blank, put a visible placeholder like
+   [ADD LATER] instead of guessing dates, weights, or topics.
+5. Visual style I want: [DESCRIBE STYLE — e.g. "cinematic dark
+   theme with amber accents" OR "clean light with blue + yellow"]
+
+After the HTML, give me a 2-line note on anything I left blank.
+
+
+----- PART 2: MY COURSE INFO (fill in the blanks) -----
+
+COURSE TITLE: ____________________
+CODE / STUDIO / SEMESTER: ____________________
+ONE-LINE TAGLINE: ____________________
+
+STUDIO OVERVIEW (2-3 sentences):
+____________________________________________________________
+
+WHAT STUDENTS WILL LEARN (3-5 points):
+- ____________________
+- ____________________
+- ____________________
+- ____________________
+
+WEEKLY TIMELINE (add or delete lines as needed):
+Week 1  |  [date]  |  ____________________
+Week 2  |  [date]  |  ____________________
+Week 3  |  [date]  |  ____________________
+Week 4  |  [date]  |  ____________________
+Week 5  |  [date]  |  ____________________
+Week 6  |  [date]  |  ____________________
+Week 7  |  [date]  |  ____________________
+Week 8  |  [date]  |  ____________________
+Week 9  |  [date]  |  ____________________
+Week 10 |  [date]  |  ____________________
+Week 11 |  [date]  |  ____________________
+Week 12 |  [date]  |  ____________________
+MID-SEMESTER BREAK (if any): ____________________
+
+ASSESSMENTS:
+- Assessment 1: name = __________ | week/date = ______ | weight = ___%
+- Assessment 2: name = __________ | week/date = ______ | weight = ___%
+
+LOGISTICS:
+- Workload: ___ hrs in-class + ___ hrs independent per week
+- Attendance policy (1-2 sentences): ____________________
+- Instructor name: ____________________
+- Email: ____________________
+- Office hours: ____________________
+
+(Banner image: upload it to Canvas Files yourself and insert it
+after pasting — no need to give it to the AI.)
+
+
+============================================================
+ END — copy everything above and paste it to your AI.
+============================================================
