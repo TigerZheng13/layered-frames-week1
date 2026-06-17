@@ -27,8 +27,16 @@ HTML source view. Follow these rules exactly:
 4. DO NOT invent any facts. Use ONLY the information in PART 2.
    If something is blank, put a visible placeholder like
    [ADD LATER] instead of guessing dates, weights, or topics.
-5. Visual style I want: [DESCRIBE STYLE — e.g. "cinematic dark
-   theme with amber accents" OR "clean light with blue + yellow"]
+5. Visual style I want: [PICK ONE NUMBER FROM THE MENU BELOW]
+
+   STYLE MENU (delete the ones you don't want, keep one):
+   1) Cinematic Dark — near-black, amber accent, serif headlines. Film/media/design.
+   2) Swiss / Typographic — white, one bold accent, big Helvetica, rules not cards. Design courses.
+   3) Editorial Magazine — warm paper, italic serif, refined accent. Writing/humanities.
+   4) Brutalist / Mono — black & white, monospace, hard borders, no rounded corners. Coding/experimental.
+   5) Institutional Clean — light, your school's brand colours, rounded cards, friendly. Safe & tidy.
+   6) Minimal Calm — white, faint lines, one muted accent, lots of whitespace. Reading-heavy.
+   (Or describe your own. Keep to two accent colours max.)
 
 After the HTML, give me a 2-line note on anything I left blank.
 
