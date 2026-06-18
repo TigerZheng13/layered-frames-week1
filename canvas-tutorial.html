@@ -89,6 +89,13 @@
   .res .rt{font-weight:600;font-size:15px;color:var(--amber);margin-bottom:4px;}
   .res .rd{font-size:13px;color:var(--muted);}
 
+  .promptbox{margin-top:28px;border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  .promptbox .pbar{display:flex;justify-content:space-between;align-items:center;background:#15803d;color:#fff;padding:11px 16px;}
+  .promptbox .pbar b{font-size:13.5px;font-weight:600;}
+  .promptbox .copybtn{background:rgba(255,255,255,0.16);color:#fff;border:1px solid rgba(255,255,255,0.32);border-radius:8px;padding:6px 15px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;transition:background .15s;}
+  .promptbox .copybtn:hover{background:rgba(255,255,255,0.28);}
+  .promptbox .copybtn.done{background:#fff;color:#15803d;border-color:#fff;}
+  .promptbox pre{margin:0;max-height:380px;overflow:auto;background:#0e0e10;color:#d8d4cd;padding:18px 20px;font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-size:12.5px;line-height:1.6;white-space:pre;tab-size:2;}
   footer{padding:48px 0 64px;text-align:center;color:var(--dim);font-size:14px;}
   @media(max-width:640px){
     .hero h1{font-size:38px;} h2{font-size:27px;}
@@ -249,11 +256,96 @@
     <h2>The copy-paste way</h2>
     <p class="lead">Best if you use ChatGPT or any other assistant. One ready-made prompt does the same job — no special setup, works anywhere.</p>
     <div class="steps">
-      <div class="step"><div class="num">1</div><div class="body"><h3>Open the prompt file</h3><p>It's a single plain-text file, <code>Canvas-Homepage-Prompt.txt</code>, with instructions and a fill-in-the-blanks form.</p></div></div>
-      <div class="step"><div class="num">2</div><div class="body"><h3>Fill in your course info</h3><p>Type your course title, weekly topics, assessments, and contact details into the blanks. Leave anything you don't know — the AI will mark it for later.</p></div></div>
+      <div class="step"><div class="num">1</div><div class="body"><h3>Copy the prompt below</h3><p>The whole prompt is right here on this page — instructions plus a fill-in-the-blanks form. Use the <strong>Copy</strong> button on the green box.</p></div></div>
+      <div class="step"><div class="num">2</div><div class="body"><h3>Fill in your course info</h3><p>Replace the blanks in <code>PART 2</code> with your course title, weekly topics, assessments, and contact details. Leave anything you don't know — the AI will mark it for later.</p></div></div>
       <div class="step"><div class="num">3</div><div class="body"><h3>Pick a style number</h3><p>The prompt has the same six-style menu (1–6). Keep the one you want, delete the rest.</p></div></div>
       <div class="step"><div class="num">4</div><div class="body"><h3>Paste it into your AI</h3><p>Copy the whole filled-in prompt into ChatGPT (or any assistant) and send. It replies with the HTML.</p></div></div>
       <div class="step"><div class="num">5</div><div class="body"><h3>Get paste-ready HTML</h3><p>Same result as Method A — one block of Canvas-safe HTML, ready to paste.</p></div></div>
+    </div>
+
+    <div class="promptbox">
+      <div class="pbar"><b>The prompt — fill in the blanks, then copy</b><button class="copybtn" id="copyPrompt">Copy</button></div>
+      <pre id="promptText">============================================================
+ CANVAS HOMEPAGE — COPY-PASTE PROMPT
+ How to use: fill in the blanks in PART 2, then copy this
+ ENTIRE box and paste it into any AI chat (ChatGPT, Claude,
+ etc.). The AI will reply with HTML. Copy that HTML into
+ Canvas: course &gt; Pages &gt; new/edit &gt; click the &lt; &gt; button
+ (HTML view) &gt; paste &gt; Save &gt; set as Front Page.
+ No API, no install, no Canvas access for the AI needed.
+============================================================
+
+
+----- PART 1: INSTRUCTION TO THE AI (leave this as-is) -----
+
+You are designing a Canvas LMS course homepage.
+
+Output ONE block of HTML that I can paste directly into Canvas's
+HTML source view. Follow these rules exactly:
+
+1. Use ONLY inline styles (style="..." on each tag). Do NOT use
+   &lt;script&gt;, do NOT use &lt;style&gt; blocks, do NOT link external
+   fonts or stylesheets — Canvas removes all of those.
+2. Use only web-safe fonts (e.g. Georgia, Helvetica, Arial,
+   monospace stacks).
+3. Make it visually polished and well-organised: a header/hero,
+   quick-link buttons, an overview, a "what you'll learn" section,
+   a weekly timeline, assessments highlighted, and a contact block.
+4. DO NOT invent any facts. Use ONLY the information in PART 2.
+   If something is blank, put a visible placeholder like
+   [ADD LATER] instead of guessing dates, weights, or topics.
+5. Visual style I want: [PICK ONE NUMBER FROM THE MENU BELOW]
+
+   STYLE MENU (delete the ones you don't want, keep one):
+   1) Cinematic Dark — near-black, amber accent, serif headlines. Film/media/design.
+   2) Swiss / Typographic — white, one bold accent, big Helvetica, rules not cards. Design courses.
+   3) Editorial Magazine — warm paper, italic serif, refined accent. Writing/humanities.
+   4) Brutalist / Mono — black &amp; white, monospace, hard borders, no rounded corners. Coding/experimental.
+   5) Institutional Clean — light, your school's brand colours, rounded cards, friendly. Safe &amp; tidy.
+   6) Minimal Calm — white, faint lines, one muted accent, lots of whitespace. Reading-heavy.
+   (Or describe your own. Keep to two accent colours max.)
+
+After the HTML, give me a 2-line note on anything I left blank.
+
+
+----- PART 2: MY COURSE INFO (fill in the blanks) -----
+
+COURSE TITLE: ____________________
+CODE / STUDIO / SEMESTER: ____________________
+ONE-LINE TAGLINE: ____________________
+
+COURSE OVERVIEW (2-3 sentences):
+____________________________________________________________
+
+WHAT STUDENTS WILL LEARN (3-5 points):
+- ____________________
+- ____________________
+- ____________________
+
+WEEKLY TIMELINE (add or delete lines as needed):
+Week 1  |  [date]  |  ____________________
+Week 2  |  [date]  |  ____________________
+Week 3  |  [date]  |  ____________________
+Week 4  |  [date]  |  ____________________
+(...continue for your remaining weeks...)
+MID-SEMESTER BREAK (if any): ____________________
+
+ASSESSMENTS:
+- Assessment 1: name = __________ | week/date = ______ | weight = ___%
+- Assessment 2: name = __________ | week/date = ______ | weight = ___%
+
+LOGISTICS:
+- Workload: ___ hrs in-class + ___ hrs independent per week
+- Attendance policy (1-2 sentences): ____________________
+- Instructor name: ____________________
+- Email: ____________________
+- Office hours: ____________________
+
+(Banner image: upload it to Canvas Files yourself and insert it
+after pasting — no need to give it to the AI.)
+============================================================
+ END — copy everything above and paste it to your AI.
+============================================================</pre>
     </div>
   </div>
 </section>
@@ -307,6 +399,22 @@
     <p style="margin:0;">The AI designs. You paste. Your course stays yours.</p>
   </div>
 </footer>
+
+<script>
+  (function(){
+    var btn = document.getElementById('copyPrompt');
+    var pre = document.getElementById('promptText');
+    if(!btn || !pre) return;
+    btn.addEventListener('click', function(){
+      var text = pre.textContent;
+      function done(){ btn.textContent = 'Copied ✓'; btn.classList.add('done'); setTimeout(function(){ btn.textContent='Copy'; btn.classList.remove('done'); }, 1800); }
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done, function(){ fallback(text); done(); });
+      } else { fallback(text); done(); }
+      function fallback(t){ var ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(e){} document.body.removeChild(ta); }
+    });
+  })();
+</script>
 
 </body>
 </html>
