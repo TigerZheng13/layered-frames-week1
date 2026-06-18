@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design a Beautiful Canvas Page — Without Giving AI Any Access</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff; --soft:#f6f6f4; --line:#e7e6e1; --ink:#1a1714; --muted:#6b6660; --dim:#9a948c;
+    --amber:#d97706; --amber-soft:#fdf3e7; --dark:#0e0e10;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Inter',-apple-system,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.65;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px;}
+  .serif{font-family:'Instrument Serif',Georgia,serif;font-weight:400;}
+  .mono{font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;}
+  a{color:var(--amber);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+
+  /* hero */
+  .hero{background:var(--dark);color:#e8e4df;padding:84px 0 72px;}
+  .hero .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--amber);margin-bottom:20px;}
+  .hero h1{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:54px;line-height:1.05;color:#f7f3ee;letter-spacing:-0.5px;}
+  .hero h1 em{font-style:italic;color:var(--amber);}
+  .hero p{font-size:18px;color:#b5b0a8;margin-top:20px;max-width:620px;}
+  .hero .tags{margin-top:28px;display:flex;gap:10px;flex-wrap:wrap;}
+  .hero .tag{font-size:13px;background:rgba(217,119,6,0.14);color:#f0b36a;border:1px solid rgba(217,119,6,0.3);padding:6px 14px;border-radius:100px;}
+
+  section{padding:56px 0;border-bottom:1px solid var(--line);}
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--amber);margin-bottom:12px;}
+  h2{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:34px;line-height:1.1;letter-spacing:-0.3px;margin-bottom:18px;}
+  h3{font-size:18px;font-weight:600;margin-bottom:8px;}
+  p.lead{font-size:17px;color:var(--muted);margin-bottom:8px;}
+  p{margin-bottom:14px;}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:28px;}
+  .card{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:24px;}
+  .card .ic{font-size:24px;margin-bottom:12px;}
+  .card h3{font-size:16px;}
+  .card p{font-size:14px;color:var(--muted);margin:0;}
+
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:28px;}
+  .split .box{border:1px solid var(--line);border-radius:14px;padding:24px;}
+  .split .box.you{background:var(--amber-soft);border-color:#f3dcc0;}
+  .split .box h3{display:flex;align-items:center;gap:8px;}
+  .split .box ul{margin:10px 0 0 0;padding-left:18px;font-size:14px;color:var(--muted);}
+  .split .box li{margin-bottom:5px;}
+
+  .callout{background:var(--amber-soft);border:1px solid #f3dcc0;border-left:4px solid var(--amber);border-radius:0 12px 12px 0;padding:18px 22px;margin-top:24px;}
+  .callout strong{color:#9a5208;}
+  .callout p{margin:0;font-size:15px;color:#7a4a18;}
+
+  /* steps */
+  .steps{margin-top:28px;counter-reset:step;}
+  .step{display:flex;gap:18px;padding:18px 0;border-top:1px solid var(--line);}
+  .step:first-child{border-top:none;}
+  .step .num{flex:none;width:34px;height:34px;border-radius:50%;background:var(--dark);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;font-family:'JetBrains Mono',monospace;}
+  .step .body{flex:1;}
+  .step .body h3{font-size:16px;margin-bottom:4px;}
+  .step .body p{font-size:14.5px;color:var(--muted);margin:0;}
+  .method-tab{display:inline-flex;align-items:center;gap:8px;background:var(--dark);color:#fff;font-size:13px;font-weight:500;padding:7px 16px;border-radius:100px;margin-bottom:6px;}
+  .method-tab.b{background:#15803d;}
+
+  code{font-family:'JetBrains Mono',monospace;font-size:0.88em;background:#efeee9;padding:2px 7px;border-radius:5px;color:#6b4a1a;}
+  .keycap{font-family:'JetBrains Mono',monospace;font-size:0.85em;background:var(--dark);color:#fff;padding:2px 9px;border-radius:5px;}
+
+  /* style gallery */
+  .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:28px;}
+  .gtile{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;}
+  .gcap{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;background:#1c1c20;color:#fff;}
+  .gcap b{font-size:12.5px;font-weight:600;}
+  .gcap span{font-size:10px;color:#9a9a9a;font-family:'JetBrains Mono',monospace;}
+  .gbody{padding:16px;min-height:118px;}
+  .gfoot{padding:8px 13px;font-size:10.5px;color:var(--muted);background:#fafafa;border-top:1px solid var(--line);}
+
+  /* compare */
+  .compare{margin-top:28px;border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  .compare .row{display:grid;grid-template-columns:160px 1fr 1fr;border-top:1px solid var(--line);}
+  .compare .row:first-child{border-top:none;background:var(--soft);font-weight:600;font-size:13px;}
+  .compare .c{padding:13px 16px;font-size:14px;border-left:1px solid var(--line);}
+  .compare .c:first-child{border-left:none;color:var(--muted);font-weight:500;}
+
+  .res{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:24px;}
+  .res a{display:block;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:18px 20px;color:var(--ink);}
+  .res a:hover{border-color:var(--amber);text-decoration:none;}
+  .res .rt{font-weight:600;font-size:15px;color:var(--amber);margin-bottom:4px;}
+  .res .rd{font-size:13px;color:var(--muted);}
+
+  footer{padding:48px 0 64px;text-align:center;color:var(--dim);font-size:14px;}
+  @media(max-width:640px){
+    .hero h1{font-size:38px;} h2{font-size:27px;}
+    .split{grid-template-columns:1fr;} .compare .row{grid-template-columns:110px 1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="eyebrow">A practical guide for teaching staff</div>
+    <h1>Design a beautiful <em>Canvas page</em><br>— without giving AI any access</h1>
+    <p>An AI designs the page. You paste it into Canvas yourself. No API token, no login, no automated access to your course — ever.</p>
+    <div class="tags">
+      <span class="tag">No API access</span>
+      <span class="tag">You stay in control</span>
+      <span class="tag">Two ways: Claude or ChatGPT</span>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">The idea</div>
+    <h2>Why this is safe to use</h2>
+    <p class="lead">Many of us — and our institutions — are cautious about handing an AI a token that can read and write a live course. This approach removes that worry entirely.</p>
+    <div class="cards">
+      <div class="card">
+        <div class="ic">🔒</div>
+        <h3>No access required</h3>
+        <p>The AI only writes HTML. It never connects to Canvas. You copy the result and paste it in by hand.</p>
+      </div>
+      <div class="card">
+        <div class="ic">👁️</div>
+        <h3>You review everything</h3>
+        <p>You preview the page in a browser before anything touches your live course. Nothing is automatic.</p>
+      </div>
+      <div class="card">
+        <div class="ic">↩️</div>
+        <h3>Fully reversible</h3>
+        <p>Canvas keeps page history. If a paste isn't right, you roll it back in a click.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">How it works</div>
+    <h2>A page is design + content</h2>
+    <p class="lead">Only one of these ever needed an API — and it wasn't the design. Separating them is what makes the no-access workflow possible.</p>
+    <div class="split">
+      <div class="box">
+        <h3>🎨 Design <span class="mono" style="font-size:12px;color:var(--dim);font-weight:400;">— the AI</span></h3>
+        <ul>
+          <li>Layout, colour, cards, typography</li>
+          <li>The weekly timeline structure</li>
+          <li>Highlighted assessments, contact block</li>
+          <li>Needs zero knowledge of your specific course</li>
+        </ul>
+      </div>
+      <div class="box you">
+        <h3>📋 Content <span class="mono" style="font-size:12px;color:var(--dim);font-weight:400;">— you</span></h3>
+        <ul>
+          <li>Course name, weekly topics, dates</li>
+          <li>Assessment names, due dates, weights</li>
+          <li>Your contact details and office hours</li>
+          <li>Pasted in as plain text — no API needed</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout">
+      <p><strong>Safer than the API, not just easier.</strong> The AI is told never to guess academic facts. If you don't supply a due date or a weight, it leaves a visible <code>[ADD LATER]</code> placeholder instead of inventing one — so a made-up date can't slip onto a student-facing page.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Step 1 · Choose a look</div>
+    <h2>Six styles to pick from</h2>
+    <p class="lead">Same content, six visual directions. You just name the one you want — the AI builds it. (Shown below on a generic example course.)</p>
+    <div class="gallery">
+
+      <div class="gtile">
+        <div class="gcap"><b>1 · Cinematic Dark</b><span>film</span></div>
+        <div class="gbody" style="background:#0e0e10;color:#e8e4df;">
+          <p class="mono" style="font-size:8px;letter-spacing:2px;color:#f59e0b;text-transform:uppercase;margin-bottom:5px;">DESN1001 · STUDIO 1</p>
+          <div class="serif" style="font-size:21px;color:#f5f1ec;line-height:1.05;">Foundations of Design</div>
+          <div style="display:flex;border-bottom:1px solid rgba(255,255,255,0.08);padding:5px 0;margin-top:8px;"><span class="mono" style="width:34px;color:#f59e0b;font-size:10px;">Wk 1</span><span style="flex:1;font-size:11px;color:#cbc7bf;">Colour & Form</span></div>
+          <div style="display:flex;background:rgba(245,158,11,0.16);border-left:2px solid #f59e0b;padding:5px 8px;margin-top:6px;"><span class="mono" style="width:30px;color:#f59e0b;font-size:10px;">Wk6</span><span style="flex:1;font-size:11px;color:#f5f1ec;">Assessment 1</span></div>
+        </div>
+        <div class="gfoot">Film · media · design studios</div>
+      </div>
+
+      <div class="gtile">
+        <div class="gcap"><b>2 · Swiss</b><span>typographic</span></div>
+        <div class="gbody" style="background:#fff;color:#111;">
+          <p style="font-size:9px;letter-spacing:1px;color:#e3120b;font-weight:700;text-transform:uppercase;margin-bottom:3px;">DESN1001 / STUDIO 1</p>
+          <div style="font-weight:700;font-size:23px;line-height:0.95;letter-spacing:-1px;">Foundations<br>of Design</div>
+          <div style="border-top:2px solid #111;padding:5px 0;display:flex;margin-top:9px;"><span style="width:26px;font-weight:700;font-size:11px;">01</span><span style="flex:1;font-size:11px;">Colour &amp; Form</span></div>
+          <div style="display:flex;background:#e3120b;color:#fff;padding:4px 6px;"><span style="width:24px;font-weight:700;font-size:11px;">06</span><span style="flex:1;font-size:11px;font-weight:700;">ASSESSMENT 1</span></div>
+        </div>
+        <div class="gfoot">Communication · typography courses</div>
+      </div>
+
+      <div class="gtile">
+        <div class="gcap"><b>3 · Editorial</b><span>magazine</span></div>
+        <div class="gbody" style="background:#faf8f3;color:#1a1a1a;">
+          <p class="serif" style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#7a2230;margin-bottom:5px;">DESN1001 — Studio 1</p>
+          <div class="serif" style="font-size:21px;font-style:italic;line-height:1.05;">Foundations of Design</div>
+          <div style="width:30px;height:2px;background:#7a2230;margin:9px 0;"></div>
+          <div style="display:flex;padding:4px 0;border-bottom:1px dotted #c8c0b0;"><span style="width:54px;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#7a2230;">Week 1</span><span style="flex:1;font-size:11px;">Colour &amp; Form</span></div>
+          <p style="font-size:11px;font-style:italic;color:#7a2230;border-left:2px solid #7a2230;padding-left:8px;margin:8px 0 0;">Assessment 1 — Week 6</p>
+        </div>
+        <div class="gfoot">Writing · theory · humanities</div>
+      </div>
+
+      <div class="gtile">
+        <div class="gcap"><b>4 · Brutalist</b><span>mono</span></div>
+        <div class="gbody mono" style="background:#fff;color:#000;">
+          <p style="font-size:9px;letter-spacing:1px;margin-bottom:6px;">[ DESN1001 // STUDIO_1 ]</p>
+          <div style="font-size:15px;font-weight:700;text-transform:uppercase;border:2px solid #000;padding:6px 8px;display:inline-block;">Foundations</div>
+          <div style="border:2px solid #000;margin-top:9px;">
+            <div style="display:flex;border-bottom:1px solid #000;padding:4px 7px;"><span style="width:36px;font-size:10px;font-weight:700;">WK1</span><span style="flex:1;font-size:10px;">COLOUR_FORM</span></div>
+            <div style="display:flex;padding:4px 7px;background:#c6ff00;"><span style="width:36px;font-size:10px;font-weight:700;">WK6</span><span style="flex:1;font-size:10px;font-weight:700;">ASSESS_1</span></div>
+          </div>
+        </div>
+        <div class="gfoot">Coding · experimental · new media</div>
+      </div>
+
+      <div class="gtile">
+        <div class="gcap"><b>5 · Institutional</b><span>clean</span></div>
+        <div class="gbody" style="background:#f8f9fa;color:#333;">
+          <div style="background:#1a1a1a;color:#fff;border-radius:7px;padding:10px 12px;margin-bottom:10px;">
+            <p style="font-size:8px;letter-spacing:1px;color:#9ad0ef;text-transform:uppercase;margin-bottom:1px;">DESN1001 · Studio 1</p>
+            <div style="font-size:15px;font-weight:600;">Foundations of Design</div>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <div style="flex:1;background:#74c3ef;border-radius:6px;padding:7px;text-align:center;font-size:10px;color:#0d3a52;">📚 Modules</div>
+            <div style="flex:1;background:#f9fa5a;border-radius:6px;padding:7px;text-align:center;font-size:10px;color:#5a5a10;">🎬 Assess</div>
+          </div>
+        </div>
+        <div class="gfoot">Conservative departments · accessibility</div>
+      </div>
+
+      <div class="gtile">
+        <div class="gcap"><b>6 · Minimal</b><span>calm</span></div>
+        <div class="gbody" style="background:#fff;color:#2c2c2c;">
+          <p style="font-size:10px;color:#9a9a9a;letter-spacing:0.5px;margin-bottom:7px;">DESN1001 · Studio 1</p>
+          <div style="font-size:18px;font-weight:600;margin-bottom:14px;">Foundations of Design</div>
+          <div style="display:flex;padding:6px 0;border-bottom:1px solid #f0f0f0;"><span style="width:42px;font-size:11px;color:#aaa;">Wk 1</span><span style="flex:1;font-size:11.5px;">🎨 Colour &amp; Form</span></div>
+          <div style="display:flex;padding:6px 0;"><span style="width:42px;font-size:11px;color:#6b8e7f;">Wk 6</span><span style="flex:1;font-size:11.5px;color:#6b8e7f;">📌 Assessment 1</span></div>
+        </div>
+        <div class="gfoot">Reading-heavy courses · minimalists</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Step 2 · Build the page — Method A</div>
+    <span class="method-tab">✦ Using Claude + the Skill</span>
+    <h2>The guided way</h2>
+    <p class="lead">Best if you use Claude. A small "skill" file teaches Claude this exact workflow, so it walks you through it and produces a Canvas-safe page automatically.</p>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><div class="body"><h3>Import the skill once</h3><p>Download <code>canvas-page-designer.skill</code> and add it to Claude. You only do this once.</p></div></div>
+      <div class="step"><div class="num">2</div><div class="body"><h3>Ask for a page</h3><p>Say: <em>"Design a Canvas homepage for my course."</em> Claude recognises the task and starts the workflow.</p></div></div>
+      <div class="step"><div class="num">3</div><div class="body"><h3>Pick a style</h3><p>Claude offers the six styles above. Reply with the one you want — e.g. <em>"the editorial magazine style"</em> or just <em>"#3"</em>.</p></div></div>
+      <div class="step"><div class="num">4</div><div class="body"><h3>Give it your course facts</h3><p>Claude asks for your weeks, assessments, dates, and contact details. Anything you don't have becomes a clearly-marked placeholder — it never invents.</p></div></div>
+      <div class="step"><div class="num">5</div><div class="body"><h3>Get paste-ready HTML</h3><p>Claude returns one block of Canvas-safe HTML plus a short list of any blanks to fill. Preview it in a browser if you like.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Step 2 · Build the page — Method B</div>
+    <span class="method-tab b">✦ Using ChatGPT (or any AI) + the Prompt</span>
+    <h2>The copy-paste way</h2>
+    <p class="lead">Best if you use ChatGPT or any other assistant. One ready-made prompt does the same job — no special setup, works anywhere.</p>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><div class="body"><h3>Open the prompt file</h3><p>It's a single plain-text file, <code>Canvas-Homepage-Prompt.txt</code>, with instructions and a fill-in-the-blanks form.</p></div></div>
+      <div class="step"><div class="num">2</div><div class="body"><h3>Fill in your course info</h3><p>Type your course title, weekly topics, assessments, and contact details into the blanks. Leave anything you don't know — the AI will mark it for later.</p></div></div>
+      <div class="step"><div class="num">3</div><div class="body"><h3>Pick a style number</h3><p>The prompt has the same six-style menu (1–6). Keep the one you want, delete the rest.</p></div></div>
+      <div class="step"><div class="num">4</div><div class="body"><h3>Paste it into your AI</h3><p>Copy the whole filled-in prompt into ChatGPT (or any assistant) and send. It replies with the HTML.</p></div></div>
+      <div class="step"><div class="num">5</div><div class="body"><h3>Get paste-ready HTML</h3><p>Same result as Method A — one block of Canvas-safe HTML, ready to paste.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Which one?</div>
+    <h2>Two methods, same result</h2>
+    <div class="compare">
+      <div class="row"><div class="c"> </div><div class="c">Method A — Claude + Skill</div><div class="c">Method B — Prompt file</div></div>
+      <div class="row"><div class="c">Setup</div><div class="c">Import the skill once</div><div class="c">None — open a text file</div></div>
+      <div class="row"><div class="c">Works with</div><div class="c">Claude</div><div class="c">ChatGPT, Claude, any AI</div></div>
+      <div class="row"><div class="c">Style choice</div><div class="c">Claude offers the menu</div><div class="c">Pick a number in the prompt</div></div>
+      <div class="row"><div class="c">Feel</div><div class="c">Guided, conversational</div><div class="c">Fill a form, paste once</div></div>
+    </div>
+    <div class="callout"><p><strong>Both produce the same kind of page</strong> — Canvas-safe HTML, your real facts only, placeholders for anything missing. Choose whichever assistant you already use.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Step 3 · Put it on Canvas</div>
+    <h2>Paste it in — the same for both methods</h2>
+    <p class="lead">No technical skill needed. About two minutes.</p>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><div class="body"><h3>Open a page to edit</h3><p>In your course: <strong>Pages</strong> → <strong>+ Page</strong> (or open an existing page and click <strong>Edit</strong>).</p></div></div>
+      <div class="step"><div class="num">2</div><div class="body"><h3>Switch to HTML view</h3><p>In the editor toolbar, click the <span class="keycap">&lt;/&gt;</span> button. On newer Canvas it may be <em>"Switch to raw HTML Editor"</em> under the <strong>⋮</strong> menu.</p></div></div>
+      <div class="step"><div class="num">3</div><div class="body"><h3>Paste the HTML</h3><p>Select everything in that box, delete it, and paste in the HTML the AI gave you.</p></div></div>
+      <div class="step"><div class="num">4</div><div class="body"><h3>Save</h3><p>Click <strong>Save</strong>. The page renders exactly as previewed.</p></div></div>
+      <div class="step"><div class="num">5</div><div class="body"><h3>Make it the home page <span style="font-weight:400;color:var(--dim);">(optional)</span></h3><p>On the saved page: <strong>⋮ → Use as Front Page</strong>, then <strong>Course Settings → Choose Home Page → Pages Front Page</strong>.</p></div></div>
+    </div>
+    <div class="callout"><p><strong>Adding a banner image?</strong> Upload it to your course <strong>Files</strong> first, then insert it with the editor's image button (or paste an <code>&lt;img&gt;</code> tag). Canvas file links work for all your students. The pages look good without one too.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Resources</div>
+    <h2>Everything you need</h2>
+    <div class="res">
+      <a href="https://github.com/TigerZheng13/layered-frames-week1/raw/main/canvas-page-designer.skill"><div class="rt">⬇ The Skill file</div><div class="rd">For Method A — import into Claude.</div></a>
+      <a href="https://tigerzheng13.github.io/layered-frames-week1/Canvas-Homepage-Prompt.txt"><div class="rt">📄 The Prompt</div><div class="rd">For Method B — fill in and paste into any AI.</div></a>
+      <a href="https://tigerzheng13.github.io/layered-frames-week1/style-sampler.html"><div class="rt">🎨 Style sampler</div><div class="rd">See all six styles side by side.</div></a>
+      <a href="https://github.com/TigerZheng13/layered-frames-week1/blob/main/HOW-TO-paste-into-canvas.md"><div class="rt">📋 Upload guide</div><div class="rd">The paste-into-Canvas steps, in writing.</div></a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p style="margin:0;">The AI designs. You paste. Your course stays yours.</p>
+  </div>
+</footer>
+
+</body>
+</html>
